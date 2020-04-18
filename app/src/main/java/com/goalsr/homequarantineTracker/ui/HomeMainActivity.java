@@ -34,6 +34,7 @@ import com.goalsr.homequarantineTracker.dialog.CustomDialogGeneric;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ReqPatient;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientFamilyInfo;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
@@ -72,19 +73,39 @@ public class HomeMainActivity extends BaseActivity implements FamillyListAdapter
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home_main);
+        setContentView(R.layout.activity_home_persiondetails);
         ButterKnife.bind(this);
+        tvHeaderFac.setText("Family Details");
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), DasboardPType.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finishAffinity();
+            }
+        });
+       /* if (PreferenceStore.getPrefernceHelperInstace().getFlag(YelligoApplication.getContext(),PreferenceStore.PERSIONTYPE)){
+            tvHeaderFac.setText("Family Details");
+        }else
+        {
+            tvHeaderFac.setText("Quarantined Details");
+        }*/
+
         initMvp();
         adapter = new FamillyListAdapter(this, new ArrayList<ResPatientFamilyInfo>());
         adapter.setListener(this);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         rvViewFamillly.setLayoutManager(manager);
         rvViewFamillly.setAdapter(adapter);
-        if (PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID)==2){
+        tvLogout.setVisibility(View.GONE);
+        /*if (PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID)==2){
             tvLogout.setVisibility(View.GONE);
         }else {
             tvLogout.setVisibility(View.VISIBLE);
-        }
+        }*/
 
 
     }
@@ -92,7 +113,7 @@ public class HomeMainActivity extends BaseActivity implements FamillyListAdapter
     @Override
     protected void onResume() {
         super.onResume();
-        getPatentInfo();
+       // getPatentInfo();
     }
 
     private void getPatentInfo() {
@@ -339,14 +360,14 @@ public class HomeMainActivity extends BaseActivity implements FamillyListAdapter
     }
 
     private void addfamilly() {
-        getCommonApi().openNewScreen(PatientFamillyActivity.class);
+        getCommonApi().openNewScreen(AddnewPatientActivity.class);
     }
 
     @Override
     public void onItemCheckedFamilly(int position, ResPatientFamilyInfo item) {
         Bundle bundle=new Bundle();
         bundle.putString("key","family");
-        bundle.putInt("v_id",item.getCitizenFamilyPersonId());
+        bundle.putInt("v_id",123);
         getCommonApi().openNewScreen(PatientSymtomUpdateActivity.class,bundle);
 
     }
@@ -354,8 +375,8 @@ public class HomeMainActivity extends BaseActivity implements FamillyListAdapter
     @Override
     public void onBackPressed() {
 
-
-        if (PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID)!=2) {
+        super.onBackPressed();
+        /*if (PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID)!=2) {
 
             new AlertDialog.Builder(this)
                     .setMessage("Are you sure you want to exit?")
@@ -369,7 +390,7 @@ public class HomeMainActivity extends BaseActivity implements FamillyListAdapter
                     .show();
         }else {
             super.onBackPressed();
-        }
+        }*/
 
     }
 }

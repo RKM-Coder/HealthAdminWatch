@@ -205,11 +205,14 @@ public class DistrictListActivity extends BaseActivity implements DistrictListAd
 
         PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(),PreferenceStore.DISTRICT_ID,item.getDistrict_code());
         PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(),PreferenceStore.DISTRICT_NAME,item.getDISTRICT_NAME());
-        if (getCommonApi().isInternetAvailable(DistrictListActivity.this)){
+
+        getCommonApi().openNewScreen(DasboardPType.class);
+        finish();
+        /*if (getCommonApi().isInternetAvailable(DistrictListActivity.this)){
             getPatientInfo();
         }else {
             Toast.makeText(YelligoApplication.getContext(),"Please enable internet connection",Toast.LENGTH_LONG).show();
-        }
+        }*/
 
 
     }

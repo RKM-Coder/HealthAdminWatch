@@ -36,7 +36,6 @@ import com.goalsr.homequarantineTracker.YelligoApplication;
 import com.goalsr.homequarantineTracker.adapter.SpinAdapter;
 import com.goalsr.homequarantineTracker.apiservice.NetworkService;
 import com.goalsr.homequarantineTracker.base.BaseActivity;
-import com.goalsr.homequarantineTracker.db.viewmodel.PatientFamilyViewmodel;
 import com.goalsr.homequarantineTracker.dialog.CustomDialogGeneric;
 import com.goalsr.homequarantineTracker.fragment.DatePickerFragment;
 import com.goalsr.homequarantineTracker.gpsenable.GpsUtils;
@@ -554,7 +553,7 @@ public class PatientFamillyActivity extends BaseActivity implements DatePickerFr
 
     private void makeSpinnerGenderMethod(final ArrayList<String> list) {
         SpinAdapter<String> adapter =
-                new SpinAdapter(getApplicationContext(), 0, 0, list);
+                new SpinAdapter(getApplicationContext(), 0, 0, list, "");
 //        adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
         spGender.setAdapter(adapter);
         spGender.setSelection(0);
@@ -580,7 +579,7 @@ public class PatientFamillyActivity extends BaseActivity implements DatePickerFr
 
     private void makeSpinnerRElationMethod(final ArrayList<String> list) {
         SpinAdapter<String> adapter =
-                new SpinAdapter(getApplicationContext(), 0, 0, list);
+                new SpinAdapter(getApplicationContext(), 0, 0, list, "");
 //        adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
         spRelation.setAdapter(adapter);
         spRelation.setSelection(0);
@@ -608,7 +607,7 @@ public class PatientFamillyActivity extends BaseActivity implements DatePickerFr
     private void makeSpinnerDistrictMethod(final ArrayList<DistrictModel> list) {
 
         SpinAdapter<String> adapter =
-                new SpinAdapter(getApplicationContext(), 0, 0, list);
+                new SpinAdapter(getApplicationContext(), 0, 0, list, "");
 //        adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
         spDistrict.setAdapter(adapter);
         spDistrict.setSelection(0);
@@ -667,7 +666,7 @@ public class PatientFamillyActivity extends BaseActivity implements DatePickerFr
         listofTaluk.add(0, item);
 
         SpinAdapter<String> adapter =
-                new SpinAdapter(getApplicationContext(), 0, 0, listofTaluk);
+                new SpinAdapter(getApplicationContext(), 0, 0, listofTaluk, "");
 //        adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
         spTaluk.setAdapter(adapter);
         spTaluk.setSelection(0);

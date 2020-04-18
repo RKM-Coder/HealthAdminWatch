@@ -19,7 +19,8 @@ import com.goalsr.homequarantineTracker.R;
 import java.util.ArrayList;
 
 /**
- * Created by Murugeshwaran M on 31-03-2020
+ * Created by RKM
+ *
  */
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListViewHolder> {
 

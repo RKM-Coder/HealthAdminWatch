@@ -447,7 +447,7 @@ public class PatientDetailsActivity extends BaseActivity implements DatePickerFr
 
     private void makeSpinnerGenderMethod(final ArrayList<String> list) {
         SpinAdapter<String> adapter =
-                new SpinAdapter(getApplicationContext(), 0, 0, list);
+                new SpinAdapter(getApplicationContext(), 0, 0, list, "");
 //        adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
         spGender.setAdapter(adapter);
         spGender.setSelection(0);
@@ -474,7 +474,7 @@ public class PatientDetailsActivity extends BaseActivity implements DatePickerFr
     private void makeSpinnerDistrictMethod(final ArrayList<DistrictModel> list) {
 
         SpinAdapter<String> adapter =
-                new SpinAdapter(getApplicationContext(), 0, 0, list);
+                new SpinAdapter(getApplicationContext(), 0, 0, list, "");
 //        adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
         spDistrict.setAdapter(adapter);
         spDistrict.setSelection(0);
@@ -529,7 +529,7 @@ public class PatientDetailsActivity extends BaseActivity implements DatePickerFr
         listofTaluk.add(0, item);
 
         SpinAdapter<String> adapter =
-                new SpinAdapter(getApplicationContext(), 0, 0, listofTaluk);
+                new SpinAdapter(getApplicationContext(), 0, 0, listofTaluk, "");
 //        adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
         spTaluk.setAdapter(adapter);
         spTaluk.setSelection(0);
@@ -603,6 +603,8 @@ public class PatientDetailsActivity extends BaseActivity implements DatePickerFr
         if (daovvalue.equalsIgnoreCase("dao")) {
             startdate = uri;
             txtDOA.setText("" + AppConstants.dateFormatChangerGVT( uri));
+            txtQurantinedate.setText("" );
+            enddate = "";
 
         } else if (daovvalue.equalsIgnoreCase("qao")) {
             enddate = uri;

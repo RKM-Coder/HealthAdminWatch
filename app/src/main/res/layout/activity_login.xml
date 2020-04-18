@@ -98,7 +98,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="0.40"
-        android:background="@drawable/button_before_login"
+        android:background="@drawable/button_after_login"
         android:text="Continue"
         android:textSize="20sp"
         android:textColor="#FFFFFF"

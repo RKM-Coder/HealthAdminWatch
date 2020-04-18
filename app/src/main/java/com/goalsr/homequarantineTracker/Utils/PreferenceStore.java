@@ -11,6 +11,7 @@ import androidx.preference.PreferenceManager;
 public class PreferenceStore {
 
     public static final String ISUPDATEPATENTINFO = "isupdatepatientinfo";
+    public static final String PERSIONTYPE = "persiontype_obser";
     public static final String DISTRICT_ID = "district_re_id";
     public static final String DISTRICT_NAME ="district_name" ;
     private static PreferenceStore preferenceHelperInstance = new PreferenceStore();

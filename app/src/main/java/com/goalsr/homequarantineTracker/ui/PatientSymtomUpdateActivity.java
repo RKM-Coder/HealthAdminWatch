@@ -61,6 +61,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.ByteArrayOutputStream;
@@ -188,8 +189,19 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_patient_symtom_update);
+        setContentView(R.layout.activity_home_symptom_main);
         ButterKnife.bind(this);
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), DasboardPType.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finishAffinity();
+            }
+        });
+        tvHeaderFac.setText("Symptom Update");
         initMvp();
         checkPermissionFortarck();
         String genderarray[] = getResources().getStringArray(R.array.relation);
@@ -269,7 +281,9 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_logout:
-                if (validation()) {
+
+                finish();
+                /*if (validation()) {
                     if (key.equalsIgnoreCase("self")) {
                         if (getCommonApi().isInternetAvailable(PatientSymtomUpdateActivity.this)){
                             symtomUpdateSelf();
@@ -285,7 +299,7 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
                         }
 
                     }
-                } /*else {
+                }*/ /*else {
                     showDialog("Please take photo", false);
                 }*/
 
@@ -296,12 +310,12 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
                     Bundle bundle=new Bundle();
                     bundle.putString("key","self");
                     bundle.putInt("v_id",0);
-                    getCommonApi().openNewScreen(PatientDetailsActivity.class,bundle);
+                    getCommonApi().openNewScreen(AddnewPatientActivity.class,bundle);
                 }else if (key.equalsIgnoreCase("Family")){
                     Bundle bundle=new Bundle();
                     bundle.putString("key","family");
-                    bundle.putInt("v_id",resPatientFamilyInfo.getCitizenFamilyPersonId());
-                    getCommonApi().openNewScreen(PatientFamillyActivity.class,bundle);
+                   //bundle.putInt("v_id",resPatientFamilyInfo.getCitizenFamilyPersonId());
+                    getCommonApi().openNewScreen(AddnewPatientActivity.class,bundle);
                 }
                 break;
             case R.id.chk_box1:

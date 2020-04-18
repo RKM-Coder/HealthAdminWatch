@@ -51,9 +51,9 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder holder, final int position) {
-        holder.tvViewNAme.setText(listString.get(position).getName());
+        /*holder.tvViewNAme.setText(listString.get(position).getName());
         holder.tvRelation.setText(listString.get(position).getMobile());
-        Log.e("INFOMOBILE",""+listString.get(position).getMobile());
+        Log.e("INFOMOBILE",""+listString.get(position).getMobile());*/
 
        /* holder.tvView.setTextColor(holder.chkBox.isChecked()? ContextCompat.getColor(context, R.color.colorselect):ContextCompat.getColor(context, R.color.colornormal));
         holder.chkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -74,18 +74,19 @@ public class PatientListAdapter extends RecyclerView.Adapter<PatientListAdapter.
         holder.ll_main_familly.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.onItemCheckedFamilly(position,listString.get(position));
+                listener.onItemCheckedFamilly(position,null);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        if (listString != null) {
+        return 10;
+        /*if (listString != null) {
             return listString.size();
         } else {
-            return 0;
-        }
+            return 10;
+        }*/
     }
 
     public void setListener(CheckedListener listener) {

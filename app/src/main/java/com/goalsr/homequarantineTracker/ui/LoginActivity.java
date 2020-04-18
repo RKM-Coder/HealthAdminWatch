@@ -115,7 +115,7 @@ public class LoginActivity extends BaseActivity {
 
         if (TextUtils.isEmpty(strPhone) || ((strPhone.length() != 10))) {
 
-            Toast.makeText(getApplicationContext(), "Please Enter Valid Mobile Number", Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), "Please Enter Valid Mobile Number", Toast.LENGTH_LONG).show();
             etPhoneNum.setText("");
             etPhoneNum.requestFocus();
             return false;
@@ -187,7 +187,12 @@ public class LoginActivity extends BaseActivity {
         switch (view.getId()) {
             case R.id.btn_login:
                 if (Validation()) {
-                    if (!PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(), PreferenceStore.USER_PHONE).equalsIgnoreCase("")) {
+                    Intent i = new Intent(getApplicationContext(), OtpCheckerActivity.class);
+                    i.putExtra("MobNumber", etPhoneNum.getText().toString());
+                    i.putExtra("rollid", 2);
+                    startActivity(i);
+
+                    /*if (!PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(), PreferenceStore.USER_PHONE).equalsIgnoreCase("")) {
                         if (!PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(), PreferenceStore.USER_PHONE).equalsIgnoreCase(etPhoneNum.getText().toString())) {
                             showDialogWarnLogout("The application is registered with " + PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(), PreferenceStore.USER_PHONE)
                                     + ", do you want to continue?");
@@ -217,7 +222,7 @@ public class LoginActivity extends BaseActivity {
                         }else {
                             Toast.makeText(YelligoApplication.getContext(),"Please enable internet connection",Toast.LENGTH_LONG).show();
                         }
-                    }
+                    }*/
                 }
                 break;
             case R.id.txt_104:

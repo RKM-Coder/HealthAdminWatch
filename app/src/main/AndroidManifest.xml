@@ -28,12 +28,21 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".ui.DemoActivity"
+            android:label="@string/title_activity_demo"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
+        <activity android:name=".ui.DasboardPType" />
+        <activity android:name=".ui.AddnewPatientActivity" />
+        <activity
             android:name=".ui.AdminPatientLsitActivity"
             android:label="@string/title_activity_admin_patient_lsit"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".ui.DistrictListActivity">
-
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ui.DistrictListActivity" />
+        <activity android:name=".ui.PanchyateListActivity" />
+        <activity android:name=".ui.VillageGenericListActivity" />
+        <activity android:name=".ui.AddressGenericListActivity" />
+        <activity android:name=".ui.RuralDistGenericListActivity" />
+        <activity android:name=".ui.TalukListActivity" />
         <activity android:name=".ui.PatientSymtomUpdateActivity" />
         <activity android:name=".ui.HomeMainActivity" />
         <activity android:name=".ui.PatientFamillyActivity" />
@@ -44,7 +53,6 @@
         <activity android:name=".ui.DashBardActivity" />
         <activity android:name=".ui.SymptomCheckerActivity" />
         <activity android:name=".ui.SplashMainActivity">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -20,9 +20,12 @@ import com.goalsr.homequarantineTracker.Utils.DialogManager;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
 import com.goalsr.homequarantineTracker.apiservice.ApiBackGround;
+import com.goalsr.homequarantineTracker.db.repository.AddressUrbaninfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.PatientFamilyinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.PatientinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.TravelTrackingRepository;
+import com.goalsr.homequarantineTracker.db.repository.VillageinfoRepository;
+import com.goalsr.homequarantineTracker.db.viewmodel.AddressUrbanViewmodel;
 import com.goalsr.homequarantineTracker.db.viewmodel.PatientFamilyViewmodel;
 import com.goalsr.homequarantineTracker.db.viewmodel.PatientViewmodel;
 import com.goalsr.homequarantineTracker.networkconnectivity.NetworkIdentityListener;
@@ -37,6 +40,8 @@ public abstract class BaseActivity extends AppCompatActivity implements NetworkI
     TravelTrackingRepository travelTrackingRepository;
     PatientinfoRepository patientinfoRepository;
     PatientFamilyinfoRepository patientFamilyinfoRepository;
+    AddressUrbaninfoRepository addressUrbaninfoRepository;
+    VillageinfoRepository villageinfoRepository;
     Context mContext;
 
     private Dialog dialogProgress;
@@ -44,6 +49,7 @@ public abstract class BaseActivity extends AppCompatActivity implements NetworkI
 
     private PatientViewmodel patientViewmodel;
     private PatientFamilyViewmodel patientfamilyViewmodel;
+    private AddressUrbanViewmodel addressUrbanViewmodel;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -58,17 +64,22 @@ public abstract class BaseActivity extends AppCompatActivity implements NetworkI
       /*  categoryRepository=new CategoryRepository(mContext);
         languageRepository=new LanguageRepository(mContext);
         proguctTagRepository=new ProguctTagRepository(mContext);*/
+        addressUrbaninfoRepository=new AddressUrbaninfoRepository(mContext);
         travelTrackingRepository=new TravelTrackingRepository(mContext);
         patientinfoRepository=new PatientinfoRepository(mContext);
         patientFamilyinfoRepository=new PatientFamilyinfoRepository(mContext);
         dialogProgress = DialogManager.getProgressDialog(mContext);
+        villageinfoRepository=new VillageinfoRepository(mContext);
         lottieAnimationView = dialogProgress.findViewById(R.id.lottie_cdp);
         patientViewmodel=ViewModelProviders.of(this).get(PatientViewmodel.class);
         patientfamilyViewmodel=ViewModelProviders.of(this).get(PatientFamilyViewmodel.class);
+        addressUrbanViewmodel=ViewModelProviders.of(this).get(AddressUrbanViewmodel.class);
     }
 
     public PatientViewmodel  getPatientViewmodel(){
         return patientViewmodel;
+    } public AddressUrbanViewmodel  getAddressUrbanViewmodel(){
+        return addressUrbanViewmodel;
     }
 
     public PatientFamilyViewmodel  getPatienFamillytViewmodel(){
@@ -87,8 +98,14 @@ public abstract class BaseActivity extends AppCompatActivity implements NetworkI
         return travelTrackingRepository;
     }
 
+    public VillageinfoRepository getVillageinfoRepository() {
+        return villageinfoRepository;
+    }
+
     public PatientinfoRepository getPatientinfoRepository() {
         return patientinfoRepository;
+    } public AddressUrbaninfoRepository getAddressUrbaninfoRepository() {
+        return addressUrbaninfoRepository;
     }
 
     public PatientFamilyinfoRepository getPatientFamillyinfoRepository() {

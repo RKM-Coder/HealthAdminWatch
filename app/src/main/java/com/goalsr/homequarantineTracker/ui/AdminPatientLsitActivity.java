@@ -78,6 +78,7 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
     SwipeRefreshLayout swipeContainer;
     private NetworkService networkService;
     private PatientListAdapter adapter;
+    private String key;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +87,21 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
         ButterKnife.bind(this);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            key = bundle.getString("key");
+           // key_id = bundle.getString("key_id");
+        }
+
+        if (PreferenceStore.getPrefernceHelperInstace().getFlag(YelligoApplication.getContext(),PreferenceStore.PERSIONTYPE)){
+            tvHeaderFcl.setText("Persion Under Quarantine");
+            txtLogout.setVisibility(View.GONE);
+        }else
+        {
+            tvHeaderFcl.setText("Persion Under Observation");
+            txtLogout.setVisibility(View.VISIBLE);
+        }
         initMvp();
         initrecyclerView();
         // getPatientInfo();
@@ -142,7 +158,7 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
             @Override
             public void onRefresh() {
                 swipeContainer.setRefreshing(false);
-                getPatientInfo();
+                //getPatientInfo();
 
             }
         });
@@ -261,13 +277,17 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
 
     @Override
     public void onItemCheckedFamilly(int position, ResPatientInfo item) {
-        if (item.getCitizenID() > 0) {
+        PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID, 123456);
+        Intent intent = new Intent(getApplicationContext(), HomeMainActivity.class);
+        /*intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);*/
+        startActivity(intent);
+       /* if (item.getCitizenID() > 0) {
             getPatientFamillyinfoRepository().clear();
             PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID, item.getCitizenID());
             Intent intent = new Intent(getApplicationContext(), HomeMainActivity.class);
-            /*intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);*/
+            *//*intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);*//*
             startActivity(intent);
-        }
+        }*/
     }
 
    /* @OnClick(R.id.txtrelationChange)
@@ -298,7 +318,7 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.txt_logout:
-                callLogout();
+                getCommonApi().openNewScreen(AddnewPatientActivity.class);
                 break;
             case R.id.txtrelationChange:
                 Intent intent = new Intent(getApplicationContext(), DistrictListActivity.class);
@@ -311,9 +331,9 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
     boolean doubleBackToExitPressedOnce = false;
     @Override
     public void onBackPressed() {
-        //super.onBackPressed();
+        super.onBackPressed();
 
-        new AlertDialog.Builder(this)
+      /*  new AlertDialog.Builder(this)
                 .setMessage("Are you sure you want to exit?")
                 .setCancelable(false)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -322,7 +342,7 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
                     }
                 })
                 .setNegativeButton("No", null)
-                .show();
+                .show();*/
 
     }
 }

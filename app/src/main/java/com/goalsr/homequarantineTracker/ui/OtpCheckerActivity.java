@@ -90,7 +90,7 @@ public class OtpCheckerActivity extends BaseActivity {
 
         txtInfoLogin.setText("" + txtHeading);
 
-        staerCountTimer();
+        //staerCountTimer();
     }
 
     public int counter = 30;
@@ -135,8 +135,8 @@ public class OtpCheckerActivity extends BaseActivity {
     private boolean Validation() {
         String otp = pinView.getText().toString();
         if (TextUtils.isEmpty(otp)) {
-            Toast.makeText(OtpCheckerActivity.this, "Please Enter OTP Number", Toast.LENGTH_LONG).show();
-            return false;
+            //Toast.makeText(OtpCheckerActivity.this, "Please Enter OTP Number", Toast.LENGTH_LONG).show();
+            return true;
         }
         return true;
     }
@@ -286,23 +286,19 @@ public class OtpCheckerActivity extends BaseActivity {
         switch (view.getId()) {
             case R.id.tv_resendOTP:
 
-                requestotp();
+               // requestotp();
                 break;
             case R.id.btn_login:
                 if (Validation()) {
 
-         /*  ReqOTpVAlidBody reqOTpVAlidBody = new ReqOTpVAlidBody();
-           reqOTpVAlidBody.setDeviceId("12222300039383883");
-           reqOTpVAlidBody.setPhoneNo("" + mobnum);
-           reqOTpVAlidBody.setOtp("" + pinView.getText().toString());
-           reqOTpVAlidBody.setPnsToken("" + PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(), PreferenceStore.FIREBASE_TOKEN));
+                    Intent intent = new Intent(getApplicationContext(), DistrictListActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    finishAffinity();
 
-           ReqOtpValid reqOtpValid = new ReqOtpValid();
-           reqOtpValid.setBody(reqOTpVAlidBody);
-           reqOtpValid.setHeader(new ReqHeader());
-           reqOtpValid.setTrailer(new ReqTrailer());*/
 
-                    if (getCommonApi().isInternetAvailable(OtpCheckerActivity.this)){
+
+                  /*  if (getCommonApi().isInternetAvailable(OtpCheckerActivity.this)){
                         ReqOtpValidGvt reqOtpValidGvt = new ReqOtpValidGvt();
                         reqOtpValidGvt.setMobileNo(mobnum);
                         reqOtpValidGvt.setOTP(pinView.getText().toString());
@@ -312,7 +308,7 @@ public class OtpCheckerActivity extends BaseActivity {
                         makeotpValid(reqOtpValidGvt);
                     }else {
                         Toast.makeText(YelligoApplication.getContext(),"Please enable internet connection",Toast.LENGTH_LONG).show();
-                    }
+                    }*/
 
 
                 }

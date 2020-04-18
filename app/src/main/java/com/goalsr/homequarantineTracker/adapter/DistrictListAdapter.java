@@ -84,6 +84,9 @@ public class DistrictListAdapter extends RecyclerView.Adapter<DistrictListAdapte
         return list != null ? list.size() : 0;
     }
 
+    public void setType(String dist) {
+    }
+
     public class EmptyViewHolder extends RecyclerView.ViewHolder {
         public EmptyViewHolder(View itemView) {
             super(itemView);

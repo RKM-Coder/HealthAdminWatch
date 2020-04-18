@@ -19,6 +19,7 @@
             <LinearLayout
                 android:orientation="vertical" android:layout_width="match_parent"
                 android:id="@+id/ll_main_familly"
+                android:visibility="gone"
                 android:layout_height="60dp">
                 <FrameLayout
                     android:layout_width="match_parent"

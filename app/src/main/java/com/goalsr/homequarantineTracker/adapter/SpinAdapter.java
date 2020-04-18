@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 
 import com.goalsr.homequarantineTracker.R;
 import com.goalsr.homequarantineTracker.resposemodel.DistrictModel;
+import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistricDB;
 import com.goalsr.homequarantineTracker.resposemodel.TalukModel;
 
 
@@ -22,14 +23,16 @@ import java.util.ArrayList;
 public class SpinAdapter<T> extends ArrayAdapter<T> /*extends ArrayAdapter<CategoryList>*/ {
     private Context context;
     private ArrayList<T> objectsList;
+    private String type;
 
     public SpinAdapter(@NonNull Context context,
                        int resource,
                        int textViewResourceId,
-                       @NonNull ArrayList<T> objectsList) {
+                       @NonNull ArrayList<T> objectsList, String s) {
         super(context, resource, textViewResourceId, objectsList);
         this.context=context;
         this.objectsList=objectsList;
+        this.type=s;
     }
 
     public int getCount() {
@@ -59,6 +62,16 @@ public class SpinAdapter<T> extends ArrayAdapter<T> /*extends ArrayAdapter<Categ
             label.setText(""+((DistrictModel) objectsList.get(position)).getDISTRICT_NAME());
         } if(objectsList.get(position) instanceof TalukModel){
             label.setText(""+((TalukModel) objectsList.get(position)).getTALUKA_NAME());
+        }if(objectsList.get(position) instanceof ResStaticMasterDistricDB){
+            if (type.equalsIgnoreCase("dist")) {
+                label.setText("" + ((ResStaticMasterDistricDB) objectsList.get(position)).getDist_name());
+            }else if (type.equalsIgnoreCase("town")) {
+                label.setText("" + ((ResStaticMasterDistricDB) objectsList.get(position)).getTown_name());
+            }else if (type.equalsIgnoreCase("ward")) {
+                label.setText("" + ((ResStaticMasterDistricDB) objectsList.get(position)).getWord_name());
+            }/*else if (type.equalsIgnoreCase("dist")) {
+                label.setText("" + ((ResStaticMasterDistricDB) objectsList.get(position)).getDist_name());
+            }else*/
         }
         /*if(objectsList.get(position) instanceof GetCategoriesItem){
             label.setText(""+((GetCategoriesItem) objectsList.get(position)).getName());
@@ -122,6 +135,16 @@ public class SpinAdapter<T> extends ArrayAdapter<T> /*extends ArrayAdapter<Categ
 
         if(objectsList.get(position) instanceof TalukModel){
             label.setText(""+((TalukModel) objectsList.get(position)).getTALUKA_NAME());
+        }
+
+        if(objectsList.get(position) instanceof ResStaticMasterDistricDB){
+            if (type.equalsIgnoreCase("dist")) {
+                label.setText("" + ((ResStaticMasterDistricDB) objectsList.get(position)).getDist_name());
+            }else if (type.equalsIgnoreCase("town")) {
+                label.setText("" + ((ResStaticMasterDistricDB) objectsList.get(position)).getTown_name());
+            }else if (type.equalsIgnoreCase("ward")) {
+                label.setText("" + ((ResStaticMasterDistricDB) objectsList.get(position)).getWord_name());
+            }
         }
        /* if(objectsList.get(position) instanceof GetCategoriesItem){
             label.setText(""+((GetCategoriesItem) objectsList.get(position)).getName());

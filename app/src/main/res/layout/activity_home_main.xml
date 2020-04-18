@@ -23,7 +23,7 @@
                 android:id="@+id/tv_header_fac"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Quarantine Watch"
+                android:text="Health Watch"
                 android:textColor="@color/colorWhite"
                 android:textSize="18sp"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -99,7 +99,7 @@
                         android:id="@+id/txt_main_p_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Name"
+                        android:text="Person"
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="18sp"
                         android:textStyle="normal" />
@@ -107,7 +107,7 @@
                         android:id="@+id/txt_main_p_mobile"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Mobile"
+                        android:text="1234567891"
                         android:textColor="@color/colormoreWhitelight"
                         android:textSize="16sp"
                         android:textStyle="normal" />

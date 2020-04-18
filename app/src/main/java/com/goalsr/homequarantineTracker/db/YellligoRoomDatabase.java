@@ -7,10 +7,14 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
+import com.goalsr.homequarantineTracker.db.dao.AdresssUrbanInfoDao;
 import com.goalsr.homequarantineTracker.db.dao.PatientFamilyInfoDao;
 import com.goalsr.homequarantineTracker.db.dao.PatientInfoDao;
 import com.goalsr.homequarantineTracker.db.dao.TravelTrackingDao;
+import com.goalsr.homequarantineTracker.db.dao.VillageUrbanInfoDao;
 import com.goalsr.homequarantineTracker.db.model.QHTracker;
+import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistricDB;
+import com.goalsr.homequarantineTracker.resposemodel.VillageModel;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientFamilyInfo;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
 
@@ -18,7 +22,7 @@ import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientIn
 /**
  * Created by ramkrishna on 11/7/18.
  */
-@Database(entities = { QHTracker.class, ResPatientInfo.class, ResPatientFamilyInfo.class}, version = 2,exportSchema = false)
+@Database(entities = { QHTracker.class, ResPatientInfo.class, ResPatientFamilyInfo.class, ResStaticMasterDistricDB.class, VillageModel.class}, version = 2,exportSchema = false)
 public abstract class YellligoRoomDatabase extends RoomDatabase {
 
     private static YellligoRoomDatabase INSTANCE;
@@ -27,7 +31,9 @@ public abstract class YellligoRoomDatabase extends RoomDatabase {
 
     public abstract TravelTrackingDao travelTrackingDao();
     public abstract PatientInfoDao patientInfoDao();
+    public abstract AdresssUrbanInfoDao adresssUrbanInfoDaoDao();
     public abstract PatientFamilyInfoDao patientFamilyInfoDao();
+    public abstract VillageUrbanInfoDao villageUrbanInfoDaoDao();
 
 
     public static YellligoRoomDatabase getDataBase(final Context context){

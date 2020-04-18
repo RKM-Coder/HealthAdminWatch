@@ -49,45 +49,32 @@ public class FamillyListAdapter extends RecyclerView.Adapter<FamillyListAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder holder, final int position) {
-        holder.tvViewNAme.setText(listString.get(position).getName());
+        /*holder.tvViewNAme.setText(listString.get(position).getName());
         if (listString.get(position).getRelationId()==0){
             holder.tvRelation.setText("No relation available");
         }else {
             holder.tvRelation.setText(famillyrelation.get(listString.get(position).getRelationId()));
-        }
+        }*/
 
 
-       /* holder.tvView.setTextColor(holder.chkBox.isChecked()? ContextCompat.getColor(context, R.color.colorselect):ContextCompat.getColor(context, R.color.colornormal));
-        holder.chkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                holder.tvView.setTextColor(holder.chkBox.isChecked()? ContextCompat.getColor(context, R.color.colorselect):ContextCompat.getColor(context, R.color.colornormal));
-                listener.onItemChecked(buttonView, position, listString.get(position), listString, isChecked);
-            }
-        });
-        holder.llChk.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                holder.tvView.setTextColor(holder.chkBox.isChecked()? ContextCompat.getColor(context, R.color.colorselect):ContextCompat.getColor(context, R.color.colornormal));
-                holder.chkBox.setChecked(!holder.chkBox.isChecked());
-            }
-        });*/
+
 
         holder.ll_main_familly.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.onItemCheckedFamilly(position,listString.get(position));
+                listener.onItemCheckedFamilly(position,null);
             }
         });
     }
 
     @Override
     public int getItemCount() {
-        if (listString != null) {
+        return 4;
+        /*if (listString != null) {
             return listString.size();
         } else {
             return 0;
-        }
+        }*/
     }
 
     public void setListener(CheckedListener listener) {

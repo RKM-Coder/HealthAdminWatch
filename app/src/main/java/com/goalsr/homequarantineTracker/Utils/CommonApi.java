@@ -37,27 +37,30 @@ import androidx.core.content.ContextCompat;
 
 import com.goalsr.homequarantineTracker.BuildConfig;
 import com.goalsr.homequarantineTracker.R;
+import com.goalsr.homequarantineTracker.resposemodel.ModelSymptomGVT;
+import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistric;
+import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistricDB;
 import com.goalsr.homequarantineTracker.resposemodel.SecurityObject;
+import com.goalsr.homequarantineTracker.resposemodel.VillageModel;
 import com.goalsr.homequarantineTracker.ui.SymtomModel;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 import java.util.Vector;
 
 public class CommonApi {
@@ -129,8 +132,8 @@ public class CommonApi {
         if (bundle != null)
             intent.putExtras(bundle);
         commonApiInstance.activity.startActivity(intent);
-        commonApiInstance.activity.overridePendingTransition(
-                android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+       /* commonApiInstance.activity.overridePendingTransition(
+                android.R.anim.slide_in_left, android.R.anim.slide_out_right);*/
     }
 
 //    public void openNewScreenWithFadeEffect(Class<?> cls, Bundle bundle) {
@@ -147,8 +150,8 @@ public class CommonApi {
         Intent intent = new Intent(
                 commonApiInstance.activity.getApplicationContext(), cls);
         commonApiInstance.activity.startActivity(intent);
-        commonApiInstance.activity.overridePendingTransition(
-                android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+       /* commonApiInstance.activity.overridePendingTransition(
+                android.R.anim.slide_in_left, android.R.anim.slide_out_right);*/
     }
 
     public void showToastDefaultMsg(String msg) {
@@ -604,5 +607,84 @@ public class CommonApi {
         list.add(new SymtomModel("Others",R.mipmap.others));
         return list;
 
+    }
+    public ArrayList<ModelSymptomGVT> getListOdSymtomByGVT(){
+        ArrayList<ModelSymptomGVT> list=new ArrayList<>();
+        list.add(new ModelSymptomGVT("1","Fever"));
+        list.add(new ModelSymptomGVT("1","Diabetes"));
+        list.add(new ModelSymptomGVT("1","Cough Sour Throat"));
+        list.add(new ModelSymptomGVT("1","Breathing Problem "));
+        list.add(new ModelSymptomGVT("1","Diarrhea"));
+        list.add(new ModelSymptomGVT("1","Hypertension"));
+        list.add(new ModelSymptomGVT("1","Heart Problem"));
+        list.add(new ModelSymptomGVT("1","HIV"));
+      /*  list.add(new SymtomModel("Diarrhoea",R.mipmap.group_dia));
+        list.add(new SymtomModel("Drowsiness",R.mipmap.ic_group_94));
+        list.add(new SymtomModel("Lack of appetite",R.mipmap.ic_group_93));
+        list.add(new SymtomModel("Others",R.mipmap.others));*/
+        return list;
+
+    }
+
+    public List<ResStaticMasterDistricDB> getDistrictUrban(Context mcontext) {
+        String jsonFileString = getJsonFromAssets(mcontext, "urbanareamaster_new.json");
+        Log.i("data", jsonFileString);
+
+        Gson gson = new Gson();
+        Type listUserType = new TypeToken<List<ResStaticMasterDistricDB>>() {
+        }.getType();
+        List<ResStaticMasterDistricDB>listOFdistrict = new ArrayList<>();
+        listOFdistrict = gson.fromJson(jsonFileString, listUserType);
+
+        return listOFdistrict;
+
+    }
+
+    public List<VillageModel> getVillageList(Context mcontext) {
+        String jsonFileString = getJsonFromAssets(mcontext, "villagefile1.json");
+        String jsonFileString2 = getJsonFromAssets(mcontext, "villagefile2.json");
+       // Log.i("data", jsonFileString);
+
+        Gson gson = new Gson();
+        Type listUserType = new TypeToken<List<VillageModel>>() {
+        }.getType();
+        List<VillageModel>listOFdistrict = new ArrayList<>();
+        List<VillageModel>listOFdistrict2 = new ArrayList<>();
+        listOFdistrict = gson.fromJson(jsonFileString, listUserType);
+        Log.e("Listsize1",listOFdistrict.size()+"");
+        listOFdistrict2 = gson.fromJson(jsonFileString2, listUserType);
+        Log.e("Listsize1",listOFdistrict2.size()+"");
+        listOFdistrict.addAll(listOFdistrict2);
+        return listOFdistrict;
+
+    }
+
+    // Function to remove duplicates from an ArrayList
+    public ArrayList<ResStaticMasterDistric> removeDuplicates(ArrayList<ResStaticMasterDistric> list)
+    {
+
+        // Create a new ArrayList
+        ArrayList<ResStaticMasterDistric> newList = new ArrayList<ResStaticMasterDistric>();
+
+        // Traverse through the first list
+        for (ResStaticMasterDistric element : list) {
+
+            // If this element is not present in newList
+            // then add it
+            if (newList.size()>0){
+                for (ResStaticMasterDistric item : newList){
+                    if (!item.getDistName().equalsIgnoreCase(element.getDistName())) {
+
+                        newList.add(element);
+                    }
+                }
+            }else {
+                newList.add(element);
+            }
+
+        }
+
+        // return the new list
+        return newList;
     }
 }
