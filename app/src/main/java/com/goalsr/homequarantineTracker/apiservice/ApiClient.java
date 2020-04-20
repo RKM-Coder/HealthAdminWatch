@@ -16,11 +16,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ApiClient {
 
 
-//    public static final String BASE_URL = "http://35.165.237.181:8080";    //prod
-//    public static final String BASE_URL = "http://54.202.114.15:8080/";    //prod
-    public static final String BASE_URL = "http://qurantinewatch.azurewebsites.net";    //prod
+
+    public static final String BASE_URL = "http://218.248.32.25/";    //prod
     public static final String BASE_URL_IMAGE = "http://218.248.32.25/";    //prod
-//    public static final String BASE_URL = "http://218.248.32.25";    //prod
+
 
     public static final String AMAZON_BUCKET = "yelligo-qa";
 

@@ -7,38 +7,35 @@ import android.os.AsyncTask;
 import androidx.lifecycle.LiveData;
 
 import com.goalsr.homequarantineTracker.db.YellligoRoomDatabase;
-import com.goalsr.homequarantineTracker.db.dao.AdresssUrbanInfoDao;
-import com.goalsr.homequarantineTracker.db.dao.AdresssUrbanInfoDao;
-import com.goalsr.homequarantineTracker.db.model.QHTracker;
-import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistricDB;
-
+import com.goalsr.homequarantineTracker.db.dao.SymtoAddDao;
+import com.goalsr.homequarantineTracker.resposemodel.hwSymtommaker.ReqSymtomAdd;
 
 import java.util.List;
 
-public class AddressUrbaninfoRepository {
+public class SymptoAddRepository {
 
-    private AdresssUrbanInfoDao mDao;
-    private LiveData<List<ResStaticMasterDistricDB>> mListLiveData;
+    private SymtoAddDao mDao;
+    private LiveData<List<ReqSymtomAdd>> mListLiveData;
 //    private List<QHTracker> mList;
 
-    public AddressUrbaninfoRepository(Application application) {
+    public SymptoAddRepository(Application application) {
         YellligoRoomDatabase db = YellligoRoomDatabase.getDataBase(application);
-        this.mDao = db.adresssUrbanInfoDaoDao();
-        mListLiveData = mDao.getListOfDistrictLivedata();
+        this.mDao = db.symtodao();
+        //mListLiveData = mDao.getListOfDistrictLivedata();
     }
-    public AddressUrbaninfoRepository(Context application) {
+    public SymptoAddRepository(Context application) {
         YellligoRoomDatabase db = YellligoRoomDatabase.getDataBase(application);
-        this.mDao = db.adresssUrbanInfoDaoDao();
-        mListLiveData = mDao.getListOfDistrictLivedata();
+        this.mDao = db.symtodao();
+        //mListLiveData = mDao.getListOfDistrictLivedata();
     }
 
-    public void insert(List<ResStaticMasterDistricDB> value) {
+    public void insert(List<ReqSymtomAdd> value) {
 
        new InsertAsynctaskList(mDao, value).execute();
         // mDao.insertItem(value);
     }
 
-    public void insert(ResStaticMasterDistricDB value) {
+    public void insert(ReqSymtomAdd value) {
 
         new InsertAsynctask(mDao, value).execute();
         // mDao.insertItem(value);
@@ -46,37 +43,25 @@ public class AddressUrbaninfoRepository {
 
     
 
-    public List<ResStaticMasterDistricDB> getListAllItemByAdmin(){
+    public List<ReqSymtomAdd> getListAllItemByAdmin(){
         return mDao.getListOfDistrict();
     }
-    public List<ResStaticMasterDistricDB> getListAllItemByDistId(String id){
-        return mDao.getListOfTown(id);
+    public List<ReqSymtomAdd> getListAllItemByDistId(String id){
+        return mDao.getListOfVilageByPID(id);
     }
-
-    public ResStaticMasterDistricDB getDistricNameByDistID(int id){
-        return mDao.getDistric(id);
-    }
-    public ResStaticMasterDistricDB getCityByCityID(int id){
-        return mDao.getCity(id);
-    }
-
-    public ResStaticMasterDistricDB getWordBiWID(int id){
-        return mDao.getWordBiWID(id);
-    }
-
-    public List<ResStaticMasterDistricDB> getListAllWordItemByTownId(String disid){
+    /*public List<ReqSymtomAdd> getListAllWordItemByTownId(String disid){
         return mDao.getListOfWord(disid);
     }
-
-    public LiveData<List<ResStaticMasterDistricDB>> getListDistLivedata(){
+*/
+    /*public LiveData<List<ReqSymtomAdd>> getListDistLivedata(){
         return mListLiveData;
-    }
+    }*/
 
    /* public List<String> getTravelListNonSyncImage(){
         return mDao.getListAllItemNonSyncImage(false);
     }*/
 
-    public void update(ResStaticMasterDistricDB value) {
+    public void update(ReqSymtomAdd value) {
 
         new UpdateAsynctask(mDao, value).execute();
         // mDao.insertItem(value);
@@ -94,7 +79,7 @@ public class AddressUrbaninfoRepository {
         // mDao.insertItem(value);
     }*/
 
-   /* public ResStaticMasterDistricDB getItem(String checkinid) {
+   /* public ReqSymtomAdd getItem(String checkinid) {
 
         return mDao.getItemById(checkinid);
     }*/
@@ -124,10 +109,10 @@ public class AddressUrbaninfoRepository {
     }*/
 
     private class InsertAsynctask extends AsyncTask<Void, Void, Void> {
-        ResStaticMasterDistricDB value;
-        AdresssUrbanInfoDao mDao;
+        ReqSymtomAdd value;
+        SymtoAddDao mDao;
 
-        public InsertAsynctask(AdresssUrbanInfoDao mDao, ResStaticMasterDistricDB value) {
+        public InsertAsynctask(SymtoAddDao mDao, ReqSymtomAdd value) {
             this.value = value;
             this.mDao = mDao;
         }
@@ -140,17 +125,17 @@ public class AddressUrbaninfoRepository {
     }
 
     private class InsertAsynctaskList extends AsyncTask<Void, Void, Void> {
-        List<ResStaticMasterDistricDB> value;
-        AdresssUrbanInfoDao mDao;
+        List<ReqSymtomAdd> value;
+        SymtoAddDao mDao;
 
-        public InsertAsynctaskList(AdresssUrbanInfoDao mDao, List<ResStaticMasterDistricDB> value) {
+        public InsertAsynctaskList(SymtoAddDao mDao, List<ReqSymtomAdd> value) {
             this.value = value;
             this.mDao = mDao;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            for (ResStaticMasterDistricDB item : value) {
+            for (ReqSymtomAdd item : value) {
                 mDao.insertItem(item);
             }
 
@@ -159,10 +144,10 @@ public class AddressUrbaninfoRepository {
     }
 
     private class UpdateAsynctask extends AsyncTask<Void, Void, Void> {
-        ResStaticMasterDistricDB value;
-        AdresssUrbanInfoDao mDao;
+        ReqSymtomAdd value;
+        SymtoAddDao mDao;
 
-        public UpdateAsynctask(AdresssUrbanInfoDao mDao, ResStaticMasterDistricDB value) {
+        public UpdateAsynctask(SymtoAddDao mDao, ReqSymtomAdd value) {
             this.value = value;
             this.mDao = mDao;
         }
@@ -177,12 +162,12 @@ public class AddressUrbaninfoRepository {
 
     private class UpdateAsynctask2 extends AsyncTask<Void, Void, Void> {
 
-        AdresssUrbanInfoDao mDao;
+        SymtoAddDao mDao;
         boolean status;
         String id;
         String today;
 
-        public UpdateAsynctask2(AdresssUrbanInfoDao mDao, boolean status, String id) {
+        public UpdateAsynctask2(SymtoAddDao mDao, boolean status, String id) {
             this.mDao = mDao;
             this.status = status;
             this.id = id;
@@ -199,12 +184,12 @@ public class AddressUrbaninfoRepository {
 
     private class UpdateAsynctaskimgestatus extends AsyncTask<Void, Void, Void> {
 
-        AdresssUrbanInfoDao mDao;
+        SymtoAddDao mDao;
         boolean status;
         String filename;
         String today;
 
-        public UpdateAsynctaskimgestatus(AdresssUrbanInfoDao mDao, boolean status, String filename) {
+        public UpdateAsynctaskimgestatus(SymtoAddDao mDao, boolean status, String filename) {
             this.mDao = mDao;
             this.status = status;
             this.filename = filename;

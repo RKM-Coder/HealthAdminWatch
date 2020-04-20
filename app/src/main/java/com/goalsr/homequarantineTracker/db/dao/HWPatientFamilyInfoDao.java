@@ -7,33 +7,40 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import com.goalsr.homequarantineTracker.db.model.QHTracker;
-import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
+import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientFamilyInfo;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientFamilyDetailsItem;
 
 import java.util.List;
 
 @Dao
-public interface PatientInfoDao {
+public interface HWPatientFamilyInfoDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insert(List<ResPatientInfo> ndhColorList);
+    void insert(List<PatientFamilyDetailsItem> ndhColorList);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertItem(ResPatientInfo item);
+    void insertItem(PatientFamilyDetailsItem item);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    void updateItem(ResPatientInfo item);
+    void updateItem(PatientFamilyDetailsItem item);
 
-    @Query("SELECT * from patient_info where CitizenID =:cid")
-    ResPatientInfo getListAllItem(int cid);
+    @Query("SELECT * from hwatch_family_info")
+    List<PatientFamilyDetailsItem> getListAllItem();
 
+    @Query("SELECT * from hwatch_family_info where citizenID =:fid")
+    List<PatientFamilyDetailsItem> getListAllItemById(int fid);
 
-    @Query("SELECT * from patient_info  where name not null order by Name ASC")
-    List<ResPatientInfo> getListAllItemByAdmin();
+    @Query("SELECT * from hwatch_family_info where citizenID =:cid")
+    LiveData<List<PatientFamilyDetailsItem>> getListAllItemLivedata(int cid);
 
-    @Query("SELECT * from patient_info where name not null order by Name ASC")
-    LiveData<List<ResPatientInfo>> getListAllItemByAdminLivedata();
+    @Query("SELECT * from hwatch_family_info where citizenID =:id")
+    LiveData<List<PatientFamilyDetailsItem>> getListAllItemLivedataById(int id);
 
+    @Query("SELECT * from hwatch_family_info where familyMemberID =:id")
+    PatientFamilyDetailsItem getListAllItem(int id);
+
+    @Query("SELECT * from hwatch_family_info where mobileNo =:mobile")
+    PatientFamilyDetailsItem getItemMobileNoExist(String mobile);
 
     /*@Query("SELECT * from qh_travel_tracking where syncstutas= :status")
     List<QHTracker> getListAllItemNonSync(boolean status);
@@ -54,9 +61,9 @@ public interface PatientInfoDao {
     void updateinsertpatientsyncstatus(boolean synstatus, String filename);*/
 
     //Clear DB DATA
-    @Query("DELETE FROM patient_info")
+    @Query("DELETE FROM hwatch_family_info")
     public void clearTable();
     //Clear perticular raw
-    @Query("DELETE FROM patient_info where CitizenID = :id")
+    @Query("DELETE FROM hwatch_family_info where CitizenID = :id")
     public void clearTableByid(String id);
 }

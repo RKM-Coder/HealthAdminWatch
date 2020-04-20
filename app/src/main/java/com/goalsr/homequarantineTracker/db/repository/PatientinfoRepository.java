@@ -197,7 +197,7 @@ public class PatientinfoRepository {
 
         @Override
         protected Void doInBackground(Void... voids) {
-           // mDao.updateimgestatus(status,filename);
+           // mDao.updateinsertpatientsyncstatus(status,filename);
             return null;
         }
     }

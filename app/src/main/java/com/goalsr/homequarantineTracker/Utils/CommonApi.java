@@ -37,7 +37,10 @@ import androidx.core.content.ContextCompat;
 
 import com.goalsr.homequarantineTracker.BuildConfig;
 import com.goalsr.homequarantineTracker.R;
+import com.goalsr.homequarantineTracker.resposemodel.BlockModel;
+import com.goalsr.homequarantineTracker.resposemodel.HWSecurity.HealthWPSecurity;
 import com.goalsr.homequarantineTracker.resposemodel.ModelSymptomGVT;
+import com.goalsr.homequarantineTracker.resposemodel.PanchyateModel;
 import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistric;
 import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistricDB;
 import com.goalsr.homequarantineTracker.resposemodel.SecurityObject;
@@ -274,6 +277,14 @@ public class CommonApi {
         SecurityObject securityObject =new SecurityObject();
         securityObject.setPassPhrase("BhoomiApI@123#=");
         securityObject.setUName("BhoomiApI");
+
+        return securityObject;
+    }
+
+    public HealthWPSecurity getHealthWatchSecurityObject(){
+        HealthWPSecurity securityObject =new HealthWPSecurity();
+        securityObject.setName("BhoomiWapi@2020");
+        securityObject.setPassphrase("c2a2b557-c792-48f9-9ccd-56fda45974b9");
 
         return securityObject;
     }
@@ -611,19 +622,55 @@ public class CommonApi {
     public ArrayList<ModelSymptomGVT> getListOdSymtomByGVT(){
         ArrayList<ModelSymptomGVT> list=new ArrayList<>();
         list.add(new ModelSymptomGVT("1","Fever"));
-        list.add(new ModelSymptomGVT("1","Diabetes"));
-        list.add(new ModelSymptomGVT("1","Cough Sour Throat"));
-        list.add(new ModelSymptomGVT("1","Breathing Problem "));
-        list.add(new ModelSymptomGVT("1","Diarrhea"));
-        list.add(new ModelSymptomGVT("1","Hypertension"));
-        list.add(new ModelSymptomGVT("1","Heart Problem"));
-        list.add(new ModelSymptomGVT("1","HIV"));
+        list.add(new ModelSymptomGVT("2","Diabetes"));
+        list.add(new ModelSymptomGVT("3","Cough Sour Throat"));
+        list.add(new ModelSymptomGVT("4","Breathing Problem "));
+        list.add(new ModelSymptomGVT("5","Diarrhea"));
+        list.add(new ModelSymptomGVT("6","Hypertension"));
+        list.add(new ModelSymptomGVT("7","Heart Problem"));
+        list.add(new ModelSymptomGVT("8","HIV"));
       /*  list.add(new SymtomModel("Diarrhoea",R.mipmap.group_dia));
         list.add(new SymtomModel("Drowsiness",R.mipmap.ic_group_94));
         list.add(new SymtomModel("Lack of appetite",R.mipmap.ic_group_93));
         list.add(new SymtomModel("Others",R.mipmap.others));*/
         return list;
 
+    }
+
+    public String getTalukName(Context mcontext,String talukid,String distid){
+        String jsonFileString = getJsonFromAssets(mcontext, "blockjson_new.json");
+       // Log.i("data", jsonFileString);
+
+        Gson gson = new Gson();
+        Type listUserType = new TypeToken<List<BlockModel>>() {
+        }.getType();
+        List<BlockModel> listOfTaluk = new ArrayList<>();
+        listOfTaluk = gson.fromJson(jsonFileString, listUserType);
+
+        for (BlockModel model:listOfTaluk){
+            if (model.getBlockCode().equalsIgnoreCase(talukid)){
+                return model.getBlockName();
+            }
+        }
+        return "";
+    }
+
+    public String getPanchyateName(Context mcontext,String talukid){
+        String jsonFileString = getJsonFromAssets(mcontext, "panchayatjson.json");
+        //Log.i("data", jsonFileString);
+
+        Gson gson = new Gson();
+        Type listUserType = new TypeToken<List<PanchyateModel>>() {
+        }.getType();
+        List<PanchyateModel> listOfTaluk = new ArrayList<>();
+        listOfTaluk = gson.fromJson(jsonFileString, listUserType);
+
+        for (PanchyateModel model:listOfTaluk){
+            if (model.getPanchayatCode().equalsIgnoreCase(talukid)){
+                return model.getPanchayatName();
+            }
+        }
+        return "";
     }
 
     public List<ResStaticMasterDistricDB> getDistrictUrban(Context mcontext) {

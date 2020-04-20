@@ -44,6 +44,10 @@ public class VillageinfoRepository {
 
     
 
+    public String getVillageName(String vid){
+        return mDao.getVillageName(vid);
+    }
+
     public List<VillageModel> getListAllItemByAdmin(){
         return mDao.getListOfDistrict();
     }
@@ -68,7 +72,7 @@ public class VillageinfoRepository {
         // mDao.insertItem(value);
     }
 
-   /* public void updatesyncdata(boolean status, String id) {
+   /* public void updatesyncdatainserupdatepatient(boolean status, String id) {
 
         new UpdateAsynctask2(mDao, status, id).execute();
         // mDao.insertItem(value);
@@ -200,7 +204,7 @@ public class VillageinfoRepository {
 
         @Override
         protected Void doInBackground(Void... voids) {
-           // mDao.updateimgestatus(status,filename);
+           // mDao.updateinsertpatientsyncstatus(status,filename);
             return null;
         }
     }

@@ -31,6 +31,7 @@ import com.goalsr.homequarantineTracker.base.BaseActivity;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ReqPatient;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
 import com.goalsr.homequarantineTracker.resposemodel.gotOtpreq.ResGvtValidOtp;
+import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ReqHWOtpValidate;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ReqOtpValidGvt;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ResGvtValidOtpValid;
 import com.google.android.material.snackbar.Snackbar;
@@ -90,7 +91,7 @@ public class OtpCheckerActivity extends BaseActivity {
 
         txtInfoLogin.setText("" + txtHeading);
 
-        //staerCountTimer();
+        staerCountTimer();
     }
 
     public int counter = 30;
@@ -141,9 +142,9 @@ public class OtpCheckerActivity extends BaseActivity {
         return true;
     }
 
-    private void makeotpValid(ReqOtpValidGvt reqOtpValid) {
+    private void makeotpValid(ReqHWOtpValidate reqOtpValid) {
         showProgressDialogStatic();
-        networkService.makeotpvalid(reqOtpValid, new NetworkService.NetworkServiceListener() {
+        networkService.makeHWotpvalid(null, new NetworkService.NetworkServiceListener() {
             @Override
             public void onFailure(Object response) {
                 hideProgressDialogStatic();
@@ -291,24 +292,24 @@ public class OtpCheckerActivity extends BaseActivity {
             case R.id.btn_login:
                 if (Validation()) {
 
-                    Intent intent = new Intent(getApplicationContext(), DistrictListActivity.class);
+                    /*Intent intent = new Intent(getApplicationContext(), DistrictListActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
-                    finishAffinity();
+                    finishAffinity();*/
 
 
 
-                  /*  if (getCommonApi().isInternetAvailable(OtpCheckerActivity.this)){
-                        ReqOtpValidGvt reqOtpValidGvt = new ReqOtpValidGvt();
-                        reqOtpValidGvt.setMobileNo(mobnum);
-                        reqOtpValidGvt.setOTP(pinView.getText().toString());
-                        reqOtpValidGvt.setpSecurity(getCommonApi().getSecurityObject());
-                        reqOtpValidGvt.setRole(rollid);
+                    if (getCommonApi().isInternetAvailable(OtpCheckerActivity.this)){
+                        ReqHWOtpValidate reqOtpValidGvt = new ReqHWOtpValidate();
+                        reqOtpValidGvt.setMobile_number(mobnum);
+                        reqOtpValidGvt.setOtp(Integer.parseInt(pinView.getText().toString()));
+                        reqOtpValidGvt.setP_security(getCommonApi().getHealthWatchSecurityObject());
+                        reqOtpValidGvt.setRole_id(rollid);
 
                         makeotpValid(reqOtpValidGvt);
                     }else {
                         Toast.makeText(YelligoApplication.getContext(),"Please enable internet connection",Toast.LENGTH_LONG).show();
-                    }*/
+                    }
 
 
                 }

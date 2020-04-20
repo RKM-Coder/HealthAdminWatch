@@ -14,6 +14,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 //import com.amitshekhar.DebugDB;
+import com.amitshekhar.DebugDB;
 import com.goalsr.homequarantineTracker.R;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
@@ -56,7 +57,7 @@ public class SplashMainActivity extends BaseActivity {
         } else {
             continueLoading();
         }
-        //Log.e("DBaddress", DebugDB.getAddressLog());
+        Log.e("DBaddress", DebugDB.getAddressLog());
 
     }
     private void initMvp() {
@@ -118,7 +119,7 @@ public class SplashMainActivity extends BaseActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                getCommonApi().openNewScreen(LoginActivity.class);
+                getCommonApi().openNewScreen(DistrictListActivity.class);
                 /*getCommonApi().openNewScreen(DasBoardWorkmanger.class);
                 finish();*/
                 /*if (PreferenceStore.getPrefernceHelperInstace().isFirstTime(SplashMainActivity.this, AppConstants.FIRST_TIME)) {

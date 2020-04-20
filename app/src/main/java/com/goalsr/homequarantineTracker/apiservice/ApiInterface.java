@@ -16,6 +16,13 @@ import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientIn
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfoByAdmin;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResUpdateInfo;
 import com.goalsr.homequarantineTracker.resposemodel.gotOtpreq.ResGvtValidOtp;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqGetPatientinfobody;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqInsertUpdatePatientInfo;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ResPatientData;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.Respatientinsertupdate;
+import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ReqHWOtp;
+import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ReqHWOtpValidate;
+import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ResHWGetOtp;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ReqOtpValidGvt;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ResGvtValidOtpValid;
 import com.goalsr.homequarantineTracker.resposemodel.poststatus.ReqStatus;
@@ -39,6 +46,43 @@ public interface ApiInterface {
     @POST("/mobileApi/login/")
     Call<LoginResponse> makeAppLoggin(@Body LoginRequest request);*/
     //@Headers({"Accept: application/json", "Content-Type: application/json"})
+//@HTTP(method = "GET", path = "/WebApi_Hwatch/api/HealthWatch/GetPatientList", hasBody = true)
+    /* @FormUrlEncoded
+    @HTTP(method = "GET", path = "/WebApi_Hwatch/api/HealthWatch/GetPatientList", hasBody = true)*/
+    /*HWATCH*/
+
+
+    @Headers({"Accept: application/json", "Content-Type: application/json"})
+    @POST("WebApi_Hwatch/api/HealthWatch/GetPatientList")
+    Call<ResPatientData> getHWPatientFamilyInfo(
+           @Body ReqGetPatientinfobody request
+    );
+
+
+    @Headers({"Accept: application/json", "Content-Type: application/json"})
+    @POST("WebApi_Hwatch/api/HealthWatch/GetOTP")
+    Call<ResHWGetOtp> makeHWReqOtp(
+            @Body ReqHWOtp request
+    );
+
+    @Headers({"Accept: application/json", "Content-Type: application/json"})
+    @POST("WebApi_Hwatch/api/HealthWatch/GetOTP")
+    Call<ResHWGetOtp> makeHWReqOtpValidate(
+                    @Body ReqHWOtpValidate request
+            );
+
+    @Headers({"Accept: application/json", "Content-Type: application/json"})
+    @POST("WebApi_Hwatch/api/HealthWatch/InsertUpdatePatientInfo")
+    Call<Respatientinsertupdate> makeHWinsertUpdatePatientInfo(
+            @Body ReqInsertUpdatePatientInfo request
+    );
+
+
+
+
+
+
+    /*QWATCH*/
 
 
     @Headers({"Accept: application/json", "Content-Type: application/json"})
@@ -81,8 +125,8 @@ public interface ApiInterface {
     @POST("/RWS_QWATCH/BHOOMI/Fn_Insert_DOCCHNK/{PSTRUSERNAME}/{PSTRPASSWORD}/")
     Call<ResImage> sendprofileImage(
             @Body ReqImageChunk request,
-            @Path ("PSTRUSERNAME") String PSTRUSERNAME,
-            @Path ("PSTRPASSWORD") String PSTRPASSWORD
+            @Path("PSTRUSERNAME") String PSTRUSERNAME,
+            @Path("PSTRPASSWORD") String PSTRPASSWORD
     );
 
     @Headers({"Accept: application/json", "Content-Type: application/json"})
@@ -110,7 +154,6 @@ public interface ApiInterface {
     );
 
 
-
     @Headers({"Accept: application/json", "Content-Type: application/json"})
     @PUT("/quarantine-api/user/updateUserQuarantineStatus")
     Call<JsonElement> makeEmergencyTrakerinside(
@@ -118,16 +161,12 @@ public interface ApiInterface {
     );
 
     /*GVT API
-    * */
+     * */
 
     @GET("/api/Values/GetOTP")
     Call<ResGvtValidOtp> makeOtpReqGOVT(
             @Query("pPmobileNo") String mobileNo
     );
-
-
-
-
 
 
 }

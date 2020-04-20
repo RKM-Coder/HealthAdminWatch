@@ -38,6 +38,25 @@ public class AppConstants {
             // Manifest.permission.READ_SMS,
             android.Manifest.permission.CAMERA,
     };
+    public final static String myPermissionsForLoac[] = {
+            android.Manifest.permission.INTERNET,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            //android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            //android.Manifest.permission.READ_EXTERNAL_STORAGE,
+
+            // android.Manifest.permission.WRITE_SETTINGS,
+            //android.Manifest.permission.ACCESS_NETWORK_STATE,
+            // android.Manifest.permission.LOCATION_HARDWARE,
+            //android.Manifest.permission.READ_PHONE_STATE,
+//            android.Manifest.permission.CALL_PHONE,
+//            android.Manifest.permission.GET_ACCOUNTS,
+            // Manifest.permission.READ_CONTACTS,
+            //Manifest.permission.RECEIVE_SMS,
+            // Manifest.permission.READ_SMS,
+           // android.Manifest.permission.CAMERA,
+    };
+
 
 //    public static final String LOGIN = "login_key";
     public static final String APP_TOKEN = "app_token";

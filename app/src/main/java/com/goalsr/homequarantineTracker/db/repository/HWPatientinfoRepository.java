@@ -7,94 +7,79 @@ import android.os.AsyncTask;
 import androidx.lifecycle.LiveData;
 
 import com.goalsr.homequarantineTracker.db.YellligoRoomDatabase;
-import com.goalsr.homequarantineTracker.db.dao.AdresssUrbanInfoDao;
-import com.goalsr.homequarantineTracker.db.dao.AdresssUrbanInfoDao;
-import com.goalsr.homequarantineTracker.db.model.QHTracker;
-import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistricDB;
-
+import com.goalsr.homequarantineTracker.db.dao.HWPatientInfoDao;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
 
 import java.util.List;
 
-public class AddressUrbaninfoRepository {
+public class HWPatientinfoRepository {
 
-    private AdresssUrbanInfoDao mDao;
-    private LiveData<List<ResStaticMasterDistricDB>> mListLiveData;
-//    private List<QHTracker> mList;
+    private HWPatientInfoDao mDao;
+    private LiveData<List<PatientListDataItem>> mListLiveData;
+    private List<PatientListDataItem> mList;
 
-    public AddressUrbaninfoRepository(Application application) {
+    public HWPatientinfoRepository(Application application) {
         YellligoRoomDatabase db = YellligoRoomDatabase.getDataBase(application);
-        this.mDao = db.adresssUrbanInfoDaoDao();
-        mListLiveData = mDao.getListOfDistrictLivedata();
+        this.mDao = db.hwpatientInfoDao();
+        //mListLiveData = mDao.getListAllItemByAdminLivedata();
     }
-    public AddressUrbaninfoRepository(Context application) {
+    public HWPatientinfoRepository(Context application) {
         YellligoRoomDatabase db = YellligoRoomDatabase.getDataBase(application);
-        this.mDao = db.adresssUrbanInfoDaoDao();
-        mListLiveData = mDao.getListOfDistrictLivedata();
+        this.mDao = db.hwpatientInfoDao();
+       // mListLiveData = mDao.getListAllItemByAdminLivedata();
     }
 
-    public void insert(List<ResStaticMasterDistricDB> value) {
+    public void insert(List<PatientListDataItem> value) {
 
        new InsertAsynctaskList(mDao, value).execute();
         // mDao.insertItem(value);
     }
 
-    public void insert(ResStaticMasterDistricDB value) {
+    public void insert(PatientListDataItem value) {
 
         new InsertAsynctask(mDao, value).execute();
         // mDao.insertItem(value);
     }
 
-    
-
-    public List<ResStaticMasterDistricDB> getListAllItemByAdmin(){
-        return mDao.getListOfDistrict();
-    }
-    public List<ResStaticMasterDistricDB> getListAllItemByDistId(String id){
-        return mDao.getListOfTown(id);
+    public PatientListDataItem getPatientInfo(int cid){
+        return mDao.getListAllItem(cid);
     }
 
-    public ResStaticMasterDistricDB getDistricNameByDistID(int id){
-        return mDao.getDistric(id);
-    }
-    public ResStaticMasterDistricDB getCityByCityID(int id){
-        return mDao.getCity(id);
+    public List<PatientListDataItem> getListAllItemByAdmin(){
+        return mDao.getListAllItemByAdmin();
     }
 
-    public ResStaticMasterDistricDB getWordBiWID(int id){
-        return mDao.getWordBiWID(id);
+    public List<PatientListDataItem> getListAllItemByAdminNONSYNC(){
+        return mDao.getListAllItemByAdminNONSYNC(false);
     }
 
-    public List<ResStaticMasterDistricDB> getListAllWordItemByTownId(String disid){
-        return mDao.getListOfWord(disid);
-    }
-
-    public LiveData<List<ResStaticMasterDistricDB>> getListDistLivedata(){
-        return mListLiveData;
+    public LiveData<List<PatientListDataItem>> getListAllItemByAdminLivedata(int ptype){
+        return mDao.getListAllItemByAdminLivedata(ptype);
     }
 
    /* public List<String> getTravelListNonSyncImage(){
         return mDao.getListAllItemNonSyncImage(false);
     }*/
 
-    public void update(ResStaticMasterDistricDB value) {
+   /* public void update(PatientListDataItem value) {
 
         new UpdateAsynctask(mDao, value).execute();
         // mDao.insertItem(value);
-    }
-
-   /* public void updatesyncdatainserupdatepatient(boolean status, String id) {
-
-        new UpdateAsynctask2(mDao, status, id).execute();
-        // mDao.insertItem(value);
     }*/
 
-   /* public void updatesyncdataimagestatus(boolean status, String filename) {
+    public void updatesyncdatainserupdatepatient(boolean status, String id, int citizenid) {
+
+        new UpdateAsynctaskInsertUpdatepatientInfo(mDao, status, id,citizenid).execute();
+        // mDao.insertItem(value);
+    }
+
+    /*public void updatesyncdataimagestatus(boolean status, String filename) {
 
         new UpdateAsynctaskimgestatus(mDao, status, filename).execute();
         // mDao.insertItem(value);
     }*/
 
-   /* public ResStaticMasterDistricDB getItem(String checkinid) {
+   /* public PatientListDataItem getItem(String checkinid) {
 
         return mDao.getItemById(checkinid);
     }*/
@@ -124,33 +109,35 @@ public class AddressUrbaninfoRepository {
     }*/
 
     private class InsertAsynctask extends AsyncTask<Void, Void, Void> {
-        ResStaticMasterDistricDB value;
-        AdresssUrbanInfoDao mDao;
+        PatientListDataItem value;
+        HWPatientInfoDao mDao;
 
-        public InsertAsynctask(AdresssUrbanInfoDao mDao, ResStaticMasterDistricDB value) {
+        public InsertAsynctask(HWPatientInfoDao mDao, PatientListDataItem value) {
             this.value = value;
             this.mDao = mDao;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            mDao.insertItem(value);
+            long id=mDao.insertItem(value);
             return null;
         }
+
+
     }
 
     private class InsertAsynctaskList extends AsyncTask<Void, Void, Void> {
-        List<ResStaticMasterDistricDB> value;
-        AdresssUrbanInfoDao mDao;
+        List<PatientListDataItem> value;
+        HWPatientInfoDao mDao;
 
-        public InsertAsynctaskList(AdresssUrbanInfoDao mDao, List<ResStaticMasterDistricDB> value) {
+        public InsertAsynctaskList(HWPatientInfoDao mDao, List<PatientListDataItem> value) {
             this.value = value;
             this.mDao = mDao;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            for (ResStaticMasterDistricDB item : value) {
+            for (PatientListDataItem item : value) {
                 mDao.insertItem(item);
             }
 
@@ -159,10 +146,10 @@ public class AddressUrbaninfoRepository {
     }
 
     private class UpdateAsynctask extends AsyncTask<Void, Void, Void> {
-        ResStaticMasterDistricDB value;
-        AdresssUrbanInfoDao mDao;
+        PatientListDataItem value;
+        HWPatientInfoDao mDao;
 
-        public UpdateAsynctask(AdresssUrbanInfoDao mDao, ResStaticMasterDistricDB value) {
+        public UpdateAsynctask(HWPatientInfoDao mDao, PatientListDataItem value) {
             this.value = value;
             this.mDao = mDao;
         }
@@ -175,36 +162,44 @@ public class AddressUrbaninfoRepository {
         }
     }
 
-    private class UpdateAsynctask2 extends AsyncTask<Void, Void, Void> {
+    private class UpdateAsynctaskInsertUpdatepatientInfo extends AsyncTask<Void, Void, Void> {
 
-        AdresssUrbanInfoDao mDao;
+        HWPatientInfoDao mDao;
         boolean status;
         String id;
+        int citizenid;
         String today;
 
-        public UpdateAsynctask2(AdresssUrbanInfoDao mDao, boolean status, String id) {
+        public UpdateAsynctaskInsertUpdatepatientInfo(HWPatientInfoDao mDao, boolean status, String id, int cid) {
             this.mDao = mDao;
             this.status = status;
             this.id = id;
+            this.citizenid = cid;
             this.today = today;
         }
 
 
         @Override
         protected Void doInBackground(Void... voids) {
-            //mDao.update(status,id);
+
+            try {
+                mDao.updateinsertpatientsyncstatus(status,id,citizenid);
+            }catch (Exception e){
+
+            }
+
             return null;
         }
     }
 
     private class UpdateAsynctaskimgestatus extends AsyncTask<Void, Void, Void> {
 
-        AdresssUrbanInfoDao mDao;
+        HWPatientInfoDao mDao;
         boolean status;
         String filename;
         String today;
 
-        public UpdateAsynctaskimgestatus(AdresssUrbanInfoDao mDao, boolean status, String filename) {
+        public UpdateAsynctaskimgestatus(HWPatientInfoDao mDao, boolean status, String filename) {
             this.mDao = mDao;
             this.status = status;
             this.filename = filename;

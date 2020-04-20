@@ -21,6 +21,8 @@ import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
 import com.goalsr.homequarantineTracker.apiservice.ApiBackGround;
 import com.goalsr.homequarantineTracker.db.repository.AddressUrbaninfoRepository;
+import com.goalsr.homequarantineTracker.db.repository.HWPatientFamilyinfoRepository;
+import com.goalsr.homequarantineTracker.db.repository.HWPatientinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.PatientFamilyinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.PatientinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.TravelTrackingRepository;
@@ -42,6 +44,9 @@ public abstract class BaseActivity extends AppCompatActivity implements NetworkI
     PatientFamilyinfoRepository patientFamilyinfoRepository;
     AddressUrbaninfoRepository addressUrbaninfoRepository;
     VillageinfoRepository villageinfoRepository;
+
+    HWPatientinfoRepository hwPatientinfoRepository;
+    HWPatientFamilyinfoRepository hwPatientFamilyinfoRepository;
     Context mContext;
 
     private Dialog dialogProgress;
@@ -70,10 +75,22 @@ public abstract class BaseActivity extends AppCompatActivity implements NetworkI
         patientFamilyinfoRepository=new PatientFamilyinfoRepository(mContext);
         dialogProgress = DialogManager.getProgressDialog(mContext);
         villageinfoRepository=new VillageinfoRepository(mContext);
+
+        hwPatientinfoRepository=new HWPatientinfoRepository(mContext);
+        hwPatientFamilyinfoRepository=new HWPatientFamilyinfoRepository(mContext);
+
         lottieAnimationView = dialogProgress.findViewById(R.id.lottie_cdp);
         patientViewmodel=ViewModelProviders.of(this).get(PatientViewmodel.class);
         patientfamilyViewmodel=ViewModelProviders.of(this).get(PatientFamilyViewmodel.class);
         addressUrbanViewmodel=ViewModelProviders.of(this).get(AddressUrbanViewmodel.class);
+    }
+
+    public HWPatientinfoRepository getHwPatientinfoRepository(){
+        return hwPatientinfoRepository;
+    }
+
+    public HWPatientFamilyinfoRepository getHwPatientFamilyinfoRepository(){
+        return hwPatientFamilyinfoRepository;
     }
 
     public PatientViewmodel  getPatientViewmodel(){

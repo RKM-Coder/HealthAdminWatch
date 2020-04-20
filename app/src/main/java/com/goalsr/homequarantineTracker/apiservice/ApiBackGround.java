@@ -6,11 +6,15 @@ import com.goalsr.homequarantineTracker.Utils.FileUploader;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
 import com.goalsr.homequarantineTracker.db.model.QHTracker;
+import com.goalsr.homequarantineTracker.db.repository.HWPatientinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.TravelTrackingRepository;
+import com.goalsr.homequarantineTracker.resposemodel.HWSecurity.HealthWPSecurity;
 import com.goalsr.homequarantineTracker.resposemodel.ReqHeader;
 import com.goalsr.homequarantineTracker.resposemodel.ReqTrailer;
 import com.goalsr.homequarantineTracker.resposemodel.emergency.ReqBodyEmergency;
 import com.goalsr.homequarantineTracker.resposemodel.emergency.ReqEmegency;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqInsertUpdatePatientInfo;
 import com.goalsr.homequarantineTracker.resposemodel.poststatus.ReqStatus;
 import com.goalsr.homequarantineTracker.resposemodel.poststatus.ReqSymtomBody;
 import com.goalsr.homequarantineTracker.resposemodel.poststatus.UserTracker;
@@ -23,12 +27,45 @@ public class ApiBackGround {
     private Context mContext;
     TravelTrackingRepository travelTrackingRepository;
     private NetworkService networkService;
+    private HWPatientinfoRepository hwPatientinfoRepository;
 
     public ApiBackGround(Context mContext) {
         this.mContext = mContext;
         travelTrackingRepository=new TravelTrackingRepository(mContext);
+        hwPatientinfoRepository=new HWPatientinfoRepository(mContext);
+
         initMvp();
     }
+
+    private void initMvp() {
+        networkService = new NetworkService();
+        networkService.inject(mContext);
+    }
+
+    public void makePatientAdded(){
+
+        ReqInsertUpdatePatientInfo reqInsertUpdatePatientInfo=new ReqInsertUpdatePatientInfo();
+        reqInsertUpdatePatientInfo.setPrimary_patient_information(getListOfPatientInsertUpdateInfo());
+        reqInsertUpdatePatientInfo.setRole_id(1);
+        reqInsertUpdatePatientInfo.setP_security(getHealthWatchSecurityObject());
+
+        networkService.makeHWPatientInfoinsertupdate(reqInsertUpdatePatientInfo,null);
+
+    }
+
+    private List<PatientListDataItem> getListOfPatientInsertUpdateInfo() {
+        return hwPatientinfoRepository.getListAllItemByAdminNONSYNC();
+    }
+    private HealthWPSecurity getHealthWatchSecurityObject(){
+        HealthWPSecurity securityObject =new HealthWPSecurity();
+        securityObject.setName("BhoomiWapi@2020");
+        securityObject.setPassphrase("c2a2b557-c792-48f9-9ccd-56fda45974b9");
+
+        return securityObject;
+    }
+
+
+
 
     public void uploadsync(boolean b){
 
@@ -48,8 +85,6 @@ public class ApiBackGround {
 
         //networkService.makestatusupdate(synstatus,b,null);
        // uploadtoServer();
-
-
     }
     private void uploadtoServer() {
         ArrayList<String> ll=new ArrayList<String>();
@@ -103,14 +138,7 @@ public class ApiBackGround {
 
 
     }
-    private void initMvp() {
 
-        networkService = new NetworkService();
-        networkService.inject(mContext);
-
-
-
-    }
 
     private ArrayList<ReqSymtomBody> getreqListObject(ArrayList<QHTracker> list) {
         ArrayList<ReqSymtomBody> reqSymtomBodylist=new ArrayList<>();

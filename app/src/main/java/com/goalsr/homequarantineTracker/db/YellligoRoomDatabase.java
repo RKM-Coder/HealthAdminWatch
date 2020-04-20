@@ -8,8 +8,11 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
 import com.goalsr.homequarantineTracker.db.dao.AdresssUrbanInfoDao;
+import com.goalsr.homequarantineTracker.db.dao.HWPatientFamilyInfoDao;
+import com.goalsr.homequarantineTracker.db.dao.HWPatientInfoDao;
 import com.goalsr.homequarantineTracker.db.dao.PatientFamilyInfoDao;
 import com.goalsr.homequarantineTracker.db.dao.PatientInfoDao;
+import com.goalsr.homequarantineTracker.db.dao.SymtoAddDao;
 import com.goalsr.homequarantineTracker.db.dao.TravelTrackingDao;
 import com.goalsr.homequarantineTracker.db.dao.VillageUrbanInfoDao;
 import com.goalsr.homequarantineTracker.db.model.QHTracker;
@@ -17,23 +20,30 @@ import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistricDB;
 import com.goalsr.homequarantineTracker.resposemodel.VillageModel;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientFamilyInfo;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
+import com.goalsr.homequarantineTracker.resposemodel.hwSymtommaker.ReqSymtomAdd;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientFamilyDetailsItem;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
 
 
 /**
  * Created by ramkrishna on 11/7/18.
  */
-@Database(entities = { QHTracker.class, ResPatientInfo.class, ResPatientFamilyInfo.class, ResStaticMasterDistricDB.class, VillageModel.class}, version = 2,exportSchema = false)
+@Database(entities = {ReqSymtomAdd.class,PatientListDataItem.class, PatientFamilyDetailsItem.class,QHTracker.class, ResPatientInfo.class, ResPatientFamilyInfo.class, ResStaticMasterDistricDB.class, VillageModel.class}, version = 1,exportSchema = false)
 public abstract class YellligoRoomDatabase extends RoomDatabase {
 
     private static YellligoRoomDatabase INSTANCE;
-    private static String DB_NAME="aragya_master";
+    private static String DB_NAME="hw_aragya_master";
 
 
     public abstract TravelTrackingDao travelTrackingDao();
     public abstract PatientInfoDao patientInfoDao();
+    public abstract HWPatientInfoDao hwpatientInfoDao();
     public abstract AdresssUrbanInfoDao adresssUrbanInfoDaoDao();
     public abstract PatientFamilyInfoDao patientFamilyInfoDao();
+    public abstract HWPatientFamilyInfoDao hwpatientFamilyInfoDao();
     public abstract VillageUrbanInfoDao villageUrbanInfoDaoDao();
+    public abstract SymtoAddDao symtodao();
+
 
 
     public static YellligoRoomDatabase getDataBase(final Context context){

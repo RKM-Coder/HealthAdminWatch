@@ -23,12 +23,15 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.goalsr.homequarantineTracker.R;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
+import com.goalsr.homequarantineTracker.adapter.HWPatientListAdapter;
 import com.goalsr.homequarantineTracker.adapter.PatientListAdapter;
 import com.goalsr.homequarantineTracker.apiservice.NetworkService;
 import com.goalsr.homequarantineTracker.base.BaseActivity;
+import com.goalsr.homequarantineTracker.db.repository.HWPatientinfoRepository;
 import com.goalsr.homequarantineTracker.resposemodel.ReqPAtientInfoByAdmin;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfoByAdmin;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
 import com.goalsr.homequarantineTracker.view.edittext.CustomEditText;
 import com.goalsr.homequarantineTracker.view.edittext.DrawableClickListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -40,7 +43,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class AdminPatientLsitActivity extends BaseActivity implements PatientListAdapter.CheckedListener {
+public class AdminPatientLsitActivity extends BaseActivity implements HWPatientListAdapter.CheckedListener {
 
     @BindView(R.id.tv_header_fcl)
     TextView tvHeaderFcl;
@@ -77,8 +80,10 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
     @BindView(R.id.swipeContainer)
     SwipeRefreshLayout swipeContainer;
     private NetworkService networkService;
-    private PatientListAdapter adapter;
+    private HWPatientListAdapter adapter;
     private String key;
+
+    private int patienttype=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,10 +102,12 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
         if (PreferenceStore.getPrefernceHelperInstace().getFlag(YelligoApplication.getContext(),PreferenceStore.PERSIONTYPE)){
             tvHeaderFcl.setText("Persion Under Quarantine");
             txtLogout.setVisibility(View.GONE);
+            patienttype=1;
         }else
         {
             tvHeaderFcl.setText("Persion Under Observation");
             txtLogout.setVisibility(View.VISIBLE);
+            patienttype=2;
         }
         initMvp();
         initrecyclerView();
@@ -185,7 +192,7 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
     }
     LinearLayoutManager manager;
     private void initrecyclerView() {
-        adapter = new PatientListAdapter(this, new ArrayList<ResPatientInfo>());
+        adapter = new HWPatientListAdapter(this, new ArrayList<PatientListDataItem>());
         adapter.setListener(this);
          manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         rvViewPatientList.setLayoutManager(manager);
@@ -257,10 +264,10 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
     private void updateUI() {
        // List<ResPatientInfo> patientList = new ArrayList<>();
 
-        getPatientViewmodel().getLivedatPAtient().observe(this, new Observer<List<ResPatientInfo>>() {
+        getPatientViewmodel().getLivedatPAtient(patienttype).observe(this, new Observer<List<PatientListDataItem>>() {
             @Override
-            public void onChanged(List<ResPatientInfo> resPatientInfos) {
-                adapter.setValue((ArrayList<ResPatientInfo>) resPatientInfos);
+            public void onChanged(List<PatientListDataItem> resPatientInfos) {
+                adapter.setValue((ArrayList<PatientListDataItem>) resPatientInfos);
             }
         });
      /*   patientList = getPatientinfoRepository().getListAllItemByAdmin();
@@ -276,18 +283,18 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
     }
 
     @Override
-    public void onItemCheckedFamilly(int position, ResPatientInfo item) {
-        PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID, 123456);
+    public void onItemCheckedFamilly(int position, PatientListDataItem item) {
+       /* PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID, 123456);
         Intent intent = new Intent(getApplicationContext(), HomeMainActivity.class);
-        /*intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);*/
-        startActivity(intent);
-       /* if (item.getCitizenID() > 0) {
-            getPatientFamillyinfoRepository().clear();
+        *//*intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);*//*
+        startActivity(intent);*/
+        if (item.getCitizenID() > 0) {
+           /* getPatientFamillyinfoRepository().clear();*/
             PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID, item.getCitizenID());
             Intent intent = new Intent(getApplicationContext(), HomeMainActivity.class);
-            *//*intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);*//*
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-        }*/
+        }
     }
 
    /* @OnClick(R.id.txtrelationChange)
@@ -318,7 +325,10 @@ public class AdminPatientLsitActivity extends BaseActivity implements PatientLis
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.txt_logout:
-                getCommonApi().openNewScreen(AddnewPatientActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putString("key","newpatient");
+                getCommonApi().openNewScreen(AddnewPatientActivity.class,bundle);
+               // getCommonApi().openNewScreen(AddnewPatientActivity.class);
                 break;
             case R.id.txtrelationChange:
                 Intent intent = new Intent(getApplicationContext(), DistrictListActivity.class);

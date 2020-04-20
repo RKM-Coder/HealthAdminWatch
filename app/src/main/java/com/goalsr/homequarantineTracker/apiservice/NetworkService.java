@@ -7,8 +7,8 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.goalsr.homequarantineTracker.BuildConfig;
-import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
-import com.goalsr.homequarantineTracker.YelligoApplication;
+import com.goalsr.homequarantineTracker.db.repository.HWPatientFamilyinfoRepository;
+import com.goalsr.homequarantineTracker.db.repository.HWPatientinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.PatientFamilyinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.PatientinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.TravelTrackingRepository;
@@ -28,14 +28,18 @@ import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientFa
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfoByAdmin;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResUpdateInfo;
-import com.goalsr.homequarantineTracker.resposemodel.getotp.GetOtpData;
-import com.goalsr.homequarantineTracker.resposemodel.getotp.ResGetOtp;
 
 import com.goalsr.homequarantineTracker.resposemodel.gotOtpreq.ResGvtValidOtp;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientupdatedataItem;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqGetPatientinfobody;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqInsertUpdatePatientInfo;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ResPatientData;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.Respatientinsertupdate;
+import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ReqHWOtp;
+import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ResHWGetOtp;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ReqOtpValidGvt;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ResGvtValidOtpValid;
-import com.goalsr.homequarantineTracker.resposemodel.otpvalidlogin.ReqOtpValid;
-import com.goalsr.homequarantineTracker.resposemodel.otpvalidlogin.ResOtpValid;
 import com.goalsr.homequarantineTracker.resposemodel.poststatus.ReqStatus;
 import com.goalsr.homequarantineTracker.resposemodel.poststatus.ResTracker;
 import com.goalsr.homequarantineTracker.resposemodel.poststatus.TrackResponseItem;
@@ -55,11 +59,19 @@ public class NetworkService {
     private PatientFamilyinfoRepository patientFamilyinfoRepository;
     private PatientinfoRepository patientinfoRepository;
 
+    private HWPatientinfoRepository hwPatientinfoRepository;
+    private HWPatientFamilyinfoRepository hwPatientFamilyinfoRepository;
+
+
     public void inject(Context mContext) {
         this.mContext = mContext;
-        travelTrackingRepository=new TravelTrackingRepository(mContext);
-        patientFamilyinfoRepository=new PatientFamilyinfoRepository(mContext);
-        patientinfoRepository=new PatientinfoRepository(mContext);
+        travelTrackingRepository = new TravelTrackingRepository(mContext);
+        patientFamilyinfoRepository = new PatientFamilyinfoRepository(mContext);
+        patientinfoRepository = new PatientinfoRepository(mContext);
+
+        /*HWatch*/
+        hwPatientinfoRepository = new HWPatientinfoRepository(mContext);
+        hwPatientFamilyinfoRepository = new HWPatientFamilyinfoRepository(mContext);
     }
 
 
@@ -82,8 +94,199 @@ public class NetworkService {
         return false;
     }
 
+    /*HEALTH WATCH*/
+
+
     // req otp
-    public void makeAppLogin(String  request, NetworkServiceListener listener) {
+    public void makeHWReqgetOTTPLogin(ReqHWOtp request, NetworkServiceListener listener) {
+        ApiInterface apiService =
+                ApiClient.getClient().create(ApiInterface.class);
+        Call<ResHWGetOtp> response = apiService.makeHWReqOtp(request);
+        response.enqueue(new Callback<ResHWGetOtp>() {
+            @Override
+            public void onResponse(Call<ResHWGetOtp> call, Response<ResHWGetOtp> response) {
+
+
+                if (response.isSuccessful()) {
+
+
+                    if (listener != null) {
+                        if (response.body().getStatus_code() == 200) {
+                            listener.onSuccess(response.body(), true);
+
+                        } else {
+
+                        }
+                    }
+
+
+                } else if (response.code() == 401) {
+//                    LoginResponse respObj = new LoginResponse();
+//                    listener.onAuthFail(makeErrorResponse(respObj,""+response.code()));
+                } else {
+                    APIError error = ErrorUtils.parseError(response);
+                    if (listener != null) {
+                        ResHWGetOtp res = new ResHWGetOtp();
+                        listener.onFailure(makeErrorResponse(res, "" + error.message()));
+                    }
+
+
+                   /* if (BuildConfig.DEBUG) {
+                        Log.d("error message", error.message());
+                    }*/
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResHWGetOtp> call, Throwable t) {
+                if (BuildConfig.DEBUG) {
+                    //Log.d("error message", t.getMessage());
+                    if (listener != null) {
+                        ResHWGetOtp loginResponse = new ResHWGetOtp();
+                        listener.onFailure(makeErrorResponse(loginResponse, "" + t.getMessage()));
+                    }
+                }
+            }
+        });
+    }
+
+    public void makeHWotpvalid(ReqOtpValidGvt request, NetworkServiceListener listener) {
+        ApiInterface apiService =
+                ApiClient.getClient().create(ApiInterface.class);
+        Call<ResGvtValidOtpValid> response = apiService.makeOtpValidReq(request);
+        response.enqueue(new Callback<ResGvtValidOtpValid>() {
+            @Override
+            public void onResponse(Call<ResGvtValidOtpValid> call, Response<ResGvtValidOtpValid> response) {
+
+
+                if (response.isSuccessful()) {
+
+                    if (listener != null) {
+                        if (response.body().getStatuscode() == 200) {
+                            listener.onSuccess(response.body(), true);
+                        } else {
+                            listener.onFailure(response.body());
+                        }
+
+                    }
+
+                } else if (response.code() == 401) {
+//                    LoginResponse respObj = new LoginResponse();
+//                    listener.onAuthFail(makeErrorResponse(respObj,""+response.code()));
+                } else {
+                    APIError error = ErrorUtils.parseError(response);
+                    if (listener != null) {
+                        ResGvtValidOtpValid res = new ResGvtValidOtpValid();
+                        listener.onFailure(makeErrorResponse(res, "" + error.message()));
+                    }
+
+
+                   /* if (BuildConfig.DEBUG) {
+                        Log.d("error message", error.message());
+                    }*/
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResGvtValidOtpValid> call, Throwable t) {
+                if (BuildConfig.DEBUG) {
+                    Log.d("error message", t.getMessage());
+                    if (listener != null) {
+                        ResGvtValidOtpValid loginResponse = new ResGvtValidOtpValid();
+                        listener.onFailure(makeErrorResponse(loginResponse, "" + t.getMessage()));
+                    }
+                }
+            }
+        });
+    }
+
+    public void getHWPatientFamillyInfo(ReqGetPatientinfobody request, NetworkServiceListener listener) {
+        /* String s=new Gson().toJson(request);*/
+        ApiInterface apiService =
+                ApiClient.getClient().create(ApiInterface.class);
+        Call<ResPatientData> response = apiService.getHWPatientFamilyInfo(request);
+
+        response.enqueue(new Callback<ResPatientData>() {
+            @Override
+            public void onResponse(Call<ResPatientData> call, Response<ResPatientData> response) {
+                if (response.isSuccessful()) {
+                    if (response.body().getStatusCode() == 200) {
+                        if (listener != null) {
+                            if (response.body().getPatientListData().size() > 0) {
+
+                                insetpatientdtatainDB(response.body().getPatientListData());
+                                final Handler handler = new Handler();
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        listener.onSuccess(response.body(), true);
+                                    }
+                                }, 2000);
+                            } else {
+                                listener.onFailure("No result found");
+                            }
+                        }
+                    } else {
+                        listener.onFailure("" + response.body().getStatusMessaage());
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResPatientData> call, Throwable t) {
+                if (listener != null) {
+                    listener.onFailure("Something went wrong");
+                }
+
+            }
+        });
+    }
+
+    private void insetpatientdtatainDB(List<PatientListDataItem> list) {
+        for (PatientListDataItem item : list) {
+            hwPatientinfoRepository.insert(item);
+            if (item.getPatientFamilyDetails().size() > 0) {
+                hwPatientFamilyinfoRepository.insert(item.getPatientFamilyDetails());
+            }
+        }
+
+
+    }
+    public void makeHWPatientInfoinsertupdate(ReqInsertUpdatePatientInfo request, NetworkServiceListener listener) {
+        ApiInterface apiService =
+                ApiClient.getClient().create(ApiInterface.class);
+        Call<Respatientinsertupdate> response = apiService.makeHWinsertUpdatePatientInfo(request);
+
+        response.enqueue(new Callback<Respatientinsertupdate>() {
+            @Override
+            public void onResponse(Call<Respatientinsertupdate> call, Response<Respatientinsertupdate> response) {
+                if (response.isSuccessful()) {
+                    if (response.body().getStatusCode()==200){
+                        if (response.body().getPatientupdatedata().size()>0){
+                            for (PatientupdatedataItem item:response.body().getPatientupdatedata()) {
+                                hwPatientinfoRepository.updatesyncdatainserupdatepatient(true, item.getLocalID(), item.getCitizenID());
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Respatientinsertupdate> call, Throwable t) {
+
+
+            }
+        });
+    }
+
+
+
+
+    /*QWATCH*********************************************************************************************************/
+
+    // req otp
+    public void makeAppLogin(String request, NetworkServiceListener listener) {
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
         Call<ResGvtValidOtp> response = apiService.makeOtpReqGOVT(request);
@@ -98,13 +301,13 @@ public class NetworkService {
                         listener.onSuccess(response.body(), true);
                     }
 
-                }else if (response.code()==401){
+                } else if (response.code() == 401) {
 //                    LoginResponse respObj = new LoginResponse();
 //                    listener.onAuthFail(makeErrorResponse(respObj,""+response.code()));
                 } else {
                     APIError error = ErrorUtils.parseError(response);
                     if (listener != null) {
-                        ResGvtValidOtp res=new ResGvtValidOtp();
+                        ResGvtValidOtp res = new ResGvtValidOtp();
                         listener.onFailure(makeErrorResponse(res, "" + error.message()));
                     }
 
@@ -127,6 +330,7 @@ public class NetworkService {
             }
         });
     }
+
     public void makeotpvalid(ReqOtpValidGvt request, NetworkServiceListener listener) {
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
@@ -139,7 +343,7 @@ public class NetworkService {
                 if (response.isSuccessful()) {
 
                     if (listener != null) {
-                        if (response.body().getStatuscode()==200) {
+                        if (response.body().getStatuscode() == 200) {
                             listener.onSuccess(response.body(), true);
                         } else {
                             listener.onFailure(response.body());
@@ -147,13 +351,13 @@ public class NetworkService {
 
                     }
 
-                }else if (response.code()==401){
+                } else if (response.code() == 401) {
 //                    LoginResponse respObj = new LoginResponse();
 //                    listener.onAuthFail(makeErrorResponse(respObj,""+response.code()));
                 } else {
                     APIError error = ErrorUtils.parseError(response);
                     if (listener != null) {
-                        ResGvtValidOtpValid res=new ResGvtValidOtpValid();
+                        ResGvtValidOtpValid res = new ResGvtValidOtpValid();
                         listener.onFailure(makeErrorResponse(res, "" + error.message()));
                     }
 
@@ -185,11 +389,11 @@ public class NetworkService {
         response.enqueue(new Callback<List<ResPatientInfo>>() {
             @Override
             public void onResponse(Call<List<ResPatientInfo>> call, Response<List<ResPatientInfo>> response) {
-                if (response.isSuccessful()){
-                    if (listener !=null){
-                        if (response.body().size()>0){
-                            listener.onSuccess(response.body().get(0),true);
-                        }else {
+                if (response.isSuccessful()) {
+                    if (listener != null) {
+                        if (response.body().size() > 0) {
+                            listener.onSuccess(response.body().get(0), true);
+                        } else {
                             listener.onFailure("No result found");
                         }
                     }
@@ -198,7 +402,7 @@ public class NetworkService {
 
             @Override
             public void onFailure(Call<List<ResPatientInfo>> call, Throwable t) {
-                if (listener !=null){
+                if (listener != null) {
                     listener.onFailure("Something went wrong");
                 }
 
@@ -214,20 +418,20 @@ public class NetworkService {
         response.enqueue(new Callback<List<ResPatientInfoByAdmin>>() {
             @Override
             public void onResponse(Call<List<ResPatientInfoByAdmin>> call, Response<List<ResPatientInfoByAdmin>> response) {
-                if (response.isSuccessful()){
-                    if (listener !=null){
-                        if (response.body().size()>0){
-                            Log.e("PatientList--", response.body().size()+"");
+                if (response.isSuccessful()) {
+                    if (listener != null) {
+                        if (response.body().size() > 0) {
+                            Log.e("PatientList--", response.body().size() + "");
                             insertTODB(response.body());
                             final Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    listener.onSuccess(response.body().get(0),true);
+                                    listener.onSuccess(response.body().get(0), true);
                                 }
                             }, 100);
 
-                        }else {
+                        } else {
                             listener.onFailure("No result found");
                         }
                     }
@@ -236,7 +440,7 @@ public class NetworkService {
 
             @Override
             public void onFailure(Call<List<ResPatientInfoByAdmin>> call, Throwable t) {
-                if (listener !=null){
+                if (listener != null) {
                     listener.onFailure("Something went wrong");
                 }
 
@@ -246,9 +450,9 @@ public class NetworkService {
 
     private void insertTODB(List<ResPatientInfoByAdmin> body) {
 
-        for (ResPatientInfoByAdmin infoByAdmin:body){
+        for (ResPatientInfoByAdmin infoByAdmin : body) {
 
-            ResPatientInfo resPatientInfo=new ResPatientInfo();
+            ResPatientInfo resPatientInfo = new ResPatientInfo();
             resPatientInfo.setCitizenID(infoByAdmin.getCitizenID());
             resPatientInfo.setName(infoByAdmin.getName());
             resPatientInfo.setAge(infoByAdmin.getAge());
@@ -292,19 +496,19 @@ public class NetworkService {
         response.enqueue(new Callback<List<ResPatientFamilyInfo>>() {
             @Override
             public void onResponse(Call<List<ResPatientFamilyInfo>> call, Response<List<ResPatientFamilyInfo>> response) {
-                if (response.isSuccessful()){
-                    if (listener !=null){
-                        if (response.body().size()>0){
+                if (response.isSuccessful()) {
+                    if (listener != null) {
+                        if (response.body().size() > 0) {
                             patientFamilyinfoRepository.insert(response.body());
                             final Handler handler = new Handler();
                             handler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
-                                    listener.onSuccess(response.body().get(0),true);
+                                    listener.onSuccess(response.body().get(0), true);
                                 }
                             }, 100);
 
-                        }else {
+                        } else {
                             listener.onFailure("");
                         }
                     }
@@ -313,7 +517,7 @@ public class NetworkService {
 
             @Override
             public void onFailure(Call<List<ResPatientFamilyInfo>> call, Throwable t) {
-                if (listener !=null){
+                if (listener != null) {
                     listener.onFailure("Something went wrong");
                 }
 
@@ -367,7 +571,7 @@ public class NetworkService {
                             listener.onFailure("No result found");
                         }
                     }
-                }else {
+                } else {
                     if (listener != null) {
                         listener.onFailure("Something went wrong");
                     }
@@ -398,14 +602,14 @@ public class NetworkService {
                         if (response.body().size() > 0) {
                             if (response.body().get(0).isSuccess()) {
                                 listener.onSuccess(response.body().get(0), true);
-                            }else {
+                            } else {
                                 listener.onFailure("No result found");
                             }
                         } else {
                             listener.onFailure("No result found");
                         }
                     }
-                }else {
+                } else {
                     if (listener != null) {
                         listener.onFailure("Something went wrong");
                     }
@@ -436,14 +640,14 @@ public class NetworkService {
                         if (response.body().size() > 0) {
                             if (response.body().get(0).isSuccess()) {
                                 listener.onSuccess(response.body().get(0), true);
-                            }else {
+                            } else {
                                 listener.onFailure("No result found");
                             }
                         } else {
                             listener.onFailure("No result found");
                         }
                     }
-                }else {
+                } else {
                     if (listener != null) {
                         listener.onFailure("Something went wrong");
                     }
@@ -459,26 +663,27 @@ public class NetworkService {
             }
         });
     }
+
     public void sendImageFile(ReqImageChunk request, NetworkServiceListener listener) {
         ApiInterface apiService =
                 ApiClient.getClientImageUpload().create(ApiInterface.class);
-        Call<ResImage> response = apiService.sendprofileImage(request,"bhoomiWS@2020","b0b17574-9457-4674-9e98-899aae87dc6e");
+        Call<ResImage> response = apiService.sendprofileImage(request, "bhoomiWS@2020", "b0b17574-9457-4674-9e98-899aae87dc6e");
 
-        String res=new Gson().toJson(request);
-        Log.e("RESPONSE-------",res);
+        String res = new Gson().toJson(request);
+        Log.e("RESPONSE-------", res);
 
         response.enqueue(new Callback<ResImage>() {
             @Override
             public void onResponse(Call<ResImage> call, Response<ResImage> response) {
 
                 if (response.isSuccessful()) {
-                   // Log.e("response",response.body().toString());
+                    // Log.e("response",response.body().toString());
                     if (listener != null) {
                         if (!response.body().getFn_Insert_DOCCHNKResult().equalsIgnoreCase("")) {
                             FnInsertDOCCHNKResult result = new Gson().fromJson(response.body().getFn_Insert_DOCCHNKResult(), FnInsertDOCCHNKResult.class);
-                            if (result.getSTATUS().equalsIgnoreCase("TRUE")){
+                            if (result.getSTATUS().equalsIgnoreCase("TRUE")) {
                                 listener.onSuccess(result.getSTATUS(), true);
-                            }else {
+                            } else {
                                 listener.onFailure("No result found");
                             }
 
@@ -489,11 +694,11 @@ public class NetworkService {
                                 listener.onFailure("No result found");
                             }*/
 
-                        }else {
+                        } else {
                             listener.onFailure("No result found");
                         }
                     }
-                }else {
+                } else {
                     if (listener != null) {
                         listener.onFailure("Something went wrong");
                     }
@@ -509,7 +714,8 @@ public class NetworkService {
             }
         });
     }
-    public void makestatusupdate(ReqStatus request,boolean b, NetworkServiceListener listener) {
+
+    public void makestatusupdate(ReqStatus request, boolean b, NetworkServiceListener listener) {
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
         Call<ResTracker> response = apiService.makeTraker(request);
@@ -521,26 +727,26 @@ public class NetworkService {
 
                     if (listener != null) {
                         if (response.body().getStatus().equalsIgnoreCase("0")) {
-                            updatedb(response.body().getData().getTrackResponse(),b);
+                            updatedb(response.body().getData().getTrackResponse(), b);
                             listener.onSuccess(response.body(), true);
 
                         } else {
                             listener.onFailure(response.body());
                         }
 
-                    }else {
+                    } else {
                         if (response.body().getStatus().equalsIgnoreCase("0")) {
-                            updatedb(response.body().getData().getTrackResponse(),b);
+                            updatedb(response.body().getData().getTrackResponse(), b);
                         }
                     }
 
-                }else if (response.code()==401){
+                } else if (response.code() == 401) {
 //                    LoginResponse respObj = new LoginResponse();
 //                    listener.onAuthFail(makeErrorResponse(respObj,""+response.code()));
                 } else {
                     APIError error = ErrorUtils.parseError(response);
                     if (listener != null) {
-                        ResTracker res=new ResTracker();
+                        ResTracker res = new ResTracker();
                         listener.onFailure(makeErrorResponse(res, "" + error.message()));
                     }
 
@@ -564,10 +770,10 @@ public class NetworkService {
         });
     }
 
-    private void updatedb(List<TrackResponseItem> trackResponse,boolean b) {
-        if (b){
+    private void updatedb(List<TrackResponseItem> trackResponse, boolean b) {
+        if (b) {
             travelTrackingRepository.clear();
-        }else {
+        } else {
             if (trackResponse.size() > 0) {
                 for (TrackResponseItem item : trackResponse) {
                     travelTrackingRepository.updatesyncdata(true, item.getLocalId());
@@ -595,17 +801,17 @@ public class NetworkService {
                             listener.onFailure(response.body());
                         }
 
-                    }else {
+                    } else {
 
                     }
 
-                }else if (response.code()==401){
+                } else if (response.code() == 401) {
 //                    LoginResponse respObj = new LoginResponse();
 //                    listener.onAuthFail(makeErrorResponse(respObj,""+response.code()));
                 } else {
                     APIError error = ErrorUtils.parseError(response);
                     if (listener != null) {
-                        ResEmergency res=new ResEmergency();
+                        ResEmergency res = new ResEmergency();
                         listener.onFailure(makeErrorResponse(res, "" + error.message()));
                     }
 
@@ -654,17 +860,12 @@ public class NetworkService {
     }
 
 
-
     private Object makeErrorResponse(Object object, String error) {
-        if (object instanceof ResGvtValidOtp) {
-            ((ResGvtValidOtp) object).setMessageToDisplay(error);
-        }else if (object instanceof ResGvtValidOtpValid) {
-            ((ResGvtValidOtpValid) object).setMessageToDisplay(error);
-        }else if (object instanceof ResTracker) {
-            ((ResTracker) object).setMsg(error);
-        }else if (object instanceof ResEmergency) {
-            ((ResEmergency) object).setMsg(error);
+        if (object instanceof ResHWGetOtp) {
+            ((ResHWGetOtp) object).setStatus_messaage(error);
         }
+
+
        /* if (object instanceof LoginResponse) {
             ((LoginResponse) object).setMessage(error);
         } else if (object instanceof ResponseOtp) {

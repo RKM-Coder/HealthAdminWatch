@@ -3,18 +3,17 @@ package com.goalsr.homequarantineTracker.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,30 +21,24 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.goalsr.homequarantineTracker.R;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
-import com.goalsr.homequarantineTracker.adapter.DistrictListAdapter;
-import com.goalsr.homequarantineTracker.adapter.FamillyListAdapter;
+import com.goalsr.homequarantineTracker.adapter.AdressGenericListAdapter;
 import com.goalsr.homequarantineTracker.apiservice.NetworkService;
 import com.goalsr.homequarantineTracker.base.BaseActivity;
 import com.goalsr.homequarantineTracker.resposemodel.DistrictModel;
-import com.goalsr.homequarantineTracker.resposemodel.ReqPAtientInfoByAdmin;
-import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientFamilyInfo;
-import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
+import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistricDB;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfoByAdmin;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqGetPatientinfobody;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ResPatientData;
 import com.goalsr.homequarantineTracker.view.edittext.CustomEditText;
 import com.goalsr.homequarantineTracker.view.edittext.DrawableClickListener;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class DistrictListActivity extends BaseActivity implements DistrictListAdapter.OnClickMainView {
+public class DistrictListActivity extends BaseActivity implements AdressGenericListAdapter.OnClickMainView {
 
     @BindView(R.id.tv_header_fac)
     TextView tvHeaderFac;
@@ -66,7 +59,7 @@ public class DistrictListActivity extends BaseActivity implements DistrictListAd
     @BindView(R.id.rv_view_famillly)
     RecyclerView rvViewFamillly;
     private ArrayList<DistrictModel> listOFdistrict;
-    private DistrictListAdapter adapter;
+    private AdressGenericListAdapter adapter;
     private NetworkService networkService;
 
 
@@ -116,7 +109,7 @@ public class DistrictListActivity extends BaseActivity implements DistrictListAd
     }
 
     private void initrecyclerView() {
-        adapter = new DistrictListAdapter(this, new ArrayList<DistrictModel>());
+        adapter = new AdressGenericListAdapter(this, new ArrayList<ResStaticMasterDistricDB>());
         adapter.setOnclickListener(this);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         rvViewFamillly.setLayoutManager(manager);
@@ -125,7 +118,7 @@ public class DistrictListActivity extends BaseActivity implements DistrictListAd
 
 
     private void getDistrict() {
-        String jsonFileString = getCommonApi().getJsonFromAssets(getApplicationContext(), "District.json");
+       /* String jsonFileString = getCommonApi().getJsonFromAssets(getApplicationContext(), "District.json");
         Log.i("data", jsonFileString);
 
         Gson gson = new Gson();
@@ -133,10 +126,10 @@ public class DistrictListActivity extends BaseActivity implements DistrictListAd
         }.getType();
         listOFdistrict = new ArrayList<>();
         listOFdistrict = gson.fromJson(jsonFileString, listUserType);
-        /*DistrictModel item = new DistrictModel();
+        *//*DistrictModel item = new DistrictModel();
         item.setDISTRICT_NAME(" Select District");
         item.setDistrict_code(-1);
-        listOFdistrict.add(0, item);*/
+        listOFdistrict.add(0, item);*//*
         Collections.sort(listOFdistrict, new Comparator<DistrictModel>() {
             @Override
             public int compare(DistrictModel s1, DistrictModel s2) {
@@ -144,7 +137,18 @@ public class DistrictListActivity extends BaseActivity implements DistrictListAd
             }
         });
         adapter.addall(listOFdistrict);
-        //makeSpinnerDistrictMethod((ArrayList<DistrictModel>) listOFdistrict);
+        //makeSpinnerDistrictMethod((ArrayList<DistrictModel>) listOFdistrict);*/
+
+        tvHeaderFac.setText("List Of District");
+        getAddressUrbanViewmodel().getListOfDistLivedata().observe(this, new Observer<List<ResStaticMasterDistricDB>>() {
+            @Override
+            public void onChanged(List<ResStaticMasterDistricDB> listOfurbandataDistrict) {
+                //makeSpinnerDistrictMethod((ArrayList<ResStaticMasterDistricDB>) listOfurbandataDistrict);
+                adapter.addall((ArrayList<ResStaticMasterDistricDB>) listOfurbandataDistrict);
+                adapter.setType("dist");
+            }
+        });
+
 
 
     }
@@ -156,14 +160,19 @@ public class DistrictListActivity extends BaseActivity implements DistrictListAd
 
     private void getPatientInfo() {
         showProgressDialogStatic();
-        ReqPAtientInfoByAdmin reqPatient = new ReqPAtientInfoByAdmin();
+        ReqGetPatientinfobody reqPatient = new ReqGetPatientinfobody();
       /*  int cId = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID);
         reqPatient.setCitizenId(cId);
         reqPatient.setLevel(2);*/
-        Log.e("PatientList",PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.DISTRICT_ID)+"");
-        reqPatient.setDistCode(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.DISTRICT_ID));
-        reqPatient.setpSecurity(getCommonApi().getSecurityObject());
-        networkService.getPatientInfoListByAdmin(reqPatient, new NetworkService.NetworkServiceListener() {
+        //Log.e("PatientList",PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.DISTRICT_ID)+"");
+        reqPatient.setDistrict_code(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.DISTRICT_ID));
+        reqPatient.setUser_id(33518);
+        reqPatient.setCity_code(-1);
+        reqPatient.setGram_Panchayat_code(-1);
+        reqPatient.setTaluk_code(-1);
+        reqPatient.setWard_code(-1);
+        reqPatient.setP_security(getCommonApi().getHealthWatchSecurityObject());
+        networkService.getHWPatientFamillyInfo(reqPatient, new NetworkService.NetworkServiceListener() {
             @Override
             public void onFailure(Object response) {
                 hideProgressDialogStatic();
@@ -181,10 +190,10 @@ public class DistrictListActivity extends BaseActivity implements DistrictListAd
             public void onSuccess(Object response, Boolean cancelFlag) {
                 hideProgressDialogStatic();
                 //requestPermissions();
-                if (response instanceof ResPatientInfoByAdmin) {
+                if (response instanceof ResPatientData) {
 
-                    // getPatientinfoRepository().insert((ResPatientInfo) response);
-                    Intent intent = new Intent(getApplicationContext(), AdminPatientLsitActivity.class);
+
+                    Intent intent = new Intent(getApplicationContext(), DasboardPType.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                     finishAffinity();
@@ -200,19 +209,26 @@ public class DistrictListActivity extends BaseActivity implements DistrictListAd
     }
 
     @Override
-    public void onClickMain(int position, DistrictModel item) {
-        getPatientinfoRepository().clear();
+    public void onClickMain(int position, ResStaticMasterDistricDB item) {
+          getPatientinfoRepository().clear();
 
-        PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(),PreferenceStore.DISTRICT_ID,item.getDistrict_code());
-        PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(),PreferenceStore.DISTRICT_NAME,item.getDISTRICT_NAME());
+        if (TextUtils.isDigitsOnly(item.getRdrp_dist_code())) {
 
-        getCommonApi().openNewScreen(DasboardPType.class);
-        finish();
-        /*if (getCommonApi().isInternetAvailable(DistrictListActivity.this)){
-            getPatientInfo();
+            PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.DISTRICT_ID, Integer.parseInt(item.getRdrp_dist_code()));
+            PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(), PreferenceStore.DISTRICT_NAME, item.getDist_name());
+            getHwPatientinfoRepository().clear();
+            getHwPatientFamilyinfoRepository().clear();
+           /* getCommonApi().openNewScreen(DasboardPType.class);
+            finish();*/
+            if (getCommonApi().isInternetAvailable(DistrictListActivity.this)){
+                getPatientInfo();
+            }else {
+                Toast.makeText(YelligoApplication.getContext(),"Please enable internet connection",Toast.LENGTH_LONG).show();
+            }
         }else {
-            Toast.makeText(YelligoApplication.getContext(),"Please enable internet connection",Toast.LENGTH_LONG).show();
-        }*/
+            Toast.makeText(YelligoApplication.getContext(),"Please try again",Toast.LENGTH_LONG).show();
+        }
+
 
 
     }

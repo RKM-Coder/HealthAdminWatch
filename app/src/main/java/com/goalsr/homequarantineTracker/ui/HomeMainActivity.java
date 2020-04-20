@@ -28,12 +28,15 @@ import com.goalsr.homequarantineTracker.R;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
 import com.goalsr.homequarantineTracker.adapter.FamillyListAdapter;
+import com.goalsr.homequarantineTracker.adapter.HWFamillyListAdapter;
 import com.goalsr.homequarantineTracker.apiservice.NetworkService;
 import com.goalsr.homequarantineTracker.base.BaseActivity;
 import com.goalsr.homequarantineTracker.dialog.CustomDialogGeneric;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ReqPatient;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientFamilyInfo;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientFamilyDetailsItem;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -44,7 +47,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class HomeMainActivity extends BaseActivity implements FamillyListAdapter.CheckedListener {
+public class HomeMainActivity extends BaseActivity implements HWFamillyListAdapter.CheckedListener {
 
     @BindView(R.id.tv_header_fac)
     TextView tvHeaderFac;
@@ -67,8 +70,8 @@ public class HomeMainActivity extends BaseActivity implements FamillyListAdapter
     @BindView(R.id.txt_main_p_mobile)
     TextView txtMainPMobile;
     private NetworkService networkService;
-    private FamillyListAdapter adapter;
-    ResPatientInfo resPatientInfo = new ResPatientInfo();
+    private HWFamillyListAdapter adapter;
+    PatientListDataItem resPatientInfo = new PatientListDataItem();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +98,7 @@ public class HomeMainActivity extends BaseActivity implements FamillyListAdapter
         }*/
 
         initMvp();
-        adapter = new FamillyListAdapter(this, new ArrayList<ResPatientFamilyInfo>());
+        adapter = new HWFamillyListAdapter(this, new ArrayList<PatientFamilyDetailsItem>());
         adapter.setListener(this);
         RecyclerView.LayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         rvViewFamillly.setLayoutManager(manager);
@@ -113,18 +116,18 @@ public class HomeMainActivity extends BaseActivity implements FamillyListAdapter
     @Override
     protected void onResume() {
         super.onResume();
-       // getPatentInfo();
+       getPatentInfo();
     }
 
     private void getPatentInfo() {
         int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
-        resPatientInfo = getPatientinfoRepository().getPatientInfo(ciD);
+        resPatientInfo = getHwPatientinfoRepository().getPatientInfo(ciD);
         setinfo();
     }
 
     private void setinfo() {
-        if (resPatientInfo.getMobile() != null) {
-            txtMainPMobile.setText("" + resPatientInfo.getMobile());
+        if (resPatientInfo.getMobileNo() != null) {
+            txtMainPMobile.setText("" + resPatientInfo.getMobileNo());
         } else {
             txtMainPMobile.setText("");
         }
@@ -135,11 +138,11 @@ public class HomeMainActivity extends BaseActivity implements FamillyListAdapter
             txtMainPName.setText("");
         }
 
-        if (getCommonApi().isInternetAvailable(HomeMainActivity.this)){
-            getPatientFamillyInfo();
+       /* if (getCommonApi().isInternetAvailable(HomeMainActivity.this)){
+            updatView();
         }else {
             Toast.makeText(YelligoApplication.getContext(),"Please enable internet connection",Toast.LENGTH_LONG).show();
-        }
+        }*/
 
         updatView();
 
@@ -183,11 +186,12 @@ public class HomeMainActivity extends BaseActivity implements FamillyListAdapter
     }
 
     private void updatView() {
+        int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
         //ArrayList<ResPatientFamilyInfo> lisofpatient = new ArrayList<>();
-        getPatienFamillytViewmodel().getLivedatPAtient().observe(this, new Observer<List<ResPatientFamilyInfo>>() {
+        getPatienFamillytViewmodel().getLivedatPAtient(ciD).observe(this, new Observer<List<PatientFamilyDetailsItem>>() {
             @Override
-            public void onChanged(List<ResPatientFamilyInfo> resPatientFamilyInfos) {
-                adapter.setValue((ArrayList<ResPatientFamilyInfo>) resPatientFamilyInfos);
+            public void onChanged(List<PatientFamilyDetailsItem> resPatientFamilyInfos) {
+                adapter.setValue((ArrayList<PatientFamilyDetailsItem>) resPatientFamilyInfos);
             }
         });
         //lisofpatient.addAll(getPatientFamillyinfoRepository().getPatientFamilyInfo());
@@ -364,10 +368,10 @@ public class HomeMainActivity extends BaseActivity implements FamillyListAdapter
     }
 
     @Override
-    public void onItemCheckedFamilly(int position, ResPatientFamilyInfo item) {
+    public void onItemCheckedFamilly(int position, PatientFamilyDetailsItem item) {
         Bundle bundle=new Bundle();
         bundle.putString("key","family");
-        bundle.putInt("v_id",123);
+        bundle.putInt("v_id",item.getFamilyMemberID());
         getCommonApi().openNewScreen(PatientSymtomUpdateActivity.class,bundle);
 
     }

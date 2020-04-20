@@ -7,33 +7,38 @@ import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
-import com.goalsr.homequarantineTracker.db.model.QHTracker;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
 
 import java.util.List;
 
 @Dao
-public interface PatientInfoDao {
+public interface HWPatientInfoDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    void insert(List<ResPatientInfo> ndhColorList);
+    void insert(List<PatientListDataItem> ndhColorList);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insertItem(ResPatientInfo item);
+    long insertItem(PatientListDataItem item);
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    void updateItem(ResPatientInfo item);
+    void updateItem(PatientListDataItem item);
 
-    @Query("SELECT * from patient_info where CitizenID =:cid")
-    ResPatientInfo getListAllItem(int cid);
+    @Query("SELECT * from hwatch_patientifo where CitizenID =:cid")
+    PatientListDataItem getListAllItem(int cid);
 
 
-    @Query("SELECT * from patient_info  where name not null order by Name ASC")
-    List<ResPatientInfo> getListAllItemByAdmin();
+    @Query("SELECT * from hwatch_patientifo where name not null order by Name ASC")
+    List<PatientListDataItem> getListAllItemByAdmin();
 
-    @Query("SELECT * from patient_info where name not null order by Name ASC")
-    LiveData<List<ResPatientInfo>> getListAllItemByAdminLivedata();
+    @Query("SELECT * from hwatch_patientifo where syncstatus =:b")
+    List<PatientListDataItem> getListAllItemByAdminNONSYNC(boolean b);
 
+    @Query("SELECT * from hwatch_patientifo where name not null and patientQuarantineStatus =:ptype order by Name ASC")
+    LiveData<List<PatientListDataItem>> getListAllItemByAdminLivedata(int ptype);
+
+    @Query("UPDATE hwatch_patientifo SET syncstatus = :synstatus and citizenID=:citiId  WHERE localID =:localid ")
+    void updateinsertpatientsyncstatus(boolean synstatus, String localid, int citiId);
 
     /*@Query("SELECT * from qh_travel_tracking where syncstutas= :status")
     List<QHTracker> getListAllItemNonSync(boolean status);
@@ -54,9 +59,9 @@ public interface PatientInfoDao {
     void updateinsertpatientsyncstatus(boolean synstatus, String filename);*/
 
     //Clear DB DATA
-    @Query("DELETE FROM patient_info")
+    @Query("DELETE FROM hwatch_patientifo")
     public void clearTable();
     //Clear perticular raw
-    @Query("DELETE FROM patient_info where CitizenID = :id")
+    @Query("DELETE FROM hwatch_patientifo where CitizenID = :id")
     public void clearTableByid(String id);
 }

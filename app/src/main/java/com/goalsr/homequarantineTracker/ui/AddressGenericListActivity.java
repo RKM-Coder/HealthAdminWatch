@@ -199,7 +199,7 @@ public class AddressGenericListActivity extends BaseActivity implements AdressGe
             String message = item.getDist_name();
             intent.putExtra("name", message);
             if (selectaretype==1) {
-                intent.putExtra("name_id", item.getKsrsac_dist_code());
+                intent.putExtra("name_id", item.getRdrp_dist_code());
             }else if (selectaretype==2) {
                 intent.putExtra("name_id", item.getRdrp_dist_code());
             }

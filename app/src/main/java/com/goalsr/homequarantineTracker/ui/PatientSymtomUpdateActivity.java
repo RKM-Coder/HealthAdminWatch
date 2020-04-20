@@ -54,6 +54,8 @@ import com.goalsr.homequarantineTracker.resposemodel.ReqImageChunk;
 import com.goalsr.homequarantineTracker.resposemodel.ResSymtomChecker;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientFamilyInfo;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientFamilyDetailsItem;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -144,8 +146,8 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
     Button submitBtn;
     @BindView(R.id.fmlayout)
     FrameLayout fmlayout;
-    ResPatientInfo resPatientInfo;
-    ResPatientFamilyInfo resPatientFamilyInfo;
+    PatientListDataItem resPatientInfo;
+    PatientFamilyDetailsItem resPatientFamilyInfo;
     int sidfamily = 0;
     @BindView(R.id.txt_main_p_relation)
     TextView txtMainPRelation;
@@ -218,9 +220,9 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
                 getPatientFamilyByid();
             }
         }
-        resPatientInfo = new ResPatientInfo();
+        resPatientInfo = new PatientListDataItem();
         int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
-        resPatientInfo = getPatientinfoRepository().getPatientInfo(ciD);
+        resPatientInfo = getHwPatientinfoRepository().getPatientInfo(ciD);
 
 
     }
@@ -239,40 +241,40 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
     }
 
     private void getPatientSelf() {
-        resPatientInfo = new ResPatientInfo();
+        resPatientInfo = new PatientListDataItem();
         int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
-        resPatientInfo = getPatientinfoRepository().getPatientInfo(ciD);
+        resPatientInfo = getHwPatientinfoRepository().getPatientInfo(ciD);
         if (resPatientInfo != null) {
             if (resPatientInfo.getName() != null) {
                 txtMainPName.setText("Name: " + resPatientInfo.getName());
             }
             txtMainPRelation.setText("Relation: Self");
-            if (resPatientInfo.getMobile() != null) {
-                txtMainPMobile.setText("Mobile: " + resPatientInfo.getMobile());
+            if (resPatientInfo.getMobileNo() != null) {
+                txtMainPMobile.setText("Mobile: " + resPatientInfo.getMobileNo());
             }
-            if (resPatientInfo.getDateQurantine() != null) {
-                txtemail.setText("End Date of Quarantine: " + AppConstants.dateFormatChangerGVT(resPatientInfo.getDateQurantine()));
+            if (resPatientInfo.getEndDateOfQuarantine() != null) {
+                txtemail.setText("End Date of Quarantine: " + AppConstants.dateFormatChangerGVT(resPatientInfo.getEndDateOfQuarantine()));
             }
         }
     }
 
     private void getPatientFamilyByid() {
-        resPatientFamilyInfo = new ResPatientFamilyInfo();
-        resPatientFamilyInfo = getPatientFamillyinfoRepository().getPatientFamilyInfo(sidfamily);
+        resPatientFamilyInfo = new PatientFamilyDetailsItem();
+        resPatientFamilyInfo = getHwPatientFamilyinfoRepository().getPatientFamilyInfo(sidfamily);
         if (resPatientFamilyInfo != null) {
             if (resPatientFamilyInfo.getName() != null) {
                 txtMainPName.setText("Name: " + resPatientFamilyInfo.getName());
             }
-            if (resPatientFamilyInfo.getRelationId()!=0) {
-                if (famillyrelation.get(resPatientFamilyInfo.getRelationId()) != null) {
-                    txtMainPRelation.setText("Relation: "+famillyrelation.get(resPatientFamilyInfo.getRelationId()));
+            if (resPatientFamilyInfo.getRelationShipCode()!=0) {
+                if (famillyrelation.get(resPatientFamilyInfo.getRelationShipCode()) != null) {
+                    txtMainPRelation.setText("Relation: "+famillyrelation.get(resPatientFamilyInfo.getRelationShipCode()));
                 }
             }
-            if (resPatientFamilyInfo.getMobile() != null) {
-                txtMainPMobile.setText("Mobile: " + resPatientFamilyInfo.getMobile());
+            if (resPatientFamilyInfo.getMobileNo() != null) {
+                txtMainPMobile.setText("Mobile: " + resPatientFamilyInfo.getMobileNo());
             }
-            if (resPatientFamilyInfo.getDateQurantine() != null) {
-                txtemail.setText("End Date of Quarantine: " + AppConstants.dateFormatChangerGVT(resPatientFamilyInfo.getDateQurantine()));
+            if (resPatientFamilyInfo.getEndDateOfQuarantine() != null) {
+                txtemail.setText("End Date of Quarantine: " + AppConstants.dateFormatChangerGVT(resPatientFamilyInfo.getEndDateOfQuarantine()));
             }
         }
     }
@@ -879,12 +881,12 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
         // reqImageChunk.setDOC_CNK("");
         if (key.equalsIgnoreCase("self")) {
             reqImageChunk.setDOC_FAMLY_PER_ID(0);
-            reqImageChunk.setDOC_MOBILE("" + resPatientInfo.getMobile());
-            reqImageChunk.setDOC_ROLE_ID(resPatientInfo.getURoleBy());
+           // reqImageChunk.setDOC_MOBILE("" + resPatientInfo.getMobile());
+           // reqImageChunk.setDOC_ROLE_ID(resPatientInfo.getURoleBy());
         } else {
-            reqImageChunk.setDOC_FAMLY_PER_ID(resPatientFamilyInfo.getCitizenFamilyPersonId());
-            reqImageChunk.setDOC_MOBILE("" + resPatientFamilyInfo.getMobile());
-            reqImageChunk.setDOC_ROLE_ID(resPatientFamilyInfo.getURoleBy());
+           // reqImageChunk.setDOC_FAMLY_PER_ID(resPatientFamilyInfo.getCitizenFamilyPersonId());
+            //reqImageChunk.setDOC_MOBILE("" + resPatientFamilyInfo.getMobile());
+            //reqImageChunk.setDOC_ROLE_ID(resPatientFamilyInfo.getURoleBy());
         }
         String imagename = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID) + "_" + uniqueId + ".png";
         reqImageChunk.setDOC_IMAGE_NAME("" + imagename);
@@ -1101,7 +1103,7 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
         int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
         ReqGvtPatientFamillySymptom reqGvtPatientSymptom = new ReqGvtPatientFamillySymptom();
         reqGvtPatientSymptom.setAdditionalInfo("ANDROID");
-        reqGvtPatientSymptom.setFamilyPersonId(resPatientFamilyInfo.getCitizenFamilyPersonId());
+        //reqGvtPatientSymptom.setFamilyPersonId(resPatientFamilyInfo.getCitizenFamilyPersonId());
         reqGvtPatientSymptom.setCitizenID(getPatientinfoRepository().getPatientInfo(ciD).getCitizenID());
         reqGvtPatientSymptom.setBreathingProblem(isbreathing);
         reqGvtPatientSymptom.setCoughSourThroat(iscoughandsour);

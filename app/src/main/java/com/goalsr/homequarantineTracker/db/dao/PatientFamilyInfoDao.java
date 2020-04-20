@@ -52,7 +52,7 @@ public interface PatientFamilyInfoDao {
     void update(boolean synstatus, String id);
 
     @Query("UPDATE qh_travel_tracking SET syncstatusimage = :synstatus  WHERE selfifilepathlocal =:filename ")
-    void updateimgestatus(boolean synstatus, String filename);*/
+    void updateinsertpatientsyncstatus(boolean synstatus, String filename);*/
 
     //Clear DB DATA
     @Query("DELETE FROM patent_family")
