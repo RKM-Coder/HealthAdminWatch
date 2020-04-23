@@ -20,11 +20,19 @@ public class PatientViewmodel extends AndroidViewModel {
     public PatientViewmodel(@NonNull Application application) {
         super(application);
         patientinfoRepository=new HWPatientinfoRepository(application);
-        //liveData=patientinfoRepository.getListAllItemByAdminLivedata();
+        liveData=patientinfoRepository.getListAllItemByAdminLivedata();
 
     }
 
     public LiveData<List<PatientListDataItem>> getLivedatPAtient(int ptype){
         return patientinfoRepository.getListAllItemByAdminLivedata(ptype);
+    }
+
+    public LiveData<List<PatientListDataItem>> getLivedatPAtientTest(){
+        return liveData;
+    }
+
+    public void  insertdata(List<PatientListDataItem> list){
+        patientinfoRepository.insert(list);
     }
 }

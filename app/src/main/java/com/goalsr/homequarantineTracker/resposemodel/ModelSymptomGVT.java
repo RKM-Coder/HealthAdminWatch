@@ -5,6 +5,7 @@ public class ModelSymptomGVT {
     private String id;
     private String symptomename;
 
+
     public ModelSymptomGVT(String id, String symptomename) {
         this.id = id;
         this.symptomename = symptomename;

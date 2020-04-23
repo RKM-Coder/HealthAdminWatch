@@ -28,6 +28,7 @@ public class SymptomListAdapter extends RecyclerView.Adapter<SymptomListAdapter.
     private ArrayList<ModelSymptomGVT> listString;
     private Context context;
     private CheckedListener listener;
+    private String setcheckitem="";
 
     public SymptomListAdapter(Context context, ArrayList<ModelSymptomGVT> listString){
         this.context = context;
@@ -46,6 +47,11 @@ public class SymptomListAdapter extends RecyclerView.Adapter<SymptomListAdapter.
     public void onBindViewHolder(@NonNull final ListViewHolder holder, final int position) {
         holder.tvView.setText(listString.get(position).getSymptomename());
 //        holder.imageicon.setImageResource(listString.get(position).getIconamker());
+        if (!setcheckitem.equalsIgnoreCase("")){
+            if (setcheckitem.contains(listString.get(position).getId())){
+                holder.chkBox.setChecked(true);
+            }
+        }
 
 
         holder.tvView.setTextColor(holder.chkBox.isChecked()? ContextCompat.getColor(context, R.color.colorselect):ContextCompat.getColor(context, R.color.colornormal));
@@ -98,5 +104,8 @@ public class SymptomListAdapter extends RecyclerView.Adapter<SymptomListAdapter.
         this.listString.clear();
         this.listString.addAll(list);
         notifyDataSetChanged();
+    }
+    public void setcheckitem(String str){
+        this.setcheckitem=str;
     }
 }

@@ -8,14 +8,15 @@ import androidx.lifecycle.LiveData;
 
 import com.goalsr.homequarantineTracker.db.YellligoRoomDatabase;
 import com.goalsr.homequarantineTracker.db.dao.SymtoAddDao;
-import com.goalsr.homequarantineTracker.resposemodel.hwSymtommaker.ReqSymtomAdd;
+import com.goalsr.homequarantineTracker.resposemodel.hwSymtommaker.ReqHWSymtomAdd;
 
+import java.io.File;
 import java.util.List;
 
 public class SymptoAddRepository {
 
     private SymtoAddDao mDao;
-    private LiveData<List<ReqSymtomAdd>> mListLiveData;
+    private LiveData<List<ReqHWSymtomAdd>> mListLiveData;
 //    private List<QHTracker> mList;
 
     public SymptoAddRepository(Application application) {
@@ -29,31 +30,33 @@ public class SymptoAddRepository {
         //mListLiveData = mDao.getListOfDistrictLivedata();
     }
 
-    public void insert(List<ReqSymtomAdd> value) {
+    public void insert(List<ReqHWSymtomAdd> value) {
 
        new InsertAsynctaskList(mDao, value).execute();
         // mDao.insertItem(value);
     }
 
-    public void insert(ReqSymtomAdd value) {
+    public void insert(ReqHWSymtomAdd value) {
 
         new InsertAsynctask(mDao, value).execute();
         // mDao.insertItem(value);
     }
 
-    
+    public List<ReqHWSymtomAdd> getListAllItemByAdminPatient(){
+        return mDao.getListOfPatientSymptom();
+    }
 
-    public List<ReqSymtomAdd> getListAllItemByAdmin(){
+    public List<ReqHWSymtomAdd> getListAllItemByAdmin(){
         return mDao.getListOfDistrict();
     }
-    public List<ReqSymtomAdd> getListAllItemByDistId(String id){
+    public List<ReqHWSymtomAdd> getListAllItemByDistId(String id){
         return mDao.getListOfVilageByPID(id);
     }
-    /*public List<ReqSymtomAdd> getListAllWordItemByTownId(String disid){
+    /*public List<ReqHWSymtomAdd> getListAllWordItemByTownId(String disid){
         return mDao.getListOfWord(disid);
     }
 */
-    /*public LiveData<List<ReqSymtomAdd>> getListDistLivedata(){
+    /*public LiveData<List<ReqHWSymtomAdd>> getListDistLivedata(){
         return mListLiveData;
     }*/
 
@@ -61,17 +64,23 @@ public class SymptoAddRepository {
         return mDao.getListAllItemNonSyncImage(false);
     }*/
 
-    public void update(ReqSymtomAdd value) {
+    public void update(ReqHWSymtomAdd value) {
 
         new UpdateAsynctask(mDao, value).execute();
         // mDao.insertItem(value);
     }
 
-   /* public void updatesyncdatainserupdatepatient(boolean status, String id) {
+    public void updatesyncdatainserupdatepatientByCitizenId(boolean status, String localid,int cid) {
 
-        new UpdateAsynctask2(mDao, status, id).execute();
+        new UpdateAsyncTaskByCitizenId(mDao, status, localid,cid).execute();
         // mDao.insertItem(value);
-    }*/
+    }
+
+    public void updatesyncdatainserupdatepatientByFamilyID(boolean status, String localid,int cid) {
+
+        new UpdateAsyncTaskByFamilyId(mDao, status, localid,cid).execute();
+        // mDao.insertItem(value);
+    }
 
    /* public void updatesyncdataimagestatus(boolean status, String filename) {
 
@@ -79,7 +88,7 @@ public class SymptoAddRepository {
         // mDao.insertItem(value);
     }*/
 
-   /* public ReqSymtomAdd getItem(String checkinid) {
+   /* public ReqHWSymtomAdd getItem(String checkinid) {
 
         return mDao.getItemById(checkinid);
     }*/
@@ -89,7 +98,29 @@ public class SymptoAddRepository {
     }
 
     public void clearbyID(String id) {
-        mDao.clearTable();
+       new AsyncTask<Void, Void, Void>() {
+           @Override
+           protected Void doInBackground(Void... voids) {
+
+               ReqHWSymtomAdd reqHWSymtomAdd=mDao.getItem(id);
+               try {
+                   if (reqHWSymtomAdd!=null){
+                       File fdelete = new File(reqHWSymtomAdd.getImageFilePath());
+                       if (fdelete.exists()) {
+                           if (fdelete.delete()) {
+                               mDao.clearTableByid(id);
+                           }
+                       }
+                   }
+
+               }catch (Exception e){
+
+               }
+               return null;
+           }
+       }.execute();
+
+
     }
 
 
@@ -109,10 +140,10 @@ public class SymptoAddRepository {
     }*/
 
     private class InsertAsynctask extends AsyncTask<Void, Void, Void> {
-        ReqSymtomAdd value;
+        ReqHWSymtomAdd value;
         SymtoAddDao mDao;
 
-        public InsertAsynctask(SymtoAddDao mDao, ReqSymtomAdd value) {
+        public InsertAsynctask(SymtoAddDao mDao, ReqHWSymtomAdd value) {
             this.value = value;
             this.mDao = mDao;
         }
@@ -125,17 +156,17 @@ public class SymptoAddRepository {
     }
 
     private class InsertAsynctaskList extends AsyncTask<Void, Void, Void> {
-        List<ReqSymtomAdd> value;
+        List<ReqHWSymtomAdd> value;
         SymtoAddDao mDao;
 
-        public InsertAsynctaskList(SymtoAddDao mDao, List<ReqSymtomAdd> value) {
+        public InsertAsynctaskList(SymtoAddDao mDao, List<ReqHWSymtomAdd> value) {
             this.value = value;
             this.mDao = mDao;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            for (ReqSymtomAdd item : value) {
+            for (ReqHWSymtomAdd item : value) {
                 mDao.insertItem(item);
             }
 
@@ -144,10 +175,10 @@ public class SymptoAddRepository {
     }
 
     private class UpdateAsynctask extends AsyncTask<Void, Void, Void> {
-        ReqSymtomAdd value;
+        ReqHWSymtomAdd value;
         SymtoAddDao mDao;
 
-        public UpdateAsynctask(SymtoAddDao mDao, ReqSymtomAdd value) {
+        public UpdateAsynctask(SymtoAddDao mDao, ReqHWSymtomAdd value) {
             this.value = value;
             this.mDao = mDao;
         }
@@ -160,24 +191,50 @@ public class SymptoAddRepository {
         }
     }
 
-    private class UpdateAsynctask2 extends AsyncTask<Void, Void, Void> {
+    private class UpdateAsyncTaskByCitizenId extends AsyncTask<Void, Void, Void> {
 
         SymtoAddDao mDao;
         boolean status;
-        String id;
+        String localid;
+        int id;
         String today;
 
-        public UpdateAsynctask2(SymtoAddDao mDao, boolean status, String id) {
+        public UpdateAsyncTaskByCitizenId(SymtoAddDao mDao, boolean status, String localid, int id) {
             this.mDao = mDao;
             this.status = status;
-            this.id = id;
+            this.localid = localid;
+            this.id=id;
             this.today = today;
         }
 
 
         @Override
         protected Void doInBackground(Void... voids) {
-            //mDao.update(status,id);
+            mDao.updatestatuscitizenid(status,localid,id);
+            return null;
+        }
+    }
+
+    private class UpdateAsyncTaskByFamilyId extends AsyncTask<Void, Void, Void> {
+
+        SymtoAddDao mDao;
+        boolean status;
+        String localid;
+        int id;
+        String today;
+
+        public UpdateAsyncTaskByFamilyId(SymtoAddDao mDao, boolean status, String localid, int id) {
+            this.mDao = mDao;
+            this.status = status;
+            this.localid = localid;
+            this.id=id;
+            this.today = today;
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            mDao.updatestatusfamilyid(status,localid,id);
             return null;
         }
     }

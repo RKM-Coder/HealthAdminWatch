@@ -27,11 +27,23 @@ public interface HWPatientFamilyInfoDao {
     @Query("SELECT * from hwatch_family_info")
     List<PatientFamilyDetailsItem> getListAllItem();
 
+    @Query("SELECT * from hwatch_family_info where syncstatus =:b")
+    List<PatientFamilyDetailsItem> getListAllItemNONSYNC(boolean b);
+
+    @Query("SELECT * from hwatch_family_info where syncstatus =:b and familyMemberID != 0")
+    List<PatientFamilyDetailsItem> getListAllItemNONSYNCNonEmptyFid(boolean b);
+
+    @Query("SELECT * from hwatch_family_info where syncstatus =:b and familyMemberID == 0")
+    List<PatientFamilyDetailsItem> getListAllItemNONSYNCNonEmpty(boolean b);
+
     @Query("SELECT * from hwatch_family_info where citizenID =:fid")
     List<PatientFamilyDetailsItem> getListAllItemById(int fid);
 
     @Query("SELECT * from hwatch_family_info where citizenID =:cid")
     LiveData<List<PatientFamilyDetailsItem>> getListAllItemLivedata(int cid);
+
+    @Query("SELECT * from hwatch_family_info where familyLocalID =:cid")
+    LiveData<List<PatientFamilyDetailsItem>> getListAllItemLivedataBylocalId(int cid);
 
     @Query("SELECT * from hwatch_family_info where citizenID =:id")
     LiveData<List<PatientFamilyDetailsItem>> getListAllItemLivedataById(int id);
@@ -39,8 +51,17 @@ public interface HWPatientFamilyInfoDao {
     @Query("SELECT * from hwatch_family_info where familyMemberID =:id")
     PatientFamilyDetailsItem getListAllItem(int id);
 
+    @Query("SELECT * from hwatch_family_info where familyLocalID =:id")
+    PatientFamilyDetailsItem getListAllItemFamilyLocalId(String id);
+
     @Query("SELECT * from hwatch_family_info where mobileNo =:mobile")
     PatientFamilyDetailsItem getItemMobileNoExist(String mobile);
+
+    @Query("UPDATE hwatch_family_info SET syncstatus = :synstatus,familyMemberID =:famID  WHERE familyLocalID =:id ")
+    void updatestatus(boolean synstatus, String id,int famID);
+
+    @Query("UPDATE hwatch_family_info SET syncstatus = :synstatus,citizenID =:famID  WHERE citizenIDLocalId =:id and citizenID==0")
+    void updatestatusCid(boolean synstatus, String id,int famID);
 
     /*@Query("SELECT * from qh_travel_tracking where syncstutas= :status")
     List<QHTracker> getListAllItemNonSync(boolean status);

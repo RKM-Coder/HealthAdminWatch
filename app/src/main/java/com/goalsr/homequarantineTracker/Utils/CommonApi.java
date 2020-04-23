@@ -39,6 +39,8 @@ import com.goalsr.homequarantineTracker.BuildConfig;
 import com.goalsr.homequarantineTracker.R;
 import com.goalsr.homequarantineTracker.resposemodel.BlockModel;
 import com.goalsr.homequarantineTracker.resposemodel.HWSecurity.HealthWPSecurity;
+import com.goalsr.homequarantineTracker.resposemodel.ModelBBMPWard;
+import com.goalsr.homequarantineTracker.resposemodel.ModelBBMPZone;
 import com.goalsr.homequarantineTracker.resposemodel.ModelSymptomGVT;
 import com.goalsr.homequarantineTracker.resposemodel.PanchyateModel;
 import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistric;
@@ -635,6 +637,42 @@ public class CommonApi {
         list.add(new SymtomModel("Others",R.mipmap.others));*/
         return list;
 
+    }
+
+    public String getBBMPZONEName(Context mcontext,String talukid,String zoneid){
+        String jsonFileString = getJsonFromAssets(mcontext, "bbmp_zone.json");
+        // Log.i("data", jsonFileString);
+
+        Gson gson = new Gson();
+        Type listUserType = new TypeToken<List<ModelBBMPZone>>() {
+        }.getType();
+        List<ModelBBMPZone> listOfTaluk = new ArrayList<>();
+        listOfTaluk = gson.fromJson(jsonFileString, listUserType);
+
+        for (ModelBBMPZone model:listOfTaluk){
+            if (model.getBbmp_zone_no_ksrsac().equalsIgnoreCase(talukid)){
+                return model.getZone_name();
+            }
+        }
+        return "";
+    }
+
+    public String getBBMPWARDName(Context mcontext,String talukid,String zoneid){
+        String jsonFileString = getJsonFromAssets(mcontext, "bbmp_ward.json");
+        // Log.i("data", jsonFileString);
+
+        Gson gson = new Gson();
+        Type listUserType = new TypeToken<List<ModelBBMPWard>>() {
+        }.getType();
+        List<ModelBBMPWard> listOfTaluk = new ArrayList<>();
+        listOfTaluk = gson.fromJson(jsonFileString, listUserType);
+
+        for (ModelBBMPWard model:listOfTaluk){
+            if (model.getWard_no_ksrac().equalsIgnoreCase(talukid)){
+                return model.getWard_name();
+            }
+        }
+        return "";
     }
 
     public String getTalukName(Context mcontext,String talukid,String distid){

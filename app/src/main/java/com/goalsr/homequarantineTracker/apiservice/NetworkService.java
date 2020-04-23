@@ -11,6 +11,7 @@ import com.goalsr.homequarantineTracker.db.repository.HWPatientFamilyinfoReposit
 import com.goalsr.homequarantineTracker.db.repository.HWPatientinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.PatientFamilyinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.PatientinfoRepository;
+import com.goalsr.homequarantineTracker.db.repository.SymptoAddRepository;
 import com.goalsr.homequarantineTracker.db.repository.TravelTrackingRepository;
 import com.goalsr.homequarantineTracker.resposemodel.FnInsertDOCCHNKResult;
 import com.goalsr.homequarantineTracker.resposemodel.ReqGvtPatientFamillySymptom;
@@ -30,14 +31,18 @@ import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientIn
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResUpdateInfo;
 
 import com.goalsr.homequarantineTracker.resposemodel.gotOtpreq.ResGvtValidOtp;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientFamilyDetailsItem;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientupdatedataItem;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqGetPatientinfobody;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqInsertUpdatePatientFamilyInfo;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqInsertUpdatePatientInfo;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ResPatientData;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.Respatientinsertupdate;
 import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ReqHWOtp;
+import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ReqHWOtpValidate;
 import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ResHWGetOtp;
+import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ResOtpValidate;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ReqOtpValidGvt;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ResGvtValidOtpValid;
 import com.goalsr.homequarantineTracker.resposemodel.poststatus.ReqStatus;
@@ -46,6 +51,7 @@ import com.goalsr.homequarantineTracker.resposemodel.poststatus.TrackResponseIte
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -61,6 +67,7 @@ public class NetworkService {
 
     private HWPatientinfoRepository hwPatientinfoRepository;
     private HWPatientFamilyinfoRepository hwPatientFamilyinfoRepository;
+    private SymptoAddRepository symptoAddRepository;
 
 
     public void inject(Context mContext) {
@@ -72,6 +79,7 @@ public class NetworkService {
         /*HWatch*/
         hwPatientinfoRepository = new HWPatientinfoRepository(mContext);
         hwPatientFamilyinfoRepository = new HWPatientFamilyinfoRepository(mContext);
+        symptoAddRepository=new SymptoAddRepository(mContext);
     }
 
 
@@ -150,19 +158,19 @@ public class NetworkService {
         });
     }
 
-    public void makeHWotpvalid(ReqOtpValidGvt request, NetworkServiceListener listener) {
+    public void makeHWotpvalid(ReqHWOtpValidate request, NetworkServiceListener listener) {
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
-        Call<ResGvtValidOtpValid> response = apiService.makeOtpValidReq(request);
-        response.enqueue(new Callback<ResGvtValidOtpValid>() {
+        Call<ResOtpValidate> response = apiService.makeHWReqOtpValidate(request);
+        response.enqueue(new Callback<ResOtpValidate>() {
             @Override
-            public void onResponse(Call<ResGvtValidOtpValid> call, Response<ResGvtValidOtpValid> response) {
+            public void onResponse(Call<ResOtpValidate> call, Response<ResOtpValidate> response) {
 
 
                 if (response.isSuccessful()) {
 
                     if (listener != null) {
-                        if (response.body().getStatuscode() == 200) {
+                        if (response.body().getStatus_code() == 200) {
                             listener.onSuccess(response.body(), true);
                         } else {
                             listener.onFailure(response.body());
@@ -176,7 +184,7 @@ public class NetworkService {
                 } else {
                     APIError error = ErrorUtils.parseError(response);
                     if (listener != null) {
-                        ResGvtValidOtpValid res = new ResGvtValidOtpValid();
+                        ResOtpValidate res = new ResOtpValidate();
                         listener.onFailure(makeErrorResponse(res, "" + error.message()));
                     }
 
@@ -188,11 +196,11 @@ public class NetworkService {
             }
 
             @Override
-            public void onFailure(Call<ResGvtValidOtpValid> call, Throwable t) {
+            public void onFailure(Call<ResOtpValidate> call, Throwable t) {
                 if (BuildConfig.DEBUG) {
                     Log.d("error message", t.getMessage());
                     if (listener != null) {
-                        ResGvtValidOtpValid loginResponse = new ResGvtValidOtpValid();
+                        ResOtpValidate loginResponse = new ResOtpValidate();
                         listener.onFailure(makeErrorResponse(loginResponse, "" + t.getMessage()));
                     }
                 }
@@ -214,14 +222,8 @@ public class NetworkService {
                         if (listener != null) {
                             if (response.body().getPatientListData().size() > 0) {
 
-                                insetpatientdtatainDB(response.body().getPatientListData());
-                                final Handler handler = new Handler();
-                                handler.postDelayed(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        listener.onSuccess(response.body(), true);
-                                    }
-                                }, 2000);
+                                insetpatientdtatainDB(response,listener);
+
                             } else {
                                 listener.onFailure("No result found");
                             }
@@ -242,42 +244,153 @@ public class NetworkService {
         });
     }
 
-    private void insetpatientdtatainDB(List<PatientListDataItem> list) {
-        for (PatientListDataItem item : list) {
+    private void insetpatientdtatainDB(Response<ResPatientData> dataResponse, NetworkServiceListener listener) {
+
+        for (PatientListDataItem item : dataResponse.body().getPatientListData()) {
             hwPatientinfoRepository.insert(item);
             if (item.getPatientFamilyDetails().size() > 0) {
-                hwPatientFamilyinfoRepository.insert(item.getPatientFamilyDetails());
+//                List<PatientFamilyDetailsItem> familyDetailsItems=new ArrayList<>();
+                for (PatientFamilyDetailsItem itemfamily:item.getPatientFamilyDetails()){
+                    itemfamily.setCitizenIDLocalId(item.getLocalID());
+                    hwPatientFamilyinfoRepository.insertitem(itemfamily);
+                }
+
+
+
+
             }
         }
 
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (listener!=null)
+                listener.onSuccess(dataResponse.body(), true);
+            }
+        }, 4000);
+
 
     }
-    public void makeHWPatientInfoinsertupdate(ReqInsertUpdatePatientInfo request, NetworkServiceListener listener) {
-        ApiInterface apiService =
-                ApiClient.getClient().create(ApiInterface.class);
-        Call<Respatientinsertupdate> response = apiService.makeHWinsertUpdatePatientInfo(request);
 
-        response.enqueue(new Callback<Respatientinsertupdate>() {
-            @Override
-            public void onResponse(Call<Respatientinsertupdate> call, Response<Respatientinsertupdate> response) {
-                if (response.isSuccessful()) {
-                    if (response.body().getStatusCode()==200){
-                        if (response.body().getPatientupdatedata().size()>0){
-                            for (PatientupdatedataItem item:response.body().getPatientupdatedata()) {
-                                hwPatientinfoRepository.updatesyncdatainserupdatepatient(true, item.getLocalID(), item.getCitizenID());
+    public void makeHWPatientInfoinsertupdate(ReqInsertUpdatePatientInfo request, NetworkServiceListener listener) {
+        Log.e("PATIENT UPDATE", "reqhit--"+request.getPrimary_patient_information().size());
+        /*if (request.getPrimary_patient_information().size() > 0) {*/
+            //String s = new Gson().toJson(request);
+            //Log.e("DATA", s);
+            ApiInterface apiService =
+                    ApiClient.getClient().create(ApiInterface.class);
+
+            Call<Respatientinsertupdate> response = apiService.makeHWinsertUpdatePatientInfo(request);
+
+            response.enqueue(new Callback<Respatientinsertupdate>() {
+                @Override
+                public void onResponse(Call<Respatientinsertupdate> call, Response<Respatientinsertupdate> response) {
+                    if (response.isSuccessful()) {
+                        if (response.body().getStatusCode() == 200) {
+                            if (response.body().getPatientupdatedata().size() > 0) {
+                                for (PatientupdatedataItem item : response.body().getPatientupdatedata()) {
+                                    Log.e("PATIENT UPDATE", item.getLocalID() + "-------------------" + item.getCitizenID());
+                                    hwPatientinfoRepository.updatesyncdatainserupdatepatient(true, item.getLocalID(), item.getCitizenID());
+                                    hwPatientFamilyinfoRepository.updatesyncdatainserupdateFamilyCID(true, item.getLocalID(), item.getCitizenID());
+                                    symptoAddRepository.updatesyncdatainserupdatepatientByCitizenId(true, item.getLocalID(), item.getCitizenID());
+                                }
+                            }
+                            if (listener!=null){
+                                final Handler handler = new Handler();
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        listener.onSuccess(response.body(), true);
+                                    }
+                                }, 2000);
+                            }
+
+                        }else if (response.body().getStatusCode() == 400) {
+                            if (listener!=null){
+                                final Handler handler = new Handler();
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        listener.onSuccess(response.body(), true);
+                                    }
+                                }, 2000);
                             }
                         }
+
+
+
+                    }else {
+                        if (listener!=null){
+                            listener.onFailure("Something went wrong");
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Respatientinsertupdate> call, Throwable t) {
+
+                    if (listener!=null){
+                        listener.onFailure("Something went wrong");
+                    }
+
+
+                }
+            });
+
+    }
+
+    public void makeHWPatientFamilyInfoinsertupdate(ReqInsertUpdatePatientFamilyInfo request, NetworkServiceListener listener) {
+        Log.e("PATIENT UPDATE", "reqhit--"+request.getPatient_family_information().size());
+        /*if (request.getPatient_family_information().size() > 0) {*/
+            String s = new Gson().toJson(request);
+            Log.e("DATA", s);
+            ApiInterface apiService =
+                    ApiClient.getClient().create(ApiInterface.class);
+
+            Call<Respatientinsertupdate> response = apiService.makeHWinsertUpdatePatientFamilyInfo(request);
+
+            response.enqueue(new Callback<Respatientinsertupdate>() {
+                @Override
+                public void onResponse(Call<Respatientinsertupdate> call, Response<Respatientinsertupdate> response) {
+                    if (response.isSuccessful()) {
+
+                        Log.e("Familyupdat---",response.body().toString());
+                        if (response.body().getStatusCode() == 200) {
+                            if (response.body().getPatientupdatedata().size() > 0) {
+                                for (PatientupdatedataItem item : response.body().getPatientupdatedata()) {
+                                    Log.e("PATIENT UPDATE", item.getLocalID() + "-------------------" + item.getCitizenID());
+                                    hwPatientFamilyinfoRepository.updatesyncdatainserupdatepatient(true, item.getLocalID(), item.getCitizenID());
+                                    symptoAddRepository.updatesyncdatainserupdatepatientByFamilyID(true, item.getLocalID(), item.getCitizenID());
+                                }
+                            }
+
+
+                        }
+                        if (listener!=null){
+                            if (listener!=null){
+                                final Handler handler = new Handler();
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        listener.onSuccess(response.body(), true);
+                                    }
+                                }, 2000);
+                            }
+                        }
+
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Respatientinsertupdate> call, Throwable t) {
+                    if (listener!=null){
+                        listener.onFailure("Something went wrong");
                     }
 
                 }
-            }
+            });
 
-            @Override
-            public void onFailure(Call<Respatientinsertupdate> call, Throwable t) {
-
-
-            }
-        });
     }
 
 
@@ -863,6 +976,9 @@ public class NetworkService {
     private Object makeErrorResponse(Object object, String error) {
         if (object instanceof ResHWGetOtp) {
             ((ResHWGetOtp) object).setStatus_messaage(error);
+        }
+        if (object instanceof ResOtpValidate) {
+            ((ResOtpValidate) object).setStatus_messaage(error);
         }
 
 

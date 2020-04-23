@@ -43,6 +43,7 @@
         <activity android:name=".ui.DistrictListActivity" />
         <activity android:name=".ui.PanchyateListActivity" />
         <activity android:name=".ui.VillageGenericListActivity" />
+        <activity android:name=".ui.BBMPZoneWardListActivity" />
         <activity android:name=".ui.AddressGenericListActivity" />
         <activity android:name=".ui.RuralDistGenericListActivity" />
         <activity android:name=".ui.TalukListActivity" />

@@ -32,6 +32,7 @@ import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ReqPatient;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
 import com.goalsr.homequarantineTracker.resposemodel.gotOtpreq.ResGvtValidOtp;
 import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ReqHWOtpValidate;
+import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ResOtpValidate;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ReqOtpValidGvt;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ResGvtValidOtpValid;
 import com.google.android.material.snackbar.Snackbar;
@@ -144,12 +145,12 @@ public class OtpCheckerActivity extends BaseActivity {
 
     private void makeotpValid(ReqHWOtpValidate reqOtpValid) {
         showProgressDialogStatic();
-        networkService.makeHWotpvalid(null, new NetworkService.NetworkServiceListener() {
+        networkService.makeHWotpvalid(reqOtpValid, new NetworkService.NetworkServiceListener() {
             @Override
             public void onFailure(Object response) {
                 hideProgressDialogStatic();
-                if (response instanceof ResGvtValidOtpValid) {
-                    String error = ((ResGvtValidOtpValid) response).getMessageToDisplay();
+                if (response instanceof ResOtpValidate) {
+                    String error = ((ResOtpValidate) response).getStatus_messaage();
                     Toast.makeText(getApplicationContext(), "" + error, Toast.LENGTH_LONG).show();
                 }
             }
@@ -163,15 +164,15 @@ public class OtpCheckerActivity extends BaseActivity {
             @Override
             public void onSuccess(Object response, Boolean cancelFlag) {
                 hideProgressDialogStatic();
-                if (response instanceof ResGvtValidOtpValid) {
+                if (response instanceof ResOtpValidate) {
 
-                    if (((ResGvtValidOtpValid) response).getStatuscode() == 200) {
+                    if (((ResOtpValidate) response).getStatus_code() == 200) {
 
-                        if (((ResGvtValidOtpValid) response).isStatus()) {
-                            if(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID)==2){
+                       // if (((ResOtpValidate) response).isStatus()) {
+                            if(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID)==1){
 
                                 PreferenceStore.getPrefernceHelperInstace().setFlag(YelligoApplication.getContext(), PreferenceStore.LOGIN, true);
-                                PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.USER_ID_login, ((ResGvtValidOtpValid) response).getUserId());
+                                PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.USER_ID_login, ((ResOtpValidate) response).getData().getUser_id());
                                 if (PreferenceStore.getPrefernceHelperInstace().getIntValue(OtpCheckerActivity.this, PreferenceStore.DISTRICT_ID)==0) {
                                     Intent intent = new Intent(getApplicationContext(), DistrictListActivity.class);
                                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -179,22 +180,23 @@ public class OtpCheckerActivity extends BaseActivity {
                                     finishAffinity();
                                 } else {
 
-                                    Intent intent = new Intent(getApplicationContext(), AdminPatientLsitActivity.class);
+                                    Intent intent = new Intent(getApplicationContext(), DasboardPType.class);
                                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                     startActivity(intent);
                                     finishAffinity();
 
                                 }
 
-                            }else {
-                                PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID, ((ResGvtValidOtpValid) response).getUserId());
+                            }
+                            /*else {
+                                //PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID, ((ResGvtValidOtpValid) response).getUserId());
                                 PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.USER_ID_login, ((ResGvtValidOtpValid) response).getUserId());
-                      /*  PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(), PreferenceStore.USER_NAME, ((ResOtpValid) response).getData().getName());
+                      *//*  PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(), PreferenceStore.USER_NAME, ((ResOtpValid) response).getData().getName());
                         PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(), PreferenceStore.USER_HOME_LAT, ((ResOtpValid) response).getData().getLatitude());
                         PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(), PreferenceStore.USER_HOME_LNG, ((ResOtpValid) response).getData().getLongitude());
                         PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(), PreferenceStore.USER_RADIOUS, ((ResOtpValid) response).getData().getRadius());
                         PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(), PreferenceStore.USER_EMAIL, ((ResOtpValid) response).getData().getEmailId());
-                        PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(), PreferenceStore.USER_PHONE, ((ResOtpValid) response).getData().getPhoneNo());*/
+                        PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(), PreferenceStore.USER_PHONE, ((ResOtpValid) response).getData().getPhoneNo());*//*
                                 PreferenceStore.getPrefernceHelperInstace().setFlag(YelligoApplication.getContext(), PreferenceStore.LOGIN, true);
 
                                 if (PreferenceStore.getPrefernceHelperInstace().getFlag(OtpCheckerActivity.this, PreferenceStore.ISUPDATEPATENTINFO)) {
@@ -207,15 +209,15 @@ public class OtpCheckerActivity extends BaseActivity {
                                     getPatientInfo();
 
                                 }
-                            }
+                            }*/
 
-                        } else {
+                        /*} else {
                             Toast.makeText(getApplicationContext(), "" + ((ResGvtValidOtpValid) response).getMessageToDisplay(), Toast.LENGTH_LONG).show();
-                        }
+                        }*/
 
 
                     } else {
-                        Toast.makeText(getApplicationContext(), "" + ((ResGvtValidOtpValid) response).getMessageToDisplay(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "" + ((ResOtpValidate) response).getStatus_messaage(), Toast.LENGTH_LONG).show();
                     }
                 }
             }

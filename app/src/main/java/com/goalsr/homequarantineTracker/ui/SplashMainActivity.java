@@ -16,6 +16,7 @@ import android.widget.Toast;
 //import com.amitshekhar.DebugDB;
 import com.amitshekhar.DebugDB;
 import com.goalsr.homequarantineTracker.R;
+import com.goalsr.homequarantineTracker.Utils.AppConstants;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
 import com.goalsr.homequarantineTracker.apiservice.NetworkService;
@@ -119,7 +120,12 @@ public class SplashMainActivity extends BaseActivity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                getCommonApi().openNewScreen(DistrictListActivity.class);
+             /*
+                if (PreferenceStore.getPrefernceHelperInstace().getFlag(YelligoApplication.getContext(), PreferenceStore.LOGIN)){
+
+                }*/
+
+               // getCommonApi().openNewScreen(DistrictListActivity.class);
                 /*getCommonApi().openNewScreen(DasBoardWorkmanger.class);
                 finish();*/
                 /*if (PreferenceStore.getPrefernceHelperInstace().isFirstTime(SplashMainActivity.this, AppConstants.FIRST_TIME)) {
@@ -131,12 +137,12 @@ public class SplashMainActivity extends BaseActivity {
                 } else*/
 
                 /*Coomet OPEN BUILD*/
-                /*if (!PreferenceStore.getPrefernceHelperInstace().getFlag(SplashMainActivity.this, PreferenceStore.LOGIN)) {
+                if (!PreferenceStore.getPrefernceHelperInstace().getFlag(SplashMainActivity.this, PreferenceStore.LOGIN)) {
                     Intent i = new Intent(SplashMainActivity.this, LoginActivity.class);
                     startActivity(i);
                     finish();
                 } else {
-                    if (PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID)==2){
+                    if (PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID)==1){
                         if (PreferenceStore.getPrefernceHelperInstace().getIntValue(SplashMainActivity.this, PreferenceStore.DISTRICT_ID)==0) {
                             Intent intent = new Intent(getApplicationContext(), DistrictListActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -144,13 +150,13 @@ public class SplashMainActivity extends BaseActivity {
                             finishAffinity();
                         } else {
 
-                            Intent intent = new Intent(getApplicationContext(), AdminPatientLsitActivity.class);
+                            Intent intent = new Intent(getApplicationContext(), DasboardPType.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
                             finishAffinity();
 
                         }
-                    }else {
+                    }/*else {
                         if (PreferenceStore.getPrefernceHelperInstace().getFlag(SplashMainActivity.this, PreferenceStore.ISUPDATEPATENTINFO)) {
                             Intent i = new Intent(SplashMainActivity.this, HomeMainActivity.class);
                             startActivity(i);
@@ -158,8 +164,8 @@ public class SplashMainActivity extends BaseActivity {
                         } else {
                             getPatientInfo();
                         }
-                    }
-                }*/
+                    }*/
+                }
 
 
             }

@@ -58,7 +58,7 @@ public class HWFamillyListAdapter extends RecyclerView.Adapter<HWFamillyListAdap
         holder.ll_main_familly.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.onItemCheckedFamilly(position,null);
+                listener.onItemCheckedFamilly(position,listString.get(position));
             }
         });
     }

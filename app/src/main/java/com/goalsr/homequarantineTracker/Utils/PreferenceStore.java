@@ -23,6 +23,7 @@ public class PreferenceStore {
     public static final String FIREBASE_TOKEN = "FIREBASETOKEN";
     public static final String FIREBASE_APPID = "FIREBASETOKENAAID";
     public static final String CITIZEN_ID = "UserID";
+    public static final String CITIZEN_LOCALID = "UserID_localid";
     public static final String USER_ID_login = "UserID_login";
     public static final String USER_HOME_LAT = "UserIDlat";
     public static final String USER_HOME_LNG = "UserIDlng";

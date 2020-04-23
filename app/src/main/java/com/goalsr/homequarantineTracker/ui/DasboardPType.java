@@ -9,14 +9,25 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.Observer;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.goalsr.homequarantineTracker.R;
+import com.goalsr.homequarantineTracker.Utils.AppConstants;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
+import com.goalsr.homequarantineTracker.apiservice.ApiBackGround;
 import com.goalsr.homequarantineTracker.base.BaseActivity;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
+import com.goalsr.homequarantineTracker.service.MysyncServiceWorkmanager;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -58,18 +69,41 @@ public class DasboardPType extends BaseActivity {
     ImageView img3;
     @BindView(R.id.img_4)
     ImageView img4;
+    private ApiBackGround apiBackGround;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard_type);
         ButterKnife.bind(this);
+        showProgressDialogStatic();
+        apiBackGround=new ApiBackGround(YelligoApplication.getContext());
         if (PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.DISTRICT_ID) != 0) {
             txtdistrictname.setText("" + PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(), PreferenceStore.DISTRICT_NAME));
         }
+        startWorkManager();
+
+
+        getPatientViewmodel().getLivedatPAtientTest().observe(this, new Observer<List<PatientListDataItem>>() {
+            @Override
+            public void onChanged(List<PatientListDataItem> list) {
+                if (list.size()>0){
+                    hideProgressDialogStatic();
+                }
+
+            }
+        });
     }
 
-    @OnClick({R.id.btn_qurantine, R.id.btn_observer,R.id.img_1, R.id.img_2, R.id.img_3, R.id.img_4})
+    private void startWorkManager() {
+         PeriodicWorkRequest periodicWork = new PeriodicWorkRequest.Builder(MysyncServiceWorkmanager.class, 30, TimeUnit.MINUTES)
+                .addTag(AppConstants.TRACKTAG)
+                .build();
+        //WorkManager.getInstance().enqueueUniquePeriodicWork("Location", ExistingPeriodicWorkPolicy.REPLACE, periodicWork);
+        WorkManager.getInstance(DasboardPType.this).enqueue(periodicWork);
+    }
+
+    @OnClick({R.id.btn_qurantine, R.id.btn_observer,R.id.img_1, R.id.img_2, R.id.img_3, R.id.img_4, R.id.txtrelationChange})
     public void onViewClicked(View view) {
         Bundle bundle = new Bundle();
         switch (view.getId()) {
@@ -102,16 +136,101 @@ public class DasboardPType extends BaseActivity {
                 getCommonApi().openNewScreen(AdminPatientLsitActivity.class, bundle);
                 break;
             case R.id.img_3:
+                makesyncthenSync();
                 break;
             case R.id.img_4:
+                makesyncthenLogout();
                 break;
             case R.id.txtrelationChange:
-                Intent intent = new Intent(getApplicationContext(), DistrictListActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
+                makesyncDistrictChange();
+
                 break;
         }
+    }
+    private void makesyncthenLogout() {
+        showProgressDialogStatic();
+        apiBackGround.setOnSyncResponse(new ApiBackGround.OnSyncResponse() {
+            @Override
+            public void onSyncSccess() {
+                hideProgressDialogStatic();
+                new AlertDialog.Builder(DasboardPType.this)
+                        .setMessage("Are you sure you want to Logout?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                //Toast.makeText(YelligoApplication.getContext(),"Successfully data sync",Toast.LENGTH_LONG).show();
+                                PreferenceStore.getPrefernceHelperInstace().setFlag(YelligoApplication.getContext(),PreferenceStore.LOGIN,false);
+                                Intent intent = new Intent(getApplicationContext(), SplashMainActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+
+            }
+
+            @Override
+            public void onFail() {
+                hideProgressDialogStatic();
+
+            }
+        });
+        apiBackGround.makesyncCall();
+    }
+
+    private void makesyncDistrictChange() {
+        showProgressDialogStatic();
+        apiBackGround.setOnSyncResponse(new ApiBackGround.OnSyncResponse() {
+            @Override
+            public void onSyncSccess() {
+                hideProgressDialogStatic();
+                new AlertDialog.Builder(DasboardPType.this)
+                        .setMessage("Are you sure you want to Change District?")
+                        .setCancelable(false)
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                               //Toast.makeText(YelligoApplication.getContext(),"Successfully data sync",Toast.LENGTH_LONG).show();
+                               // PreferenceStore.getPrefernceHelperInstace().setFlag(YelligoApplication.getContext(),PreferenceStore.LOGIN,false);
+
+                                Intent intent = new Intent(getApplicationContext(), DistrictListActivity.class);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(intent);
+                                finish();
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+
+            }
+
+            @Override
+            public void onFail() {
+                hideProgressDialogStatic();
+            }
+        });
+        apiBackGround.makesyncCall();
+    }
+
+    private void makesyncthenSync() {
+        showProgressDialogStatic();
+        apiBackGround.setOnSyncResponse(new ApiBackGround.OnSyncResponse() {
+            @Override
+            public void onSyncSccess() {
+                hideProgressDialogStatic();
+
+                Toast.makeText(YelligoApplication.getContext(),"Successfully data sync",Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onFail() {
+                hideProgressDialogStatic();
+                Toast.makeText(YelligoApplication.getContext(),"Please try again",Toast.LENGTH_LONG).show();
+
+            }
+        });
+        apiBackGround.makesyncCall();
     }
 
     @Override

@@ -120,8 +120,9 @@ public class HomeMainActivity extends BaseActivity implements HWFamillyListAdapt
     }
 
     private void getPatentInfo() {
-        int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
-        resPatientInfo = getHwPatientinfoRepository().getPatientInfo(ciD);
+        //int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
+        String ciD=PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(),PreferenceStore.CITIZEN_LOCALID);
+        resPatientInfo = getHwPatientinfoRepository().getPatientInfobylocalid(ciD);
         setinfo();
     }
 
@@ -148,42 +149,7 @@ public class HomeMainActivity extends BaseActivity implements HWFamillyListAdapt
 
     }
 
-    private void getPatientFamillyInfo() {
-        showProgressDialogStatic();
-        ReqPatient reqPatient = new ReqPatient();
-        reqPatient.setCitizenId(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID));
-        reqPatient.setLevel(2);
-        reqPatient.setpSecurity(getCommonApi().getSecurityObject());
-        networkService.getPatientFamilyInfo(reqPatient, new NetworkService.NetworkServiceListener() {
-            @Override
-            public void onFailure(Object response) {
-                hideProgressDialogStatic();
-                if (response instanceof String) {
-                    if (!((String) response).equalsIgnoreCase("")) {
-                        Toast.makeText(YelligoApplication.getContext(), "" + response, Toast.LENGTH_LONG).show();
-                    }
-                }
-            }
 
-            @Override
-            public void onAuthFail(Object error) {
-                hideProgressDialogStatic();
-            }
-
-            @Override
-            public void onSuccess(Object response, Boolean cancelFlag) {
-                hideProgressDialogStatic();
-                if (response instanceof ResPatientFamilyInfo) {
-                    updatView();
-
-
-                    //updateUI();
-
-                }
-            }
-        });
-
-    }
 
     private void updatView() {
         int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
@@ -364,7 +330,11 @@ public class HomeMainActivity extends BaseActivity implements HWFamillyListAdapt
     }
 
     private void addfamilly() {
-        getCommonApi().openNewScreen(AddnewPatientActivity.class);
+        Bundle bundle=new Bundle();
+        bundle.putString("key","newpatient");
+        bundle.putString("keytype","family");
+        bundle.putString("keytype_family_localid","");
+        getCommonApi().openNewScreen(AddnewPatientActivity.class,bundle);
     }
 
     @Override
@@ -372,6 +342,7 @@ public class HomeMainActivity extends BaseActivity implements HWFamillyListAdapt
         Bundle bundle=new Bundle();
         bundle.putString("key","family");
         bundle.putInt("v_id",item.getFamilyMemberID());
+        bundle.putString("v_id_local",item.getFamilyLocalID());
         getCommonApi().openNewScreen(PatientSymtomUpdateActivity.class,bundle);
 
     }

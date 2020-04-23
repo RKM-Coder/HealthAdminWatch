@@ -130,6 +130,53 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/llrelation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginTop="5dp"
+                    android:visibility="gone"
+                    android:layout_marginRight="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Relation *"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="35dp"
+                        android:layout_gravity="center|left"
+                        android:layout_marginTop="5dp"
+                        android:background="@drawable/edittext_selector"
+                        android:orientation="horizontal">
+
+                        <Spinner
+                            android:id="@+id/sp_relation"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:layout_weight="4"
+                            android:background="@android:color/transparent"
+                            android:gravity="center"
+                            android:minHeight="35dp"
+                            android:spinnerMode="dropdown" />
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginRight="10dp"
+                            android:src="@drawable/ic_arrow_dropdown"
+                            android:visibility="visible" />
+
+                    </LinearLayout>
+                </LinearLayout>
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -363,14 +410,40 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="10dp">
+
+                    <CheckedTextView
+                        android:id="@+id/simpleCheckedTextView"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:checked="false"
+                        android:gravity="center"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
+                        android:textColor="@color/colorPrimaryDark"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:checkMark="@drawable/check_box_btn"
+                        android:text="Having any travel history" />
+
+                </LinearLayout>
+
+                <LinearLayout
+
+                    android:id="@+id/llpoorigin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
                     android:layout_marginTop="15dp"
                     android:layout_marginRight="10dp"
+                    android:visibility="gone"
                     android:orientation="vertical">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Port of Origin"
+                        android:text="Port of Origin *"
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -394,17 +467,19 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/llpoarrival"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_marginTop="15dp"
+                    android:visibility="gone"
                     android:layout_marginRight="10dp"
                     android:orientation="vertical">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Port of Arrival"
+                        android:text="Port of Arrival *"
                         android:textColor="@color/colorPrimaryDark"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -428,6 +503,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/lladdresstag"
                     android:layout_width="match_parent"
                     android:layout_height="40dp"
 
@@ -450,6 +526,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/llTypelocation"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
@@ -650,7 +727,82 @@
                     </LinearLayout>
                 </LinearLayout>
 
+                <LinearLayout
+                    android:id="@+id/llbbmp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginRight="10dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="BBPM Zone *"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+
+                        <TextView
+                            android:id="@+id/txt_bbmpzone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edittext_selector"
+                            android:drawableRight="@drawable/ic_navigate_next_black_24dp"
+                            android:hint="Select BBMP Zone"
+                            android:imeOptions="actionNext"
+                            android:importantForAutofill="no"
+                            android:minHeight="35dp"
+                            android:paddingTop="5dp"
+                            android:paddingBottom="5dp"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginRight="10dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="BBPM Ward *"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+
+                        <TextView
+                            android:id="@+id/txt_bbmpword_spin"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/edittext_selector"
+                            android:drawableRight="@drawable/ic_navigate_next_black_24dp"
+                            android:hint="Select BBPM Ward"
+                            android:imeOptions="actionNext"
+                            android:importantForAutofill="no"
+                            android:minHeight="35dp"
+                            android:paddingTop="5dp"
+                            android:paddingBottom="5dp"
+                            android:textColor="@color/colorPrimaryDark"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/llurban"
@@ -908,7 +1060,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
 
-                                    android:text="History of Contact with \n a lab confirmed case"
+                                    android:text="History of Contact with \na lab confirmed case"
                                     android:textColor="@color/colorPrimaryDark"
                                     android:textSize="16sp" />
 
@@ -1004,6 +1156,7 @@
                             android:layout_marginTop="5dp"
                             android:layout_marginBottom="5dp"
                             android:gravity="center"
+                            android:visibility="gone"
                             android:padding="5dp">
 
                             <LinearLayout
@@ -1039,6 +1192,46 @@
                                 android:button="@drawable/check_box_btn"
                                 android:clickable="true" />
 
+                        </FrameLayout>
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+
+                            <RadioGroup
+                                android:layout_width="match_parent"
+                                android:layout_height="40dp"
+                                android:layout_below="@+id/imageView"
+                                android:layout_marginTop="15dp"
+                                android:orientation="horizontal"
+                                android:weightSum="2"
+                                android:id="@+id/radioGroup">
+
+                                <RadioButton
+                                    android:layout_width="0dp"
+                                    android:layout_height="35dp"
+                                    android:text="High Risk"
+                                    android:layout_weight="1"
+                                    android:id="@+id/radioButton"
+                                    android:button="@drawable/radio_button_selector"
+                                    android:layout_gravity="center_horizontal"
+                                    android:onClick="onRadioButtonClicked"
+                                    android:checked="false"
+                                    android:textSize="16sp" />
+
+                                <RadioButton
+                                    android:layout_width="0dp"
+                                    android:layout_height="35dp"
+                                    android:text="Low Risk"
+                                    android:layout_weight="1"
+                                    android:button="@drawable/radio_button_selector"
+                                    android:id="@+id/radioButton2"
+                                    android:layout_gravity="center_horizontal"
+                                    android:onClick="onRadioButtonClicked"
+                                    android:checked="false"
+                                    android:textSize="16sp"
+                                    />
+                            </RadioGroup>
                         </FrameLayout>
 
                         <View

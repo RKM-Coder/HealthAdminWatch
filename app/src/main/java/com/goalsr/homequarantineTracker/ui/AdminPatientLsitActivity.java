@@ -1,19 +1,20 @@
 package com.goalsr.homequarantineTracker.ui;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,14 +25,14 @@ import com.goalsr.homequarantineTracker.R;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
 import com.goalsr.homequarantineTracker.adapter.HWPatientListAdapter;
-import com.goalsr.homequarantineTracker.adapter.PatientListAdapter;
+import com.goalsr.homequarantineTracker.apiservice.ApiBackGround;
 import com.goalsr.homequarantineTracker.apiservice.NetworkService;
 import com.goalsr.homequarantineTracker.base.BaseActivity;
-import com.goalsr.homequarantineTracker.db.repository.HWPatientinfoRepository;
 import com.goalsr.homequarantineTracker.resposemodel.ReqPAtientInfoByAdmin;
-import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfoByAdmin;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqGetPatientinfobody;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ResPatientData;
 import com.goalsr.homequarantineTracker.view.edittext.CustomEditText;
 import com.goalsr.homequarantineTracker.view.edittext.DrawableClickListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -79,11 +80,15 @@ public class AdminPatientLsitActivity extends BaseActivity implements HWPatientL
     LinearLayout llMainFamilly;
     @BindView(R.id.swipeContainer)
     SwipeRefreshLayout swipeContainer;
+    @BindView(R.id.pbprogress)
+    ProgressBar pbprogress;
     private NetworkService networkService;
     private HWPatientListAdapter adapter;
     private String key;
 
-    private int patienttype=0;
+    private int patienttype = 0;
+    ApiBackGround apiBackGround;
+    boolean checkDataLoad=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,22 +97,23 @@ public class AdminPatientLsitActivity extends BaseActivity implements HWPatientL
         ButterKnife.bind(this);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        apiBackGround=new ApiBackGround(YelligoApplication.getContext());
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             key = bundle.getString("key");
-           // key_id = bundle.getString("key_id");
+            // key_id = bundle.getString("key_id");
         }
 
-        if (PreferenceStore.getPrefernceHelperInstace().getFlag(YelligoApplication.getContext(),PreferenceStore.PERSIONTYPE)){
-            tvHeaderFcl.setText("Persion Under Quarantine");
-            txtLogout.setVisibility(View.GONE);
-            patienttype=1;
-        }else
-        {
-            tvHeaderFcl.setText("Persion Under Observation");
-            txtLogout.setVisibility(View.VISIBLE);
-            patienttype=2;
+
+
+        if (PreferenceStore.getPrefernceHelperInstace().getFlag(YelligoApplication.getContext(), PreferenceStore.PERSIONTYPE)) {
+            tvHeaderFcl.setText("Person Under Quarantine");
+            //txtLogout.setVisibility(View.GONE);
+            patienttype = 1;
+        } else {
+            tvHeaderFcl.setText("Person Under Observation");
+            //txtLogout.setVisibility(View.VISIBLE);
+            patienttype = 2;
         }
         initMvp();
         initrecyclerView();
@@ -165,7 +171,8 @@ public class AdminPatientLsitActivity extends BaseActivity implements HWPatientL
             @Override
             public void onRefresh() {
                 swipeContainer.setRefreshing(false);
-                //getPatientInfo();
+
+                getPatientInfo();
 
             }
         });
@@ -181,20 +188,22 @@ public class AdminPatientLsitActivity extends BaseActivity implements HWPatientL
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if (manager.findFirstCompletelyVisibleItemPosition()==0){
+                if (manager.findFirstCompletelyVisibleItemPosition() == 0) {
                     swipeContainer.setEnabled(true);
-                }else {
+                } else {
                     swipeContainer.setEnabled(false);
                 }
 
             }
         });
     }
+
     LinearLayoutManager manager;
+
     private void initrecyclerView() {
         adapter = new HWPatientListAdapter(this, new ArrayList<PatientListDataItem>());
         adapter.setListener(this);
-         manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         rvViewPatientList.setLayoutManager(manager);
         rvViewPatientList.setAdapter(adapter);
     }
@@ -205,70 +214,98 @@ public class AdminPatientLsitActivity extends BaseActivity implements HWPatientL
     }
 
     private void getPatientInfo() {
-        //showProgressDialogStatic();
-
-        ReqPAtientInfoByAdmin reqPatient = new ReqPAtientInfoByAdmin();
-      /*  int cId = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID);
-        reqPatient.setCitizenId(cId);
-        reqPatient.setLevel(2);*/
-        reqPatient.setDistCode(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.DISTRICT_ID));
-        reqPatient.setpSecurity(getCommonApi().getSecurityObject());
-        networkService.getPatientInfoListByAdmin(reqPatient, new NetworkService.NetworkServiceListener() {
+        //TODO check sync done or not
+       // setOnSyncResponse.
+        showProgressDialogStatic();
+        apiBackGround.setOnSyncResponse(new ApiBackGround.OnSyncResponse() {
             @Override
-            public void onFailure(Object response) {
-                if (swipeContainer!=null)
-                    swipeContainer.setRefreshing(false);
-                if (response instanceof String) {
-                    Toast.makeText(YelligoApplication.getContext(), "" + response, Toast.LENGTH_LONG).show();
-                }
-            }
-
-            @Override
-            public void onAuthFail(Object error) {
+            public void onSyncSccess() {
                 hideProgressDialogStatic();
+                ReqGetPatientinfobody reqPatient = new ReqGetPatientinfobody();
+                reqPatient.setDistrict_code(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.DISTRICT_ID));
+                reqPatient.setUser_id(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));
+                reqPatient.setCity_code(-1);
+                reqPatient.setGram_Panchayat_code(-1);
+                reqPatient.setTaluk_code(-1);
+                reqPatient.setWard_code(-1);
+                reqPatient.setP_security(getCommonApi().getHealthWatchSecurityObject());
+                networkService.getHWPatientFamillyInfo(reqPatient, new NetworkService.NetworkServiceListener() {
+                    @Override
+                    public void onFailure(Object response) {
+                        if (swipeContainer != null)
+                            swipeContainer.setRefreshing(false);
+                        if (response instanceof String) {
+                            Toast.makeText(YelligoApplication.getContext(), "" + response, Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    @Override
+                    public void onAuthFail(Object error) {
+                        hideProgressDialogStatic();
+                    }
+
+                    @Override
+                    public void onSuccess(Object response, Boolean cancelFlag) {
+
+                        //requestPermissions();
+                        if (swipeContainer != null)
+                            swipeContainer.setRefreshing(false);
+                        if (response instanceof ResPatientData) {
+
+                        }
+                    }
+                });
             }
 
             @Override
-            public void onSuccess(Object response, Boolean cancelFlag) {
-                if (swipeContainer!=null)
+            public void onFail() {
+                hideProgressDialogStatic();
+                if (swipeContainer != null)
                     swipeContainer.setRefreshing(false);
-                //requestPermissions();
-                if (response instanceof ResPatientInfoByAdmin) {
-
-                    // getPatientinfoRepository().insert((ResPatientInfo) response);
-                    updateUI();
-
-
-                    /*PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(), PreferenceStore.USER_PHONE, ((ResPatientInfo) response).getMobile());
-                    getPatientinfoRepository().insert((ResPatientInfo) response);
-                    //updateUI();
-                    if (((ResPatientInfo) response).getURoleBy() != 0) {
-                        PreferenceStore.getPrefernceHelperInstace().setFlag(YelligoApplication.getContext(), PreferenceStore.ISUPDATEPATENTINFO, true);
-                        Intent intent = new Intent(getApplicationContext(), HomeMainActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        finishAffinity();
-                    } else {
-                        PreferenceStore.getPrefernceHelperInstace().setFlag(YelligoApplication.getContext(), PreferenceStore.ISUPDATEPATENTINFO, false);
-
-
-                    }*/
-
-
-                }
+                Toast.makeText(YelligoApplication.getContext(),"Try Again",Toast.LENGTH_LONG).show();
             }
         });
+        apiBackGround.makesyncCall();
 
     }
 
     private void updateUI() {
-       // List<ResPatientInfo> patientList = new ArrayList<>();
-
+        // List<ResPatientInfo> patientList = new ArrayList<>();
+        pbprogress.setVisibility(View.VISIBLE);
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (pbprogress!=null)
+                    pbprogress.setVisibility(View.GONE);
+            }
+        }, 8000);
         getPatientViewmodel().getLivedatPAtient(patienttype).observe(this, new Observer<List<PatientListDataItem>>() {
             @Override
             public void onChanged(List<PatientListDataItem> resPatientInfos) {
+                //Log.e("DataChange",)
+                if (resPatientInfos.size()>0){
+                    if (pbprogress!=null)
+                        pbprogress.setVisibility(View.GONE);
+                }
+
+                /*if (resPatientInfos.size()>0){
+                    if (pbprogress!=null)
+                    pbprogress.setVisibility(View.GONE);
+                }*//*else if (resPatientInfos.size()==0){
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (pbprogress!=null)
+                            pbprogress.setVisibility(View.VISIBLE);
+                        }
+                    }, 4000);
+
+                }*/
                 adapter.setValue((ArrayList<PatientListDataItem>) resPatientInfos);
             }
+
         });
      /*   patientList = getPatientinfoRepository().getListAllItemByAdmin();
         Log.e("PatientList--", patientList.size() + "");*/
@@ -288,8 +325,9 @@ public class AdminPatientLsitActivity extends BaseActivity implements HWPatientL
         Intent intent = new Intent(getApplicationContext(), HomeMainActivity.class);
         *//*intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);*//*
         startActivity(intent);*/
-        if (item.getCitizenID() > 0) {
-           /* getPatientFamillyinfoRepository().clear();*/
+        if (!item.getLocalID().equalsIgnoreCase("")) {
+            /* getPatientFamillyinfoRepository().clear();*/
+            PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(), PreferenceStore.CITIZEN_LOCALID, item.getLocalID());
             PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID, item.getCitizenID());
             Intent intent = new Intent(getApplicationContext(), HomeMainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -325,10 +363,12 @@ public class AdminPatientLsitActivity extends BaseActivity implements HWPatientL
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.txt_logout:
-                Bundle bundle=new Bundle();
-                bundle.putString("key","newpatient");
-                getCommonApi().openNewScreen(AddnewPatientActivity.class,bundle);
-               // getCommonApi().openNewScreen(AddnewPatientActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putString("key", "newpatient");
+                bundle.putString("keytype", "self");
+                bundle.putString("keytype_family_localid", "");
+                getCommonApi().openNewScreen(AddnewPatientActivity.class, bundle);
+                // getCommonApi().openNewScreen(AddnewPatientActivity.class);
                 break;
             case R.id.txtrelationChange:
                 Intent intent = new Intent(getApplicationContext(), DistrictListActivity.class);
@@ -338,7 +378,9 @@ public class AdminPatientLsitActivity extends BaseActivity implements HWPatientL
                 break;
         }
     }
+
     boolean doubleBackToExitPressedOnce = false;
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();

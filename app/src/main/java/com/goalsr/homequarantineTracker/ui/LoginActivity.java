@@ -140,7 +140,7 @@ public class LoginActivity extends BaseActivity {
                     if (response instanceof ResHWGetOtp) {
                         String error = ((ResHWGetOtp) response).getStatus_messaage();
                         if (error != null) {
-                            Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), ""+error, Toast.LENGTH_LONG).show();
                         }
                     }
 
@@ -196,11 +196,20 @@ public class LoginActivity extends BaseActivity {
                     i.putExtra("rollid", 2);
                     startActivity(i);*/
 
-                    PreferenceStore.getPrefernceHelperInstace().clearValue(YelligoApplication.getContext(),PreferenceStore.ISUPDATEPATENTINFO);
-                    PreferenceStore.getPrefernceHelperInstace().clearValue(YelligoApplication.getContext(),PreferenceStore.USER_PHONE);
+                   // PreferenceStore.getPrefernceHelperInstace().clearValue(YelligoApplication.getContext(),PreferenceStore.ISUPDATEPATENTINFO);
+
+
+                   /* if (!PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(), PreferenceStore.USER_PHONE).equalsIgnoreCase("")) {
+
+                    }*/
+
+
+
+
+                    /*PreferenceStore.getPrefernceHelperInstace().clearValue(YelligoApplication.getContext(),PreferenceStore.USER_PHONE);
                     PreferenceStore.getPrefernceHelperInstace().clearValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
                     PreferenceStore.getPrefernceHelperInstace().clearValue(YelligoApplication.getContext(),PreferenceStore.DISTRICT_NAME);
-                    PreferenceStore.getPrefernceHelperInstace().clearValue(YelligoApplication.getContext(),PreferenceStore.DISTRICT_ID);
+                    PreferenceStore.getPrefernceHelperInstace().clearValue(YelligoApplication.getContext(),PreferenceStore.DISTRICT_ID);*/
                   /*  getPatientinfoRepository().clear();
                     getPatientFamillyinfoRepository().clear();*/
 

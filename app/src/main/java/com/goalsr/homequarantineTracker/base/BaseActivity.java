@@ -25,6 +25,7 @@ import com.goalsr.homequarantineTracker.db.repository.HWPatientFamilyinfoReposit
 import com.goalsr.homequarantineTracker.db.repository.HWPatientinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.PatientFamilyinfoRepository;
 import com.goalsr.homequarantineTracker.db.repository.PatientinfoRepository;
+import com.goalsr.homequarantineTracker.db.repository.SymptoAddRepository;
 import com.goalsr.homequarantineTracker.db.repository.TravelTrackingRepository;
 import com.goalsr.homequarantineTracker.db.repository.VillageinfoRepository;
 import com.goalsr.homequarantineTracker.db.viewmodel.AddressUrbanViewmodel;
@@ -47,6 +48,7 @@ public abstract class BaseActivity extends AppCompatActivity implements NetworkI
 
     HWPatientinfoRepository hwPatientinfoRepository;
     HWPatientFamilyinfoRepository hwPatientFamilyinfoRepository;
+    SymptoAddRepository symptoAddRepository;
     Context mContext;
 
     private Dialog dialogProgress;
@@ -76,6 +78,8 @@ public abstract class BaseActivity extends AppCompatActivity implements NetworkI
         dialogProgress = DialogManager.getProgressDialog(mContext);
         villageinfoRepository=new VillageinfoRepository(mContext);
 
+        symptoAddRepository=new SymptoAddRepository(mContext);
+
         hwPatientinfoRepository=new HWPatientinfoRepository(mContext);
         hwPatientFamilyinfoRepository=new HWPatientFamilyinfoRepository(mContext);
 
@@ -91,6 +95,10 @@ public abstract class BaseActivity extends AppCompatActivity implements NetworkI
 
     public HWPatientFamilyinfoRepository getHwPatientFamilyinfoRepository(){
         return hwPatientFamilyinfoRepository;
+    }
+
+    public SymptoAddRepository getSymptoAddRepository(){
+        return symptoAddRepository;
     }
 
     public PatientViewmodel  getPatientViewmodel(){

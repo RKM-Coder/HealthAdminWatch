@@ -72,7 +72,7 @@ public class AppConstants {
     public static final String cartSize = "0";
 
     public static final String MERCHANT_ID = "5338430";
-    public static final String TRACKTAG = "workertrack";
+    public static final String TRACKTAG = "Sync data";
 
     //public static DataCart dataCart = null;
 
@@ -117,6 +117,13 @@ public class AppConstants {
     public static String getCurrentDateTimeGVT(){
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+        String currentDateandTime = sdf.format(new Date());
+        return currentDateandTime;
+    }
+
+    public static String getCurrentDateTimeHW(){
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         String currentDateandTime = sdf.format(new Date());
         return currentDateandTime;
     }

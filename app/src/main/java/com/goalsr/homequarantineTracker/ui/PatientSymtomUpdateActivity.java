@@ -16,8 +16,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -37,23 +39,24 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.goalsr.homequarantineTracker.GlideApp;
 import com.goalsr.homequarantineTracker.R;
 import com.goalsr.homequarantineTracker.Utils.AppConstants;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
+import com.goalsr.homequarantineTracker.adapter.SymptomListAdapter;
+import com.goalsr.homequarantineTracker.apiservice.ApiBackGround;
 import com.goalsr.homequarantineTracker.apiservice.NetworkService;
 import com.goalsr.homequarantineTracker.base.BaseActivity;
 import com.goalsr.homequarantineTracker.dialog.CustomDialogGeneric;
 import com.goalsr.homequarantineTracker.gpsenable.GpsUtils;
-import com.goalsr.homequarantineTracker.imagecompress.ImageCompressionToBitMapAsyncTask;
-import com.goalsr.homequarantineTracker.resposemodel.ReqGvtPatientFamillySymptom;
-import com.goalsr.homequarantineTracker.resposemodel.ReqGvtPatientSymptom;
+import com.goalsr.homequarantineTracker.imagecompress.ImageCompressionAsyncTask;
+import com.goalsr.homequarantineTracker.resposemodel.ModelSymptomGVT;
 import com.goalsr.homequarantineTracker.resposemodel.ReqImageChunk;
-import com.goalsr.homequarantineTracker.resposemodel.ResSymtomChecker;
-import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientFamilyInfo;
-import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
+import com.goalsr.homequarantineTracker.resposemodel.hwSymtommaker.ReqHWSymtomAdd;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientFamilyDetailsItem;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -79,7 +82,7 @@ import butterknife.OnClick;
 
 import static com.goalsr.homequarantineTracker.Utils.AppConstants.myPermissions;
 
-public class PatientSymtomUpdateActivity extends BaseActivity {
+public class PatientSymtomUpdateActivity extends BaseActivity implements SymptomListAdapter.CheckedListener {
 
     private static final String TAG = "symtomchecker";
     @BindView(R.id.tv_header_fac)
@@ -149,8 +152,12 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
     PatientListDataItem resPatientInfo;
     PatientFamilyDetailsItem resPatientFamilyInfo;
     int sidfamily = 0;
+
+    String sidfamilylocal = "";
     @BindView(R.id.txt_main_p_relation)
     TextView txtMainPRelation;
+    @BindView(R.id.rv_view)
+    RecyclerView rvView;
     private String key = "";
     boolean isfever, iscoughandsour, isbreathing, isdiarria, isdiabaties, ishypertense, isheartdisses, ishiv;
 
@@ -183,10 +190,13 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
     private FusedLocationProviderClient mFusedLocationClient;
 
     private LocationCallback mLocationCallback;
-    private String filename, filepath;
+    private String filename="", filepath="";
     private NetworkService networkService;
     List<String> famillyrelation = new ArrayList<>();
     private String[] number;
+
+    private SymptomListAdapter adapter;
+    private ArrayList<String> selectedString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -217,20 +227,21 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
             } else if (bundle.getString("key").equalsIgnoreCase("family")) {
                 key = bundle.getString("key");
                 sidfamily = bundle.getInt("v_id");
+                sidfamilylocal = bundle.getString("v_id_local");
                 getPatientFamilyByid();
             }
         }
         resPatientInfo = new PatientListDataItem();
-        int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
+        int ciD = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID);
         resPatientInfo = getHwPatientinfoRepository().getPatientInfo(ciD);
-
+        initSymptomView();
 
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mFusedLocationClient!=null){
+        if (mFusedLocationClient != null) {
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);
         }
     }
@@ -240,10 +251,34 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
         networkService.inject(PatientSymtomUpdateActivity.this);
     }
 
+    private void initSymptomView() {
+        adapter = new SymptomListAdapter(this, new ArrayList<ModelSymptomGVT>());
+        adapter.setListener(this);
+        RecyclerView.LayoutManager manager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        rvView.setLayoutManager(manager);
+        rvView.setAdapter(adapter);
+        selectedString = new ArrayList<>();
+        adapter.setValue(getList());
+    }
+
+    private ArrayList<ModelSymptomGVT> getList() {
+      /*  ArrayList<String> listString = new ArrayList<>();
+        listString.add("Fever");
+        listString.add("cough");
+        listString.add("Cold");
+        listString.add("Tiredness");
+        listString.add("Other");*/
+        return getCommonApi().getListOdSymtomByGVT();
+    }
+
     private void getPatientSelf() {
         resPatientInfo = new PatientListDataItem();
-        int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
+        int ciD = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID);
         resPatientInfo = getHwPatientinfoRepository().getPatientInfo(ciD);
+        if (resPatientInfo == null) {
+            String clocalid = PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(), PreferenceStore.CITIZEN_LOCALID);
+            resPatientInfo = getHwPatientinfoRepository().getPatientInfobylocalid(clocalid);
+        }
         if (resPatientInfo != null) {
             if (resPatientInfo.getName() != null) {
                 txtMainPName.setText("Name: " + resPatientInfo.getName());
@@ -260,14 +295,20 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
 
     private void getPatientFamilyByid() {
         resPatientFamilyInfo = new PatientFamilyDetailsItem();
-        resPatientFamilyInfo = getHwPatientFamilyinfoRepository().getPatientFamilyInfo(sidfamily);
+        resPatientFamilyInfo = getHwPatientFamilyinfoRepository().getPatientFamilyInfoByFamilyMId(sidfamily);
+
+        if (resPatientFamilyInfo == null) {
+            resPatientFamilyInfo = getHwPatientFamilyinfoRepository().getPatientFamilyInfoByFamilyLocalId("" + sidfamilylocal);
+        }
+
+
         if (resPatientFamilyInfo != null) {
             if (resPatientFamilyInfo.getName() != null) {
                 txtMainPName.setText("Name: " + resPatientFamilyInfo.getName());
             }
-            if (resPatientFamilyInfo.getRelationShipCode()!=0) {
+            if (resPatientFamilyInfo.getRelationShipCode() != 0) {
                 if (famillyrelation.get(resPatientFamilyInfo.getRelationShipCode()) != null) {
-                    txtMainPRelation.setText("Relation: "+famillyrelation.get(resPatientFamilyInfo.getRelationShipCode()));
+                    txtMainPRelation.setText("Relation: " + famillyrelation.get(resPatientFamilyInfo.getRelationShipCode()));
                 }
             }
             if (resPatientFamilyInfo.getMobileNo() != null) {
@@ -279,45 +320,54 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
         }
     }
 
-    @OnClick({R.id.ll_call,R.id.ll_lelp,R.id.tv_logout, R.id.takesefi, R.id.ll_main_patient, R.id.chk_box1, R.id.chk_box2, R.id.chk_box3, R.id.chk_box4, R.id.chk_box5, R.id.chk_box6, R.id.chk_box7, R.id.chk_box8, R.id.submit_btn})
+    @OnClick({R.id.ll_call, R.id.ll_lelp, R.id.tv_logout, R.id.takesefi, R.id.ll_main_patient, R.id.chk_box1, R.id.chk_box2, R.id.chk_box3, R.id.chk_box4, R.id.chk_box5, R.id.chk_box6, R.id.chk_box7, R.id.chk_box8, R.id.submit_btn})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_logout:
 
-                finish();
-                /*if (validation()) {
+                // finish();
+                if (validation()) {
                     if (key.equalsIgnoreCase("self")) {
-                        if (getCommonApi().isInternetAvailable(PatientSymtomUpdateActivity.this)){
-                            symtomUpdateSelf();
+
+                        symtomUpdateSelf();
+                        /*if (getCommonApi().isInternetAvailable(PatientSymtomUpdateActivity.this)){
+
                         }else {
                             Toast.makeText(YelligoApplication.getContext(),"Please enable internet connection",Toast.LENGTH_LONG).show();
-                        }
+                        }*/
 
                     } else if (key.equalsIgnoreCase("family")) {
-                        if (getCommonApi().isInternetAvailable(PatientSymtomUpdateActivity.this)){
-                            symtomUpdateFamily();
-                        }else {
-                            Toast.makeText(YelligoApplication.getContext(),"Please enable internet connection",Toast.LENGTH_LONG).show();
-                        }
+                        symtomUpdateFamily();
+                       /* if (getCommonApi().isInternetAvailable(PatientSymtomUpdateActivity.this)) {
 
+                        } else {
+                            Toast.makeText(YelligoApplication.getContext(), "Please enable internet connection", Toast.LENGTH_LONG).show();
+                        }
+*/
                     }
-                }*/ /*else {
+                } /*else {
                     showDialog("Please take photo", false);
                 }*/
 
 
                 break;
             case R.id.ll_main_patient:
-                if (key.equalsIgnoreCase("self")){
-                    Bundle bundle=new Bundle();
-                    bundle.putString("key","self");
+                if (key.equalsIgnoreCase("self")) {
+                    Bundle bundle = new Bundle();
+                  /*  bundle.putString("key","self");
                     bundle.putInt("v_id",0);
-                    getCommonApi().openNewScreen(AddnewPatientActivity.class,bundle);
-                }else if (key.equalsIgnoreCase("Family")){
-                    Bundle bundle=new Bundle();
-                    bundle.putString("key","family");
-                   //bundle.putInt("v_id",resPatientFamilyInfo.getCitizenFamilyPersonId());
-                    getCommonApi().openNewScreen(AddnewPatientActivity.class,bundle);
+                    Bundle bundle=new Bundle();*/
+                    bundle.putString("key", "");
+                    bundle.putString("keytype", "self");
+                    bundle.putString("keytype_family_localid", "");
+                    getCommonApi().openNewScreen(AddnewPatientActivity.class, bundle);
+                } else if (key.equalsIgnoreCase("Family")) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("key", "");
+                    bundle.putString("keytype", "Family");
+                    bundle.putString("keytype_family_localid", sidfamilylocal);
+                    //bundle.putInt("v_id",resPatientFamilyInfo.getCitizenFamilyPersonId());
+                    getCommonApi().openNewScreen(AddnewPatientActivity.class, bundle);
                 }
                 break;
             case R.id.chk_box1:
@@ -372,7 +422,7 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
 
         }
 
-        if (value.size()==0){
+        if (filepath.equalsIgnoreCase("")) {
             showDialog("Please take photo", false);
             return false;
         }
@@ -469,7 +519,7 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
             }
         } catch (Exception e) {
             // For OOM exception
-            Log.e("eee",e.getMessage());
+            Log.e("eee", e.getMessage());
         }
     }
 
@@ -482,34 +532,24 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
 
     private void compressImage(String imagePath, String staticstring, String filepathname) {
 
-        ImageCompressionToBitMapAsyncTask imageCompression = new ImageCompressionToBitMapAsyncTask("") {
+
+        ImageCompressionAsyncTask imageCompression = new ImageCompressionAsyncTask(filepathname) {
             @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                showProgressDialogStatic();
-            }
+            protected void onPostExecute(String file) {
+                Log.e("Filepath", file);
+                if (!TextUtils.isEmpty(file)) {
 
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-                String base64File = convert(bitmap);
+                    filename = staticstring;
+                    filepath = file;
 
-                hideProgressDialogStatic();
-                value = new ArrayList<>();
-
-                splitBase64(base64File);
-                Log.e("tttttttt", value.size() + "---" + base64File.length());
-
-                if (bitmap != null) {
+                    Log.e("FilePath--", filepathname);
+                    Log.e("FilePath--", filepath);
 
                     GlideApp.with(YelligoApplication.getContext())
-                            .load(bitmap)
+                            .load(filepath)
                             .into(imgPreview);
                     fmlayout.setVisibility(View.VISIBLE);
-                   /* takesefifilename.setVisibility(View.VISIBLE);
-                    takesefifilename.setText(""+staticstring);
-                    filename=staticstring;
-                    filepath=filepathname;
-                    uploadtoServer(file);*/
+                    // uploadtoServer(file);
                 }
                 // image here is compressed & ready to be sent to the server
             }
@@ -519,37 +559,6 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
     }
 
     ArrayList<String> value = new ArrayList<>();
-    /*public ArrayList<String> getSplitImageList(String str){
-
-        Log.e("Filepath", str.length()+"");
-
-        if (str.length()>20000){
-            int indexcount=str.length()/20000;
-            *//*String result=str.substring(0,20000);
-            if (str.length()>0){
-
-            }*//*
-           // value= (ArrayList<String>) Arrays.asList(str.split(str,indexcount));
-
-        }
-        return value;
-    }*/
-
-    private void splitBase64(String str) {
-        //Log.e("tt",str);
-        if (str.length() > 20000) {
-
-            String result = str.substring(0, 20000);
-            Log.e("Length---", result.length() + "");
-            value.add(result);
-
-            splitBase64(str.substring(20000));
-        } else {
-            value.add(str);
-        }
-        //return result;
-    }
-
 
     public static String getFilename(String filename) {
         File mediaStorageDir = new File(Environment.getExternalStorageDirectory()
@@ -587,7 +596,7 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
     private void checkPermissionFortarck() {
         if (!checkPermissionAvl()) {
 
-           requestPermissions();
+            requestPermissions();
         } else {
 
             getCurrentLOc();
@@ -708,6 +717,7 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
             }
         }
     }
+
     private void helpmethod() {
         String url = "https://landrecords.karnataka.gov.in/covid/";
         Intent i = new Intent(Intent.ACTION_VIEW);
@@ -747,7 +757,6 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
             ActivityCompat.requestPermissions(PatientSymtomUpdateActivity.this, new String[]{Manifest.permission.CALL_PHONE}, 5101);
         }
     }
-
 
 
     @SuppressLint("MissingPermission")
@@ -875,20 +884,20 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
 
         reqImageChunk.setDOC_CAPTYPE("Image");
         reqImageChunk.setDOC_TYPE("PATIENT_SELFIE_IMAGE");
-        reqImageChunk.setDOC_CBY(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));
+        reqImageChunk.setDOC_CBY(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.USER_ID_login));
         reqImageChunk.setDOC_CHNK_CNT(value.size());
-        reqImageChunk.setDOC_CITZ_ID(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID));
+        reqImageChunk.setDOC_CITZ_ID(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID));
         // reqImageChunk.setDOC_CNK("");
         if (key.equalsIgnoreCase("self")) {
             reqImageChunk.setDOC_FAMLY_PER_ID(0);
-           // reqImageChunk.setDOC_MOBILE("" + resPatientInfo.getMobile());
-           // reqImageChunk.setDOC_ROLE_ID(resPatientInfo.getURoleBy());
+            // reqImageChunk.setDOC_MOBILE("" + resPatientInfo.getMobile());
+            // reqImageChunk.setDOC_ROLE_ID(resPatientInfo.getURoleBy());
         } else {
-           // reqImageChunk.setDOC_FAMLY_PER_ID(resPatientFamilyInfo.getCitizenFamilyPersonId());
+            // reqImageChunk.setDOC_FAMLY_PER_ID(resPatientFamilyInfo.getCitizenFamilyPersonId());
             //reqImageChunk.setDOC_MOBILE("" + resPatientFamilyInfo.getMobile());
             //reqImageChunk.setDOC_ROLE_ID(resPatientFamilyInfo.getURoleBy());
         }
-        String imagename = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID) + "_" + uniqueId + ".png";
+        String imagename = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID) + "_" + uniqueId + ".png";
         reqImageChunk.setDOC_IMAGE_NAME("" + imagename);
 
         reqImageChunk.setDOC_LAT(mLocation.getLatitude());
@@ -953,11 +962,15 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
                         public void onLeftButtonClick(CustomDialogGeneric dialog) {
                             dialog.dismiss();
                             if (b) {
-                                PreferenceStore.getPrefernceHelperInstace().setFlag(YelligoApplication.getContext(), PreferenceStore.ISUPDATEPATENTINFO, true);
+
+                                ApiBackGround apiBackGround = new ApiBackGround(YelligoApplication.getContext());
+                                apiBackGround.makesyncCall();
+                                finish();
+                               /* PreferenceStore.getPrefernceHelperInstace().setFlag(YelligoApplication.getContext(), PreferenceStore.ISUPDATEPATENTINFO, true);
                                 Intent intent = new Intent(getApplicationContext(), HomeMainActivity.class);
                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                 startActivity(intent);
-                                finishAffinity();
+                                finishAffinity();*/
                             }
                             //dialog.dismiss();
                         }
@@ -999,7 +1012,7 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
                                 //TODO check Location
                                 if (!checkPermissionAvl()) {
                                     showRationaleDialog();
-                                }else {
+                                } else {
                                     new GpsUtils(PatientSymtomUpdateActivity.this).turnGPSOn(new GpsUtils.onGpsListener() {
                                         @Override
                                         public void gpsStatus(boolean isGPSEnable) {
@@ -1054,10 +1067,48 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
     private void symtomUpdateSelf() {
 
         showProgressDialogStatic();
-        int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
-        ReqGvtPatientSymptom reqGvtPatientSymptom = new ReqGvtPatientSymptom();
-        reqGvtPatientSymptom.setAdditionalInfo("ANDROID");
-        reqGvtPatientSymptom.setCitizenID(getPatientinfoRepository().getPatientInfo(ciD).getCitizenID());
+        int ciD = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID);
+        String ciDLocal = PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(), PreferenceStore.CITIZEN_LOCALID);
+
+
+        ReqHWSymtomAdd reqGvtPatientSymptom = new ReqHWSymtomAdd();
+        reqGvtPatientSymptom.setCitizenID(ciD);
+        reqGvtPatientSymptom.setCitizenlocalId(ciDLocal);
+        reqGvtPatientSymptom.setDateTime(AppConstants.getCurrentDateTimeHW());
+        reqGvtPatientSymptom.setFamilyMemberID(0);
+        reqGvtPatientSymptom.setFamilylocalID("");
+
+        String uniqueId = UUID.randomUUID().toString().toUpperCase();
+        String imagename = System.currentTimeMillis()+ "_" + uniqueId + ".png";
+        reqGvtPatientSymptom.setImageName(imagename);
+        reqGvtPatientSymptom.setImageFilePath(filepath);
+        reqGvtPatientSymptom.setLatitude(mLocation.getLatitude());
+        reqGvtPatientSymptom.setLongitude(mLocation.getLongitude());
+        String s_symptom = TextUtils.join(",", selectedString);
+        reqGvtPatientSymptom.setSymptoms(s_symptom);
+        reqGvtPatientSymptom.setSyncstatus(false);
+        reqGvtPatientSymptom.setTypeofpatient("self");
+        reqGvtPatientSymptom.setLocalID(uniqueId);
+/*
+        String s=new Gson().toJson(reqGvtPatientSymptom);
+        Log.e("symptom----",s);*/
+        getSymptoAddRepository().insert(reqGvtPatientSymptom);
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+
+                hideProgressDialogStatic();
+
+                showDialog("Successfully added", true);
+
+            }
+        }, 1000);
+
+
+      /*  reqGvtPatientSymptom.setCitizenID(getPatientinfoRepository().getPatientInfo(ciD).getCitizenID());
         reqGvtPatientSymptom.setBreathingProblem(isbreathing);
         reqGvtPatientSymptom.setCoughSourThroat(iscoughandsour);
         reqGvtPatientSymptom.setDiarrhea(isdiarria);
@@ -1068,9 +1119,22 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
         reqGvtPatientSymptom.setHIV(ishiv);
         reqGvtPatientSymptom.setRoleId(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID));
         reqGvtPatientSymptom.setUBy(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));
-        reqGvtPatientSymptom.setpSecurity(getCommonApi().getSecurityObject());
+        reqGvtPatientSymptom.setpSecurity(getCommonApi().getSecurityObject());*/
 
-        networkService.sendpatientsymtomInfo(reqGvtPatientSymptom, new NetworkService.NetworkServiceListener() {
+
+
+
+
+
+
+
+
+
+
+
+
+
+        /*networkService.sendpatientsymtomInfo(reqGvtPatientSymptom, new NetworkService.NetworkServiceListener() {
             @Override
             public void onFailure(Object response) {
                 hideProgressDialogStatic();
@@ -1093,60 +1157,82 @@ public class PatientSymtomUpdateActivity extends BaseActivity {
 
                 }
             }
-        });
+        });*/
 
 
     }
 
     private void symtomUpdateFamily() {
+
         showProgressDialogStatic();
-        int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
-        ReqGvtPatientFamillySymptom reqGvtPatientSymptom = new ReqGvtPatientFamillySymptom();
-        reqGvtPatientSymptom.setAdditionalInfo("ANDROID");
-        //reqGvtPatientSymptom.setFamilyPersonId(resPatientFamilyInfo.getCitizenFamilyPersonId());
-        reqGvtPatientSymptom.setCitizenID(getPatientinfoRepository().getPatientInfo(ciD).getCitizenID());
-        reqGvtPatientSymptom.setBreathingProblem(isbreathing);
-        reqGvtPatientSymptom.setCoughSourThroat(iscoughandsour);
-        reqGvtPatientSymptom.setDiarrhea(isdiarria);
-        reqGvtPatientSymptom.setFever(isfever);
-        reqGvtPatientSymptom.setDiabetes(isdiabaties);
-        reqGvtPatientSymptom.setHeartIssue(isheartdisses);
-        reqGvtPatientSymptom.setHypertension(ishypertense);
-        reqGvtPatientSymptom.setHIV(ishiv);
-        reqGvtPatientSymptom.setRoleId(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID));
-        reqGvtPatientSymptom.setUBy(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));
-        reqGvtPatientSymptom.setpSecurity(getCommonApi().getSecurityObject());
+        int ciD = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID);
+        String ciDLocal = PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(), PreferenceStore.CITIZEN_LOCALID);
 
-        networkService.sendpatientFamillysymtomInfo(reqGvtPatientSymptom, new NetworkService.NetworkServiceListener() {
+
+        ReqHWSymtomAdd reqGvtPatientSymptom = new ReqHWSymtomAdd();
+        reqGvtPatientSymptom.setCitizenID(ciD);
+        reqGvtPatientSymptom.setCitizenlocalId(ciDLocal);
+        reqGvtPatientSymptom.setFamilylocalID(sidfamilylocal);
+        reqGvtPatientSymptom.setFamilyMemberID(sidfamily);
+        reqGvtPatientSymptom.setDateTime(AppConstants.getCurrentDateTimeHW());
+
+        String uniqueId = UUID.randomUUID().toString().toUpperCase();
+        String imagename = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID) + "_" + uniqueId + ".png";
+        reqGvtPatientSymptom.setImageName(imagename);
+        reqGvtPatientSymptom.setImageFilePath(filepath);
+        reqGvtPatientSymptom.setLatitude(mLocation.getLatitude());
+        reqGvtPatientSymptom.setLongitude(mLocation.getLongitude());
+        String s_symptom = TextUtils.join(",", selectedString);
+        reqGvtPatientSymptom.setSymptoms(s_symptom);
+        reqGvtPatientSymptom.setSyncstatus(false);
+        reqGvtPatientSymptom.setTypeofpatient("family");
+        reqGvtPatientSymptom.setLocalID(uniqueId);
+/*
+        String s=new Gson().toJson(reqGvtPatientSymptom);
+        Log.e("symptom----",s);*/
+        getSymptoAddRepository().insert(reqGvtPatientSymptom);
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
             @Override
-            public void onFailure(Object response) {
+            public void run() {
+
+
                 hideProgressDialogStatic();
-                if (response instanceof String) {
-                    Toast.makeText(YelligoApplication.getContext(), "" + response, Toast.LENGTH_LONG).show();
-                }
-            }
 
-            @Override
-            public void onAuthFail(Object error) {
+                showDialog("Successfully added", true);
 
             }
-
-            @Override
-            public void onSuccess(Object response, Boolean cancelFlag) {
-                hideProgressDialogStatic();
-                if (response instanceof ResSymtomChecker) {
-                    upload();
-                   // Toast.makeText(YelligoApplication.getContext(), "Successfully Updated", Toast.LENGTH_LONG).show();
-
-                }
-            }
-        });
-
-
+        }, 1000);
     }
 
     @Override
     public void onInternetConnectivityChanged(boolean isConnected) {
 
+    }
+
+    @Override
+    public void onItemChecked(View v, int position, ModelSymptomGVT item, ArrayList<ModelSymptomGVT> listString, boolean isChecked) {
+        if (isChecked) {
+           /* if (position == listString.size()-1 && item.getStrname().equals("Others")){
+               // etView.setVisibility(View.VISIBLE);
+            }*/
+            addOption(item.getId());
+        } else {
+
+            removeOption(item.getId());
+        }
+    }
+
+    private void removeOption(String item) {
+        for (int i = 0; i < selectedString.size(); i++) {
+            if (selectedString.get(i).equals(item)) {
+                selectedString.remove(i);
+            }
+        }
+    }
+
+    private void addOption(String item) {
+        selectedString.add(item);
     }
 }

@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "symptom_addpatientfamily")
-public class ReqSymtomAdd{
+public class ReqHWSymtomAdd {
 
 	@PrimaryKey
 	@NonNull
@@ -26,6 +26,12 @@ public class ReqSymtomAdd{
 	@SerializedName("familyMemberID")
 	private int familyMemberID;
 
+	@SerializedName("familylocalId")
+	private String familylocalID;
+
+	@SerializedName("citizenLocalId")
+	private String citizenlocalId;
+
 	@SerializedName("latitude")
 	private double latitude;
 
@@ -43,6 +49,32 @@ public class ReqSymtomAdd{
 	private String imagelocalFilePath;
 
 	private boolean syncstatus;
+
+	private String typeofpatient;
+
+	public String getFamilylocalID() {
+		return familylocalID;
+	}
+
+	public void setFamilylocalID(String familylocalID) {
+		this.familylocalID = familylocalID;
+	}
+
+	public String getCitizenlocalId() {
+		return citizenlocalId;
+	}
+
+	public void setCitizenlocalId(String citizenlocalId) {
+		this.citizenlocalId = citizenlocalId;
+	}
+
+	public String getTypeofpatient() {
+		return typeofpatient;
+	}
+
+	public void setTypeofpatient(String typeofpatient) {
+		this.typeofpatient = typeofpatient;
+	}
 
 	public String getImagelocalFilePath() {
 		return imagelocalFilePath;
@@ -135,7 +167,7 @@ public class ReqSymtomAdd{
 	@Override
  	public String toString(){
 		return 
-			"ReqSymtomAdd{" + 
+			"ReqHWSymtomAdd{" +
 			"symptoms = '" + symptoms + '\'' + 
 			",dateTime = '" + dateTime + '\'' + 
 			",imageName = '" + imageName + '\'' + 

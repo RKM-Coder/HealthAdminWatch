@@ -3,6 +3,7 @@ package com.goalsr.homequarantineTracker.db.repository;
 import android.app.Application;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 
@@ -45,6 +46,10 @@ public class HWPatientinfoRepository {
         return mDao.getListAllItem(cid);
     }
 
+    public PatientListDataItem getPatientInfobylocalid(String cid){
+        return mDao.getListAllItembyLocalId(cid);
+    }
+
     public List<PatientListDataItem> getListAllItemByAdmin(){
         return mDao.getListAllItemByAdmin();
     }
@@ -55,6 +60,11 @@ public class HWPatientinfoRepository {
 
     public LiveData<List<PatientListDataItem>> getListAllItemByAdminLivedata(int ptype){
         return mDao.getListAllItemByAdminLivedata(ptype);
+    }
+
+    public LiveData<List<PatientListDataItem>> getListAllItemByAdminLivedata(){
+
+        return mDao.getListAllItemByAdminLData();
     }
 
    /* public List<String> getTravelListNonSyncImage(){
@@ -183,7 +193,9 @@ public class HWPatientinfoRepository {
         protected Void doInBackground(Void... voids) {
 
             try {
-                mDao.updateinsertpatientsyncstatus(status,id,citizenid);
+                Log.e("PATIENT UPDATE", id + "-------------------" + citizenid);
+                long idlong=mDao.updateinsertpatientsyncstatus(status,id,citizenid);
+                Log.e("PATIENT UPDATE SUCC", idlong+"");
             }catch (Exception e){
 
             }

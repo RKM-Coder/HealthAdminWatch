@@ -166,7 +166,7 @@ public class DistrictListActivity extends BaseActivity implements AdressGenericL
         reqPatient.setLevel(2);*/
         //Log.e("PatientList",PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.DISTRICT_ID)+"");
         reqPatient.setDistrict_code(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.DISTRICT_ID));
-        reqPatient.setUser_id(33518);
+        reqPatient.setUser_id(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));
         reqPatient.setCity_code(-1);
         reqPatient.setGram_Panchayat_code(-1);
         reqPatient.setTaluk_code(-1);

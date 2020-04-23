@@ -13,13 +13,16 @@ public class PatientFamilyDetailsItem{
 	@SerializedName("citizenID")
 	private int citizenID;
 
+	@SerializedName("citizenIDlocalID")
+	private String citizenIDLocalId;
+
 	@PrimaryKey
 	@NotNull
 	@SerializedName("familyLocalID")
 	private String familyLocalID;
 
 	@SerializedName("familyMemberID")
-	private int familyMemberID;
+	private int familyMemberID=0;
 
 
 	@SerializedName("startDateOfQuarantine")
@@ -68,9 +71,7 @@ public class PatientFamilyDetailsItem{
 	private String additionalInfo="";
 
 	@SerializedName("isProfileUpdated")
-	private boolean isProfileUpdated=false;
-
-
+	private boolean isProfileUpdated=true;
 
 	@SerializedName("email")
 	private String email="";
@@ -82,7 +83,73 @@ public class PatientFamilyDetailsItem{
 	private double longitude=0.0;
 
 
-	private boolean syncstatus=false;
+	private boolean syncstatus=true;
+
+	@SerializedName("IsHavingTravelHistory")
+	private boolean isHavingTravelHistory=false;
+
+	@SerializedName("HisOfLabCaseConfirmed")
+	private boolean hisOfLabCaseConfirmed=false;
+
+	@SerializedName("IsHospitalized")
+	private boolean isHospitalized=false;
+
+
+	@SerializedName("RiskArea")
+	private int riskArea=0;
+
+	@SerializedName("DateOfFirstSymptom")
+	private String dateOfFirstSymptom="";
+
+
+
+	public boolean isHavingTravelHistory() {
+		return isHavingTravelHistory;
+	}
+
+	public void setHavingTravelHistory(boolean havingTravelHistory) {
+		isHavingTravelHistory = havingTravelHistory;
+	}
+
+	public boolean isHisOfLabCaseConfirmed() {
+		return hisOfLabCaseConfirmed;
+	}
+
+	public void setHisOfLabCaseConfirmed(boolean hisOfLabCaseConfirmed) {
+		this.hisOfLabCaseConfirmed = hisOfLabCaseConfirmed;
+	}
+
+	public boolean isHospitalized() {
+		return isHospitalized;
+	}
+
+	public void setHospitalized(boolean hospitalized) {
+		isHospitalized = hospitalized;
+	}
+
+	public int getRiskArea() {
+		return riskArea;
+	}
+
+	public void setRiskArea(int riskArea) {
+		this.riskArea = riskArea;
+	}
+
+	public String getDateOfFirstSymptom() {
+		return dateOfFirstSymptom;
+	}
+
+	public void setDateOfFirstSymptom(String dateOfFirstSymptom) {
+		this.dateOfFirstSymptom = dateOfFirstSymptom;
+	}
+
+	public String getCitizenIDLocalId() {
+		return citizenIDLocalId;
+	}
+
+	public void setCitizenIDLocalId(String citizenIDLocalId) {
+		this.citizenIDLocalId = citizenIDLocalId;
+	}
 
 	public boolean isSyncstatus() {
 		return syncstatus;

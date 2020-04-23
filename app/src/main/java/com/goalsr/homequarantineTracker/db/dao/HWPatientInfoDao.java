@@ -27,9 +27,15 @@ public interface HWPatientInfoDao {
     @Query("SELECT * from hwatch_patientifo where CitizenID =:cid")
     PatientListDataItem getListAllItem(int cid);
 
+    @Query("SELECT * from hwatch_patientifo where localID =:cid")
+    PatientListDataItem getListAllItembyLocalId(String cid);
+
 
     @Query("SELECT * from hwatch_patientifo where name not null order by Name ASC")
     List<PatientListDataItem> getListAllItemByAdmin();
+
+    @Query("SELECT * from hwatch_patientifo where name not null order by Name ASC")
+    LiveData<List<PatientListDataItem>> getListAllItemByAdminLData();
 
     @Query("SELECT * from hwatch_patientifo where syncstatus =:b")
     List<PatientListDataItem> getListAllItemByAdminNONSYNC(boolean b);
@@ -37,8 +43,8 @@ public interface HWPatientInfoDao {
     @Query("SELECT * from hwatch_patientifo where name not null and patientQuarantineStatus =:ptype order by Name ASC")
     LiveData<List<PatientListDataItem>> getListAllItemByAdminLivedata(int ptype);
 
-    @Query("UPDATE hwatch_patientifo SET syncstatus = :synstatus and citizenID=:citiId  WHERE localID =:localid ")
-    void updateinsertpatientsyncstatus(boolean synstatus, String localid, int citiId);
+    @Query("UPDATE hwatch_patientifo SET syncstatus = :synstatus,citizenID=:citiId  WHERE localID =:localid ")
+    long updateinsertpatientsyncstatus(boolean synstatus, String localid, int citiId);
 
     /*@Query("SELECT * from qh_travel_tracking where syncstutas= :status")
     List<QHTracker> getListAllItemNonSync(boolean status);

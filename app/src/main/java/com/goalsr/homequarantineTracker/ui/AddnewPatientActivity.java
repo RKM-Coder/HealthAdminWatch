@@ -14,10 +14,14 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CheckedTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -47,9 +51,7 @@ import com.goalsr.homequarantineTracker.gpsenable.GpsUtils;
 import com.goalsr.homequarantineTracker.resposemodel.ModelSymptomGVT;
 import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistric;
 import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistricDB;
-import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ReqUpdatePatentInfo;
-import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
-import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResUpdateInfo;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientFamilyDetailsItem;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -58,7 +60,6 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,7 +73,6 @@ import butterknife.OnClick;
 import static com.goalsr.homequarantineTracker.Utils.AppConstants.myPermissionsForLoac;
 
 public class AddnewPatientActivity extends BaseActivity implements SymptomListAdapter.CheckedListener, DatePickerFragment.OnFragmentInteractionListener {
-
 
 
     @BindView(R.id.tv_header_fac)
@@ -174,7 +174,6 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
     CardView helpcovid;*/
     @BindView(R.id.activity_main_rl)
     RelativeLayout activityMainRl;
-    ArrayList<ResStaticMasterDistric> listOfurbandata;
 
 
     @BindView(R.id.txt_dist_spin)
@@ -211,6 +210,36 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
     TextView txtDOA11;
     @BindView(R.id.rv_view)
     RecyclerView rvView;
+    @BindView(R.id.simpleCheckedTextView)
+    CheckedTextView simpleCheckedTextView;
+    @BindView(R.id.txt_bbmpzone)
+    TextView txtBbmpzone;
+    @BindView(R.id.txt_bbmpword_spin)
+    TextView txtBbmpwordSpin;
+    @BindView(R.id.llbbmp)
+    LinearLayout llbbmp;
+    @BindView(R.id.radioButton)
+    RadioButton radioButton;
+    @BindView(R.id.radioButton2)
+    RadioButton radioButton2;
+    @BindView(R.id.radioGroup)
+    RadioGroup radioGroup;
+    @BindView(R.id.submit_btn)
+    Button submitBtn;
+    @BindView(R.id.llpoorigin)
+    LinearLayout llpoorigin;
+    @BindView(R.id.llpoarrival)
+    LinearLayout llpoarrival;
+    @BindView(R.id.sp_relation)
+    Spinner spRelation;
+    @BindView(R.id.llrelation)
+    LinearLayout llrelation;
+    @BindView(R.id.lladdresstag)
+    LinearLayout lladdresstag;
+    @BindView(R.id.llTypelocation)
+    LinearLayout llTypelocation;
+
+
 
     private String selctedDistId = "-1";
     private String selctedCityId = "-1";
@@ -218,6 +247,12 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
     private String selctedpanchyateId = "-1";
     private String selctedvillageId = "-1";
     private String selctedtalukid = "-1";
+    private String selctedbbmpzoneid = "-1";
+    private String selctedbbmpwordId = "-1";
+
+
+    boolean isHospitalised=false;
+    boolean isHistoryContactLab=false;
 
     public static int RES_DIST = 5951;
     public static int RES_TOWN = 5952;
@@ -225,7 +260,11 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
     public static int RES_TALUK = 5954;
     public static int RES_PANCHYATE = 5955;
     public static int RES_VILLAGE = 5956;
+    public static int RES_BBMPZONE = 5957;
+    public static int RES_BBMPWARD = 5958;
 
+
+    ArrayList<ResStaticMasterDistric> listOfurbandata;
     private SymptomListAdapter adapter;
     private ArrayList<String> selectedString;
 
@@ -233,6 +272,7 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
     private NetworkService networkService;
 
     PatientListDataItem resPatientInfo = new PatientListDataItem();
+    PatientFamilyDetailsItem resPatientFamilyInfo = new PatientFamilyDetailsItem();
 
 
     private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
@@ -258,9 +298,12 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
     private FusedLocationProviderClient mFusedLocationClient;
 
     private LocationCallback mLocationCallback;
-    private int selectedgender=0;
+    private int selectedgender = 0;
 
-    String key="";
+    String key = "", keytype = "", keytypefamilyloclId = "";
+    private boolean isForignTip = false;
+    private int selectedrelation = 0;
+    private int selctedriskarea = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -280,7 +323,9 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
         Bundle bundle = getIntent().getExtras();
         tvHeaderFac.setText("Person Details");
         if (bundle != null) {
-            key=bundle.getString("key");
+            key = bundle.getString("key");
+            keytype = bundle.getString("keytype");
+            keytypefamilyloclId = bundle.getString("keytype_family_localid");
             /*if (bundle.getString("key").equalsIgnoreCase("self")) {
                 //tvHeaderFac.setText("Person Details");
 
@@ -293,12 +338,17 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
         List<String> areatypelist = new ArrayList<>();
         areatypelist = new ArrayList<>(Arrays.asList(areaytypearray));
         makeSpinnerAreaType((ArrayList<String>) areatypelist);
+
+
+        String relationship[] = getResources().getStringArray(R.array.relation);
+        List<String> relationlist = new ArrayList<>();
+        relationlist = new ArrayList<>(Arrays.asList(relationship));
+        makeSpinnerRElationMethod((ArrayList<String>) relationlist);
+
+
         listOfurbandata = new ArrayList<>();
 
         initSymptomView();
-        //listOfurbandata=getCommonApi().getDistrictUrban(getApplicationContext());
-
-        // List<ResStaticMasterDistricDB> listOfurbandataDistrict=getAddressUrbaninfoRepository().getListAllItemByAdmin();
 
 
         getAddressUrbanViewmodel().getListOfDistLivedata().observe(this, new Observer<List<ResStaticMasterDistricDB>>() {
@@ -310,7 +360,7 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
 
         if (!PreferenceStore.getPrefernceHelperInstace().getFlag(YelligoApplication.getContext(), PreferenceStore.PERSIONTYPE)) {
 
-            txtStartdateHeading.setText("Start Date of Observation");
+            txtStartdateHeading.setText("Start Date of Observation *");
             txtEndHeading.setText("End Date of Observation");
         } else {
             txtStartdateHeading.setText("Start Date of Quarntine *");
@@ -327,15 +377,86 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
         genderlist= (ArrayList<String>) Arrays.asList(genderarray);*/
         makeSpinnerGenderMethod((ArrayList<String>) genderlist);
 
-        if (key.equalsIgnoreCase("newpatient")){
-            maketosetAllValue();
 
-        }else {
-            setInfoMainpatient();
+        if (keytype.equalsIgnoreCase("self")) {
+            lladdresstag.setVisibility(View.VISIBLE);
+            llTypelocation.setVisibility(View.VISIBLE);
+
+            spAreatype.setSelection(0);
+
+            llrelation.setVisibility(View.GONE);
+            if (key.equalsIgnoreCase("newpatient")) {
+                maketosetAllValue();
+
+            } else {
+                setInfoMainpatient();
+            }
+
+        } else if (keytype.equalsIgnoreCase("family")) {
+            lladdresstag.setVisibility(View.GONE);
+            llTypelocation.setVisibility(View.GONE);
+            spAreatype.setSelection(0);
+            llRural.setVisibility(View.GONE);
+            llurban.setVisibility(View.GONE);
+            lladdress.setVisibility(View.GONE);
+            llbbmp.setVisibility(View.GONE);
+
+            int ciD = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID);
+            resPatientInfo = getHwPatientinfoRepository().getPatientInfo(ciD);
+            llrelation.setVisibility(View.VISIBLE);
+            if (key.equalsIgnoreCase("newpatient")) {
+                maketosetAllValue();
+
+            } else {
+                setInfoMainpatientFamilyDetails();
+            }
         }
 
 
+    }
 
+    private void makeSpinnerRElationMethod(final ArrayList<String> list) {
+        SpinAdapter<String> adapter =
+                new SpinAdapter(getApplicationContext(), 0, 0, list, "");
+//        adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item);
+        spRelation.setAdapter(adapter);
+        spRelation.setSelection(0);
+        adapter.notifyDataSetChanged();
+        spRelation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedrelation = position;
+                /*if (position != 0) {
+                    selectedgender = list.get(position).toString();
+                } else {
+                    selectedgender = "";
+                }*/
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+    }
+
+    public void onRadioButtonClicked(View view) {
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+        selctedriskarea = 0;
+        // Check which radio button was clicked
+        switch (view.getId()) {
+            case R.id.radioButton:
+                if (checked)
+                    selctedriskarea = 1;
+                break;
+            case R.id.radioButton2:
+                if (checked)
+                    selctedriskarea = 2;
+
+                break;
+        }
     }
 
     private void initMvp() {
@@ -378,6 +499,7 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
         rvView.setAdapter(adapter);
         selectedString = new ArrayList<>();
         adapter.setValue(getList());
+        adapter.setcheckitem("");
     }
 
     private ArrayList<ModelSymptomGVT> getList() {
@@ -408,36 +530,54 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
                         llRural.setVisibility(View.GONE);
                         llurban.setVisibility(View.GONE);
                         lladdress.setVisibility(View.GONE);
-
-                            resetViewForAreaType();
-                            selectaretype = 0;
+                        llbbmp.setVisibility(View.GONE);
+                        resetViewForAreaType();
+                        selectaretype = 0;
 
                         break;
                     case 1:
                         llRural.setVisibility(View.GONE);
+                        llbbmp.setVisibility(View.GONE);
                         llurban.setVisibility(View.VISIBLE);
                         lladdress.setVisibility(View.VISIBLE);
-                        if (selectaretype!=1) {
+                        if (selectaretype != 1) {
                             resetViewForAreaType();
                             selectaretype = 1;
                         }
                         break;
                     case 2:
                         llRural.setVisibility(View.VISIBLE);
+                        llbbmp.setVisibility(View.GONE);
                         llurban.setVisibility(View.GONE);
                         lladdress.setVisibility(View.VISIBLE);
-                        if (selectaretype!=2) {
+                        if (selectaretype != 2) {
                             resetViewForAreaType();
                             selectaretype = 2;
+                        }
+                        break;
+
+                    case 3://BBMP
+                        llRural.setVisibility(View.GONE);
+                        llbbmp.setVisibility(View.VISIBLE);
+                        llurban.setVisibility(View.GONE);
+                        lladdress.setVisibility(View.VISIBLE);
+                        if (selectaretype != 3) {
+
+                            resetViewForAreaType();
+
+                            selctedDistId = "1502";
+                            txtDistSpin.setText("Bengaluru");
+                            selectaretype = 3;
                         }
                         break;
                     default:
                         llRural.setVisibility(View.GONE);
                         llurban.setVisibility(View.GONE);
-                        lladdress.setVisibility(View.VISIBLE);
+                        llbbmp.setVisibility(View.GONE);
+                        lladdress.setVisibility(View.GONE);
 
-                            resetViewForAreaType();
-                            selectaretype = 0;
+                        resetViewForAreaType();
+                        selectaretype = 0;
 
                 }
             }
@@ -455,6 +595,9 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
         txtCitySpin.setText("Select City");
         txtWordSpin.setText("Select Word");
 
+        txtBbmpzone.setText("Select BBMP Zone");
+        txtBbmpwordSpin.setText("Select BBMP Word");
+
         txtTalukSpin.setText("Select Taluk/Block");
         txtGrampanchyateSpin.setText("Select Panchyate");
         txtVillageSpin.setText("Select Village");
@@ -464,6 +607,8 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
         selctedpanchyateId = "-1";
         selctedvillageId = "-1";
         selctedtalukid = "-1";
+        selctedbbmpzoneid = "-1";
+        selctedbbmpwordId = "-1";
     }
 
     @Override
@@ -471,17 +616,19 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
 
     }
 
-    @OnClick({R.id.txt_dist_spin, R.id.txt_city_spin, R.id.txt_word_spin, R.id.txt_taluk_spin, R.id.txt_grampanchyate_spin, R.id.txt_village_spin, R.id.submit_btn, R.id.tv_logout, R.id.txt_DOA, R.id.txt_qurantinedate, R.id.txt_DOA11})
+    @OnClick({R.id.chk_box12, R.id.chk_box13, R.id.chk_box14, R.id.simpleCheckedTextView, R.id.txt_bbmpzone, R.id.txt_bbmpword_spin, R.id.llbbmp, R.id.txt_dist_spin, R.id.txt_city_spin, R.id.txt_word_spin, R.id.txt_taluk_spin, R.id.txt_grampanchyate_spin, R.id.txt_village_spin, R.id.submit_btn, R.id.tv_logout, R.id.txt_DOA, R.id.txt_qurantinedate, R.id.txt_DOA11})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.txt_dist_spin:
-                Bundle bundle = new Bundle();
-                bundle.putString("key", "dist");
-                bundle.putString("key_id", "0");
-                //resetViewForAreaType();
-                Intent intent = new Intent(getApplicationContext(), AddressGenericListActivity.class);
-                intent.putExtras(bundle);
-                startActivityForResult(intent, RES_DIST);
+                if (selectaretype!=3) {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("key", "dist");
+                    bundle.putString("key_id", "0");
+                    //resetViewForAreaType();
+                    Intent intent = new Intent(getApplicationContext(), AddressGenericListActivity.class);
+                    intent.putExtras(bundle);
+                    startActivityForResult(intent, RES_DIST);
+                }
 
                 break;
             case R.id.txt_city_spin:
@@ -583,11 +730,17 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
                             // turn on GPS
                             AppConstants.isGPS = isGPSEnable;
                             getCurrentLOc();
-                            if (getCommonApi().isInternetAvailable(AddnewPatientActivity.this)) {
-                                submitData();
-                            } else {
-                                Toast.makeText(YelligoApplication.getContext(), "Please enable internet connection", Toast.LENGTH_LONG).show();
+                            //if (getCommonApi().isInternetAvailable(AddnewPatientActivity.this)) {
+
+                            if (keytype.equalsIgnoreCase("self")) {
+                                submitDatapatientself();
+                            } else if (keytype.equalsIgnoreCase("family")) {
+                                submitDatapatientfamily();
                             }
+
+                            /*} else {
+                                Toast.makeText(YelligoApplication.getContext(), "Please enable internet connection", Toast.LENGTH_LONG).show();
+                            }*/
                         }
                     });
 
@@ -634,6 +787,58 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
                     // show the datePicker
                     newFragment2.show(getSupportFragmentManager(), "datePicker");
                 }
+                break;
+
+            case R.id.simpleCheckedTextView:
+
+                if (simpleCheckedTextView.isChecked()) {
+                    isForignTip = false;
+                    simpleCheckedTextView.setChecked(false);
+                    llpoarrival.setVisibility(View.GONE);
+                    llpoorigin.setVisibility(View.GONE);
+
+
+                } else {
+                    isForignTip = true;
+                    simpleCheckedTextView.setChecked(true);
+                    llpoarrival.setVisibility(View.VISIBLE);
+                    llpoorigin.setVisibility(View.VISIBLE);
+                }
+                break;
+
+            case R.id.chk_box12:
+                isHistoryContactLab=chkBox12.isChecked();
+                break;
+            case R.id.chk_box13:
+                isHospitalised=chkBox13.isChecked();
+                break;
+            case R.id.chk_box14:
+                break;
+            case R.id.txt_bbmpzone:
+                if (!selctedDistId.equalsIgnoreCase("-1")) {
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putString("key", "zone");
+                    bundle1.putString("key_id", selctedDistId);
+                    Intent intent1 = new Intent(getApplicationContext(), BBMPZoneWardListActivity.class);
+                    intent1.putExtras(bundle1);
+                    startActivityForResult(intent1, RES_BBMPZONE);
+                } else {
+                    Toast.makeText(YelligoApplication.getContext(), "Please select district", Toast.LENGTH_LONG).show();
+                }
+                break;
+            case R.id.txt_bbmpword_spin:
+                if (!selctedbbmpzoneid.equalsIgnoreCase("-1")) {
+                    Bundle bundle1 = new Bundle();
+                    bundle1.putString("key", "ward");
+                    bundle1.putString("key_id", selctedbbmpzoneid);
+                    Intent intent1 = new Intent(getApplicationContext(), BBMPZoneWardListActivity.class);
+                    intent1.putExtras(bundle1);
+                    startActivityForResult(intent1, RES_BBMPWARD);
+                } else {
+                    Toast.makeText(YelligoApplication.getContext(), "Please select Zone", Toast.LENGTH_LONG).show();
+                }
+                break;
+            case R.id.llbbmp:
                 break;
 
           /*  case R.id.simpleCheckedTextView:
@@ -791,16 +996,42 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             }
             //txtWordSpin.requestFocus();
         } else if (requestCode == RES_VILLAGE) {
-            String name = data.getStringExtra("name");
-            selctedvillageId = data.getStringExtra("name_id");
-            txtVillageSpin.setText(name);
+            if (!data.getStringExtra("name_id").equalsIgnoreCase("")) {
+                String name = data.getStringExtra("name");
+                selctedvillageId = data.getStringExtra("name_id");
+                txtVillageSpin.setText(name);
+            }
+            //txtWordSpin.requestFocus();
+        } else if (requestCode == RES_BBMPZONE) {
+
+            if (!data.getStringExtra("name_id").equalsIgnoreCase("")) {
+
+                //txtGrampanchyateSpin.setText("Select Panchyate");
+                txtBbmpwordSpin.setText("Select BBMP Ward");
+                // selctedDistId = "-1";
+                // selctedCityId = "-1";
+                //selctedWordId = "-1";
+                selctedbbmpwordId = "-1";
+                // selctedvillageId = "-1";
+                // selctedtalukid = "-1";
+                String name = data.getStringExtra("name");
+                selctedbbmpzoneid = data.getStringExtra("name_id");
+                txtBbmpzone.setText(name);
+            }
+            //txtWordSpin.requestFocus();
+        } else if (requestCode == RES_BBMPWARD) {
+            if (!data.getStringExtra("name_id").equalsIgnoreCase("")) {
+                String name = data.getStringExtra("name");
+                selctedbbmpwordId = data.getStringExtra("name_id");
+                txtBbmpwordSpin.setText(name);
+            }
             //txtWordSpin.requestFocus();
         }
     }
 
     @Override
     public void onItemChecked(View v, int position, ModelSymptomGVT item, ArrayList<ModelSymptomGVT> listString, boolean isChecked) {
-        if (isChecked){
+        if (isChecked) {
            /* if (position == listString.size()-1 && item.getStrname().equals("Others")){
                // etView.setVisibility(View.VISIBLE);
             }*/
@@ -812,8 +1043,8 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
     }
 
     private void removeOption(String item) {
-        for (int i=0; i<selectedString.size(); i++){
-            if (selectedString.get(i).equals(item)){
+        for (int i = 0; i < selectedString.size(); i++) {
+            if (selectedString.get(i).equals(item)) {
                 selectedString.remove(i);
             }
         }
@@ -842,18 +1073,18 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
     }
 
 
-    private void submitData() {
+    private void submitDatapatientself() {
         if (validation()) {
 
 
             showProgressDialogStatic();
             PatientListDataItem resPatientInfoupdate = new PatientListDataItem();
-            if (key.equalsIgnoreCase("newpatient")){
-                String localid= UUID.randomUUID().toString().toUpperCase();
+            if (key.equalsIgnoreCase("newpatient")) {
+                String localid = UUID.randomUUID().toString().toUpperCase();
                 resPatientInfoupdate.setLocalID(localid);
 
-            }else {
-                resPatientInfoupdate=resPatientInfo;
+            } else {
+                resPatientInfoupdate = resPatientInfo;
             }
 
             resPatientInfoupdate.setLatitude(mLocation.getLatitude());
@@ -873,6 +1104,12 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             resPatientInfoupdate.setStreet(etStreet.getText().toString());
 
 
+            resPatientInfoupdate.setHospitalized(isHospitalised);
+            resPatientInfoupdate.setHisOfLabCaseConfirmed(isHistoryContactLab);
+            resPatientInfoupdate.setRiskArea(selctedriskarea);
+            resPatientInfoupdate.setAreaType(selectaretype);
+
+
             //info symtom
           /*  resPatientInfo.setFever(isfever);
             resPatientInfo.setCoughSourThroat(iscoughandsour);
@@ -883,30 +1120,34 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             resPatientInfo.setHeartIssue(isheartdisses);
             resPatientInfo.setHIV(ishiv);*/
 
-          resPatientInfoupdate.setDistCode(Integer.parseInt(selctedDistId));
-          resPatientInfoupdate.setCityCode(Integer.parseInt(selctedCityId));
-          resPatientInfoupdate.setWardCode(Integer.parseInt(selctedWordId));
-          resPatientInfoupdate.setTalukCode(Integer.parseInt(selctedtalukid));
-          resPatientInfoupdate.setGramPanchayatCode(Integer.parseInt(selctedpanchyateId));
-          resPatientInfoupdate.setVillageCode(Integer.parseInt(selctedvillageId));
+            resPatientInfoupdate.setDistCode(Integer.parseInt(selctedDistId));
+            resPatientInfoupdate.setCityCode(Integer.parseInt(selctedCityId));
+            resPatientInfoupdate.setWardCode(Integer.parseInt(selctedWordId));
+            resPatientInfoupdate.setTalukCode(Integer.parseInt(selctedtalukid));
+            resPatientInfoupdate.setGramPanchayatCode(Integer.parseInt(selctedpanchyateId));
+            resPatientInfoupdate.setVillageCode(Integer.parseInt(selctedvillageId));
+            resPatientInfoupdate.setWardBBMPID(Integer.parseInt(selctedbbmpwordId));
+            resPatientInfoupdate.setZoneBBMPID(Integer.parseInt(selctedbbmpzoneid));
+
             resPatientInfoupdate.setAdditionalInfo("Android");
-            String s_symptom=android.text.TextUtils.join(",", selectedString);
+            String s_symptom = TextUtils.join(",", selectedString);
             resPatientInfoupdate.setSymptoms(s_symptom);
-            if (key.equalsIgnoreCase("newpatient")){
-                resPatientInfoupdate.setProfileCreatedBy(33518);
-            }else {
-                if (resPatientInfo!=null) {
-                    resPatientInfoupdate.setProfileUpdatedBy(33518);
+            if (key.equalsIgnoreCase("newpatient")) {
+                resPatientInfoupdate.setProfileCreatedBy(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));
+                resPatientInfoupdate.setProfileUpdated(false);
+                resPatientInfoupdate.setProfileUpdatedBy(0);
+            } else {
+                if (resPatientInfo != null) {
+                    resPatientInfoupdate.setProfileUpdatedBy(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));
                     resPatientInfoupdate.setProfileUpdated(true);
                 }
             }
 
             if (PreferenceStore.getPrefernceHelperInstace().getFlag(YelligoApplication.getContext(), PreferenceStore.PERSIONTYPE)) {
                 resPatientInfoupdate.setPatientQuarantineStatus(1);
-            }else {
+            } else {
                 resPatientInfoupdate.setPatientQuarantineStatus(2);
             }
-
 
 
             resPatientInfoupdate.setSyncstatus(false);
@@ -921,51 +1162,106 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
                 @Override
                 public void run() {
 
-                    ApiBackGround apiBackGround=new ApiBackGround(YelligoApplication.getContext());
-                    apiBackGround.makePatientAdded();
 
                     hideProgressDialogStatic();
 
-                    showDialog("Successfully added",true);
+                    showDialog("Successfully added", true);
 
                 }
             }, 1000);
 
+        }
+    }
 
-           /* ReqUpdatePatentInfo info = new ReqUpdatePatentInfo();
-           // info.setPersonDetails(resPatientInfo);
-            info.setpSecurity(getCommonApi().getSecurityObject());
+    private void submitDatapatientfamily() {
+        if (validation()) {
 
-            networkService.updatepatentInfo(info, new NetworkService.NetworkServiceListener() {
+
+            showProgressDialogStatic();
+            PatientFamilyDetailsItem resPatientfamilyInfoupdate = new PatientFamilyDetailsItem();
+            if (key.equalsIgnoreCase("newpatient")) {
+                String localid = UUID.randomUUID().toString().toUpperCase();
+                resPatientfamilyInfoupdate.setFamilyLocalID(localid);
+
+            } else {
+                resPatientfamilyInfoupdate = resPatientFamilyInfo;
+            }
+            resPatientfamilyInfoupdate.setCitizenID(resPatientInfo.getCitizenID());
+
+            resPatientfamilyInfoupdate.setLatitude(mLocation.getLatitude());
+            resPatientfamilyInfoupdate.setLongitude(mLocation.getLongitude());
+
+            resPatientfamilyInfoupdate.setName(etCustomerName.getText().toString());
+            resPatientfamilyInfoupdate.setMobileNo(etCustomerMobile.getText().toString());
+            resPatientfamilyInfoupdate.setEmail(etCustomerEmail.getText().toString());
+            resPatientfamilyInfoupdate.setAge(Integer.parseInt(etAge.getText().toString()));
+            resPatientfamilyInfoupdate.setGenderCode(selectedgender);
+            resPatientfamilyInfoupdate.setRelationShipCode(selectedrelation);//
+            resPatientfamilyInfoupdate.setStartDateOfQuarantine(startdate);
+            resPatientfamilyInfoupdate.setEndDateOfQuarantine(enddate);
+            resPatientfamilyInfoupdate.setPortOfOrigin(etPoorigin.getText().toString());
+            resPatientfamilyInfoupdate.setPortOfArrival(etPoarrival.getText().toString());
+
+
+
+            resPatientfamilyInfoupdate.setHospitalized(isHospitalised);
+            resPatientfamilyInfoupdate.setHisOfLabCaseConfirmed(isHistoryContactLab);
+            resPatientfamilyInfoupdate.setRiskArea(selctedriskarea);
+            //resPatientfamilyInfoupdate.setAreaType(selectaretype);
+
+           /* resPatientInfoupdate.setHouseNo(etHouseno.getText().toString());
+            resPatientInfoupdate.setBuilding(etBuilding.getText().toString());
+            resPatientInfoupdate.setStreet(etStreet.getText().toString());*/
+
+            /*resPatientInfoupdate.setDistCode(Integer.parseInt(selctedDistId));
+            resPatientInfoupdate.setCityCode(Integer.parseInt(selctedCityId));
+            resPatientInfoupdate.setWardCode(Integer.parseInt(selctedWordId));
+            resPatientInfoupdate.setTalukCode(Integer.parseInt(selctedtalukid));
+            resPatientInfoupdate.setGramPanchayatCode(Integer.parseInt(selctedpanchyateId));
+            resPatientInfoupdate.setVillageCode(Integer.parseInt(selctedvillageId));*/
+
+
+            resPatientfamilyInfoupdate.setAdditionalInfo("Android");
+            String s_symptom = TextUtils.join(",", selectedString);
+            resPatientfamilyInfoupdate.setSymptoms(s_symptom);
+            if (key.equalsIgnoreCase("newpatient")) {
+                resPatientfamilyInfoupdate.setProfileCreatedBy(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));//TODO USER ID DYNAMIC
+                resPatientfamilyInfoupdate.setProfileUpdated(false);
+                resPatientfamilyInfoupdate.setProfileUpdatedBy(0);
+            } else {
+                if (resPatientFamilyInfo != null) {
+                    resPatientfamilyInfoupdate.setProfileUpdatedBy(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));//TODO USER ID DYNAMIC
+                    resPatientfamilyInfoupdate.setProfileUpdated(true);
+                }
+            }
+
+            if (PreferenceStore.getPrefernceHelperInstace().getFlag(YelligoApplication.getContext(), PreferenceStore.PERSIONTYPE)) {
+                resPatientfamilyInfoupdate.setPatientQuarantineStatus(1);
+            } else {
+                resPatientfamilyInfoupdate.setPatientQuarantineStatus(2);
+            }
+
+
+            resPatientfamilyInfoupdate.setSyncstatus(false);
+
+            //String s=new Gson().toJson(resPatientInfoupdate);
+            //Log.e("ttttttt----",s);
+
+            getHwPatientFamilyinfoRepository().insertitem(resPatientfamilyInfoupdate);
+
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
                 @Override
-                public void onFailure(Object response) {
+                public void run() {
+
+
                     hideProgressDialogStatic();
-                    if (response instanceof String) {
-                        Toast.makeText(YelligoApplication.getContext(), "" + response, Toast.LENGTH_LONG).show();
-                    }
-                }
 
-                @Override
-                public void onAuthFail(Object error) {
+                    showDialog("Successfully added", true);
 
                 }
+            }, 1000);
 
-                @Override
-                public void onSuccess(Object response, Boolean cancelFlag) {
-                    hideProgressDialogStatic();
-                    if (response instanceof ResUpdateInfo) {
-                        PreferenceStore.getPrefernceHelperInstace().setString(YelligoApplication.getContext(), PreferenceStore.USER_PHONE, etCustomerMobile.getText().toString());
-                        //getPatientinfoRepository().update(resPatientInfo);
-                        PreferenceStore.getPrefernceHelperInstace().setFlag(YelligoApplication.getContext(), PreferenceStore.ISUPDATEPATENTINFO, true);
-                        Intent intent = new Intent(getApplicationContext(), HomeMainActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        finishAffinity();
-
-                        Toast.makeText(YelligoApplication.getContext(), "Successfully Updated", Toast.LENGTH_LONG).show();
-                    }
-                }
-            });*/
         }
     }
 
@@ -977,6 +1273,14 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
                         public void onLeftButtonClick(CustomDialogGeneric dialog) {
                             dialog.dismiss();
                             if (b) {
+                                if (keytype.equalsIgnoreCase("self")) {
+                                    ApiBackGround apiBackGround = new ApiBackGround(YelligoApplication.getContext());
+//                                    apiBackGround.makePatientAdded();
+                                    apiBackGround.makesyncCall();
+                                } else if (keytype.equalsIgnoreCase("family")) {
+                                    ApiBackGround apiBackGround = new ApiBackGround(YelligoApplication.getContext());
+                                    apiBackGround.makesyncCall();
+                                }
                                 finish();
                             }
                             //dialog.dismiss();
@@ -1013,6 +1317,13 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
 
         }
 
+        if (keytype.equalsIgnoreCase("family")) {
+            if (selectedrelation == 0) {
+                Toast.makeText(YelligoApplication.getContext(), "Please select relation", Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }
+
         if (selectedgender == 0) {
             Toast.makeText(YelligoApplication.getContext(), "Please select gender", Toast.LENGTH_LONG).show();
             return false;
@@ -1037,61 +1348,82 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             Toast.makeText(YelligoApplication.getContext(), "Please enter Mobile Number", Toast.LENGTH_LONG).show();
             return false;
         }
-
+        if (startdate.equalsIgnoreCase("")) {
+            Toast.makeText(YelligoApplication.getContext(), "Please enter start date", Toast.LENGTH_LONG).show();
+            return false;
+        }
 
         if (PreferenceStore.getPrefernceHelperInstace().getFlag(YelligoApplication.getContext(), PreferenceStore.PERSIONTYPE)) {
 
-            if (startdate.equalsIgnoreCase("")) {
+            /*if (startdate.equalsIgnoreCase("")) {
                 Toast.makeText(YelligoApplication.getContext(), "Please enter start date", Toast.LENGTH_LONG).show();
                 return false;
-            }
+            }*/
             if (enddate.equalsIgnoreCase("")) {
                 Toast.makeText(YelligoApplication.getContext(), "Please enter end date", Toast.LENGTH_LONG).show();
                 return false;
             }
         }
-        if (selectaretype==0){
-            Toast.makeText(YelligoApplication.getContext(), "Please select Location type", Toast.LENGTH_LONG).show();
-            return false;
+
+        if (keytype.equalsIgnoreCase("self")) {
+            if (selectaretype == 0) {
+                Toast.makeText(YelligoApplication.getContext(), "Please select Location type", Toast.LENGTH_LONG).show();
+                return false;
+            }
+
+            if (selectaretype == 1) {
+                if (selctedDistId.equalsIgnoreCase("-1")) {
+                    Toast.makeText(YelligoApplication.getContext(), "Please select District", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+                if (selctedCityId.equalsIgnoreCase("-1")) {
+                    Toast.makeText(YelligoApplication.getContext(), "Please select City", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+                if (selctedWordId.equalsIgnoreCase("-1")) {
+                    Toast.makeText(YelligoApplication.getContext(), "Please select Word", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+
+            } else if (selectaretype == 2) {
+                if (selctedDistId.equalsIgnoreCase("-1")) {
+                    Toast.makeText(YelligoApplication.getContext(), "Please select District", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+                if (selctedtalukid.equalsIgnoreCase("-1")) {
+                    Toast.makeText(YelligoApplication.getContext(), "Please select Taluk", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+                if (selctedpanchyateId.equalsIgnoreCase("-1")) {
+                    Toast.makeText(YelligoApplication.getContext(), "Please select Gram Panchyate", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+                if (selctedvillageId.equalsIgnoreCase("-1")) {
+                    Toast.makeText(YelligoApplication.getContext(), "Please select village", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+            }else if (selectaretype==3){
+                if (selctedDistId.equalsIgnoreCase("-1")) {
+                    Toast.makeText(YelligoApplication.getContext(), "Please select District", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+                if (selctedbbmpzoneid.equalsIgnoreCase("-1")) {
+                    Toast.makeText(YelligoApplication.getContext(), "Please select BBMP Zone", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+
+                if (selctedbbmpwordId.equalsIgnoreCase("-1")) {
+                    Toast.makeText(YelligoApplication.getContext(), "Please select BBMP Ward", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+            }
         }
 
-        if (selectaretype==1){
-            if (selctedDistId.equalsIgnoreCase("-1")) {
-                Toast.makeText(YelligoApplication.getContext(), "Please select District", Toast.LENGTH_LONG).show();
-                return false;
-            }
-
-            if (selctedCityId.equalsIgnoreCase("-1")) {
-                Toast.makeText(YelligoApplication.getContext(), "Please select City", Toast.LENGTH_LONG).show();
-                return false;
-            }
-            if (selctedWordId.equalsIgnoreCase("-1")) {
-                Toast.makeText(YelligoApplication.getContext(), "Please select Word", Toast.LENGTH_LONG).show();
-                return false;
-            }
-
-
-
-        }else if (selectaretype==2){
-            if (selctedDistId.equalsIgnoreCase("-1")) {
-                Toast.makeText(YelligoApplication.getContext(), "Please select District", Toast.LENGTH_LONG).show();
-                return false;
-            }
-
-            if (selctedtalukid.equalsIgnoreCase("-1")) {
-                Toast.makeText(YelligoApplication.getContext(), "Please select Taluk", Toast.LENGTH_LONG).show();
-                return false;
-            }
-            if (selctedpanchyateId.equalsIgnoreCase("-1")) {
-                Toast.makeText(YelligoApplication.getContext(), "Please select Gram Panchyate", Toast.LENGTH_LONG).show();
-                return false;
-            }
-
-            if (selctedvillageId.equalsIgnoreCase("-1")) {
-                Toast.makeText(YelligoApplication.getContext(), "Please select village", Toast.LENGTH_LONG).show();
-                return false;
-            }
-        }
 
 
        /* if (district_code == 0) {
@@ -1258,16 +1590,15 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
 
     }
 
-    public void setInfoMainpatient(){
-        int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
+    public void setInfoMainpatient() {
+        int ciD = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID);
         resPatientInfo = getHwPatientinfoRepository().getPatientInfo(ciD);
 
-        if (resPatientInfo!=null){
+        if (resPatientInfo != null) {
 
-            spAreatype.setSelection(1);
+            spAreatype.setSelection(resPatientInfo.getAreaType());
 
-
-            selectaretype=1;
+            selectaretype = resPatientInfo.getAreaType();
 
             if (resPatientInfo.getName() != null) {
                 etCustomerName.setText("" + resPatientInfo.getName());
@@ -1282,11 +1613,11 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             }
             if (resPatientInfo.getStartDateOfQuarantine() != null) {
                 startdate = resPatientInfo.getStartDateOfQuarantine();
-                txtDOA.setText("" +AppConstants.dateFormatChangerGVT( resPatientInfo.getStartDateOfQuarantine()));
+                txtDOA.setText("" + AppConstants.dateFormatChangerGVT(resPatientInfo.getStartDateOfQuarantine()));
             }
             if (resPatientInfo.getEndDateOfQuarantine() != null) {
                 enddate = resPatientInfo.getEndDateOfQuarantine();
-                txtQurantinedate.setText("" + AppConstants.dateFormatChangerGVT( resPatientInfo.getEndDateOfQuarantine()));
+                txtQurantinedate.setText("" + AppConstants.dateFormatChangerGVT(resPatientInfo.getEndDateOfQuarantine()));
             }
             if (resPatientInfo.getPortOfOrigin() != null) {
                 etPoorigin.setText("" + resPatientInfo.getPortOfOrigin());
@@ -1314,15 +1645,51 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
                 spGender.setSelection(resPatientInfo.getGenderCode());
             }
 
+            if(resPatientInfo.getDateOfFirstSymptom()!=null){
+                if (!resPatientInfo.getDateOfFirstSymptom().equalsIgnoreCase("")){
+                    dateofsymtom = resPatientInfo.getDateOfFirstSymptom();
+                    txtDOA11.setText("" + AppConstants.dateFormatChangerGVT(resPatientInfo.getDateOfFirstSymptom()));
+                }
+            }
+
+            if (resPatientInfo.isHospitalized()){
+                chkBox13.setChecked(true);
+            }
+            if (resPatientInfo.isHisOfLabCaseConfirmed()){
+                chkBox12.setChecked(true);
+            }
+
+            if (!resPatientInfo.getSymptoms().equalsIgnoreCase("")){
+                selectedString= new ArrayList<>( Arrays.asList(resPatientInfo.getSymptoms().split(",")));
+                adapter.setcheckitem(resPatientInfo.getSymptoms());
+//                setinlist();
+            }
 
 
 
+
+
+
+            selctedriskarea = resPatientInfo.getRiskArea();
+            if (resPatientInfo.getRiskArea() == 1) {
+                radioButton.setChecked(true);
+
+            }
+            if (resPatientInfo.getRiskArea() == 2) {
+                radioButton2.setChecked(true);
+
+            }
+            if (resPatientInfo.getRiskArea() == 0) {
+                radioButton.setChecked(false);
+                radioButton2.setChecked(false);
+
+            }
 
             setAddress();
 
-            if (resPatientInfo.isProfileUpdated()){
+            if (resPatientInfo.isProfileUpdated()) {
                 tvLogout.setVisibility(View.GONE);
-            }else {
+            } else {
                 tvLogout.setVisibility(View.VISIBLE);
             }
 
@@ -1339,57 +1706,191 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
 
     }
 
+    public void setInfoMainpatientFamilyDetails() {
+
+        resPatientFamilyInfo = getHwPatientFamilyinfoRepository().getPatientFamilyInfoByFamilyLocalId(keytypefamilyloclId);
+
+        if (resPatientFamilyInfo != null) {
+
+            /*spAreatype.setSelection(1);
+
+
+            selectaretype = 1;*/
+
+            if (resPatientFamilyInfo.getName() != null) {
+                etCustomerName.setText("" + resPatientFamilyInfo.getName());
+                etCustomerName.setEnabled(false);
+            }
+            if (resPatientFamilyInfo.getMobileNo() != null) {
+                etCustomerMobile.setText("" + resPatientFamilyInfo.getMobileNo());
+            }
+
+            if (resPatientFamilyInfo.getEmail() != null) {
+                etCustomerEmail.setText("" + resPatientFamilyInfo.getEmail());
+            }
+            if (resPatientFamilyInfo.getStartDateOfQuarantine() != null) {
+                startdate = resPatientFamilyInfo.getStartDateOfQuarantine();
+                txtDOA.setText("" + AppConstants.dateFormatChangerGVT(resPatientFamilyInfo.getStartDateOfQuarantine()));
+            }
+            if (resPatientFamilyInfo.getEndDateOfQuarantine() != null) {
+                enddate = resPatientFamilyInfo.getEndDateOfQuarantine();
+                txtQurantinedate.setText("" + AppConstants.dateFormatChangerGVT(resPatientFamilyInfo.getEndDateOfQuarantine()));
+            }
+            if (resPatientFamilyInfo.getPortOfOrigin() != null) {
+                etPoorigin.setText("" + resPatientFamilyInfo.getPortOfOrigin());
+            }
+            if (resPatientFamilyInfo.getPortOfArrival() != null) {
+                etPoarrival.setText("" + resPatientFamilyInfo.getPortOfArrival());
+            }
+
+//            TODO IF REQUIRED
+
+            /*if (resPatientInfo.getHouseNo() != null) {
+                etHouseno.setText("" + resPatientInfo.getHouseNo());
+            }
+            if (resPatientInfo.getBuilding() != null) {
+                etBuilding.setText("" + resPatientInfo.getBuilding());
+            }
+            if (resPatientInfo.getStreet() != null) {
+                etStreet.setText("" + resPatientInfo.getStreet());
+            }*/
+
+
+            if (resPatientFamilyInfo.getAge() != 0) {
+                etAge.setText("" + resPatientFamilyInfo.getAge());
+            }
+
+
+            if (resPatientFamilyInfo.getGenderCode() != -1) {
+                spGender.setSelection(resPatientFamilyInfo.getGenderCode());
+            }
+            if (resPatientFamilyInfo.getRelationShipCode() != -1) {
+                spRelation.setSelection(resPatientFamilyInfo.getRelationShipCode());
+            }
+
+            if (resPatientFamilyInfo.isProfileUpdated()) {
+                tvLogout.setVisibility(View.GONE);
+            } else {
+                tvLogout.setVisibility(View.VISIBLE);
+            }
+
+            if(resPatientFamilyInfo.getDateOfFirstSymptom()!=null){
+                if (!resPatientFamilyInfo.getDateOfFirstSymptom().equalsIgnoreCase("")){
+                    dateofsymtom = resPatientFamilyInfo.getDateOfFirstSymptom();
+                    txtDOA11.setText("" + AppConstants.dateFormatChangerGVT(resPatientInfo.getDateOfFirstSymptom()));
+                }
+            }
+
+            if (resPatientFamilyInfo.isHospitalized()){
+                chkBox13.setChecked(true);
+            }
+            if (resPatientFamilyInfo.isHisOfLabCaseConfirmed()){
+                chkBox12.setChecked(true);
+            }
+
+            if (!resPatientFamilyInfo.getSymptoms().equalsIgnoreCase("")){
+                selectedString= new ArrayList<>( Arrays.asList(resPatientFamilyInfo.getSymptoms().split(",")));
+                adapter.setcheckitem(resPatientFamilyInfo.getSymptoms());
+//                setinlist();
+            }
+
+
+
+
+
+
+            selctedriskarea = resPatientFamilyInfo.getRiskArea();
+            if (resPatientFamilyInfo.getRiskArea() == 1) {
+                radioButton.setChecked(true);
+
+            }
+            if (resPatientFamilyInfo.getRiskArea() == 2) {
+                radioButton2.setChecked(true);
+
+            }
+            if (resPatientFamilyInfo.getRiskArea() == 0) {
+                radioButton.setChecked(false);
+                radioButton2.setChecked(false);
+
+            }
+
+            //TODO CHECK ADDRESS REQUIRED
+            //setAddress();
+
+        }
+
+    }
+
     private void setAddress() {
-        if (resPatientInfo!=null){
-            if (resPatientInfo.getDistCode()!=-1){
-                ResStaticMasterDistricDB resStaticMasterDistricDB=getAddressUrbaninfoRepository().getDistricNameByDistID(resPatientInfo.getDistCode());
-                if (resStaticMasterDistricDB!=null){
+        if (resPatientInfo != null) {
+            if (resPatientInfo.getDistCode() != -1) {
+                ResStaticMasterDistricDB resStaticMasterDistricDB = getAddressUrbaninfoRepository().getDistricNameByDistID(resPatientInfo.getDistCode());
+                if (resStaticMasterDistricDB != null) {
                     txtDistSpin.setText(resStaticMasterDistricDB.getDist_name());
-                    selctedDistId=""+resPatientInfo.getDistCode();
+                    selctedDistId = "" + resPatientInfo.getDistCode();
                 }
             }
 
 
-            if (resPatientInfo.getCityCode()!=-1){
-                ResStaticMasterDistricDB resStaticMasterDistricDB=getAddressUrbaninfoRepository().getCityByCityID(resPatientInfo.getCityCode());
-                if (resStaticMasterDistricDB!=null){
+            if (resPatientInfo.getCityCode() != -1) {
+                ResStaticMasterDistricDB resStaticMasterDistricDB = getAddressUrbaninfoRepository().getCityByCityID(resPatientInfo.getCityCode());
+                if (resStaticMasterDistricDB != null) {
                     txtCitySpin.setText(resStaticMasterDistricDB.getTown_name());
-                    selctedCityId=""+resPatientInfo.getCityCode();
+                    selctedCityId = "" + resPatientInfo.getCityCode();
                 }
             }
 
-            if (resPatientInfo.getWardCode()!=-1){
-                ResStaticMasterDistricDB resStaticMasterDistricDB=getAddressUrbaninfoRepository().getWordBiWID(resPatientInfo.getWardCode());
-                if (resStaticMasterDistricDB!=null){
+            if (resPatientInfo.getWardCode() != -1) {
+                ResStaticMasterDistricDB resStaticMasterDistricDB = getAddressUrbaninfoRepository().getWordBiWID(resPatientInfo.getWardCode());
+                if (resStaticMasterDistricDB != null) {
                     txtWordSpin.setText(resStaticMasterDistricDB.getWord_name());
-                    selctedWordId=""+resPatientInfo.getWardCode();
+                    selctedWordId = "" + resPatientInfo.getWardCode();
                 }
             }
-            if (resPatientInfo.getTalukCode()!=-1){
-                String tName=getCommonApi().getTalukName(getApplicationContext(),""+resPatientInfo.getTalukCode(),"");
-                if (!tName.equalsIgnoreCase("")){
+            if (resPatientInfo.getTalukCode() != -1) {
+                String tName = getCommonApi().getTalukName(getApplicationContext(), "" + resPatientInfo.getTalukCode(), "");
+                if (!tName.equalsIgnoreCase("")) {
                     txtTalukSpin.setText(tName);
-                    selctedtalukid=""+resPatientInfo.getTalukCode();
+                    selctedtalukid = "" + resPatientInfo.getTalukCode();
                 }
             }
 
-            if (resPatientInfo.getGramPanchayatCode()!=-1){
-                String tName=getCommonApi().getPanchyateName(getApplicationContext(),""+resPatientInfo.getGramPanchayatCode());
-                if (!tName.equalsIgnoreCase("")){
+            if (resPatientInfo.getGramPanchayatCode() != -1) {
+                String tName = getCommonApi().getPanchyateName(getApplicationContext(), "" + resPatientInfo.getGramPanchayatCode());
+                if (!tName.equalsIgnoreCase("")) {
                     txtGrampanchyateSpin.setText(tName);
-                    selctedpanchyateId=""+resPatientInfo.getGramPanchayatCode();
+                    selctedpanchyateId = "" + resPatientInfo.getGramPanchayatCode();
                 }
             }
 
-            if (resPatientInfo.getVillageCode()!=-1){
-                String tName=getVillageinfoRepository().getVillageName(""+resPatientInfo.getVillageCode());
-                if (tName!=null){
+            if (resPatientInfo.getVillageCode() != -1) {
+                String tName = getVillageinfoRepository().getVillageName("" + resPatientInfo.getVillageCode());
+                if (tName != null) {
                     txtVillageSpin.setText(tName);
-                    selctedvillageId=""+resPatientInfo.getVillageCode();
+                    selctedvillageId = "" + resPatientInfo.getVillageCode();
                 }
             }
+
+            if (resPatientInfo.getZoneBBMPID() != -1) {
+                String tName = getCommonApi().getBBMPZONEName(getApplicationContext(), "" + resPatientInfo.getZoneBBMPID(), "");
+                if (!tName.equalsIgnoreCase("")) {
+                    txtBbmpzone.setText(tName);
+                    selctedbbmpzoneid = "" + resPatientInfo.getZoneBBMPID();
+                }
+            }
+            if (resPatientInfo.getWardBBMPID() != -1) {
+                String tName = getCommonApi().getBBMPWARDName(getApplicationContext(), "" + resPatientInfo.getWardBBMPID(), "");
+                if (!tName.equalsIgnoreCase("")) {
+                    txtBbmpwordSpin.setText(tName);
+                    selctedbbmpwordId = "" + resPatientInfo.getWardBBMPID();
+                }
+            }
+
         }
     }
+
+
+
 
     /*@OnClick(R.id.simpleCheckedTextView)
     public void onViewClicked() {

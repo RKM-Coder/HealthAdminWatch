@@ -17,12 +17,14 @@ import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientIn
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResUpdateInfo;
 import com.goalsr.homequarantineTracker.resposemodel.gotOtpreq.ResGvtValidOtp;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqGetPatientinfobody;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqInsertUpdatePatientFamilyInfo;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ReqInsertUpdatePatientInfo;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.ResPatientData;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.Respatientinsertupdate;
 import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ReqHWOtp;
 import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ReqHWOtpValidate;
 import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ResHWGetOtp;
+import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ResOtpValidate;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ReqOtpValidGvt;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ResGvtValidOtpValid;
 import com.goalsr.homequarantineTracker.resposemodel.poststatus.ReqStatus;
@@ -66,8 +68,8 @@ public interface ApiInterface {
     );
 
     @Headers({"Accept: application/json", "Content-Type: application/json"})
-    @POST("WebApi_Hwatch/api/HealthWatch/GetOTP")
-    Call<ResHWGetOtp> makeHWReqOtpValidate(
+    @POST("WebApi_Hwatch/api/HealthWatch/ValidateOTP")
+    Call<ResOtpValidate> makeHWReqOtpValidate(
                     @Body ReqHWOtpValidate request
             );
 
@@ -75,6 +77,12 @@ public interface ApiInterface {
     @POST("WebApi_Hwatch/api/HealthWatch/InsertUpdatePatientInfo")
     Call<Respatientinsertupdate> makeHWinsertUpdatePatientInfo(
             @Body ReqInsertUpdatePatientInfo request
+    );
+
+    @Headers({"Accept: application/json", "Content-Type: application/json"})
+    @POST("WebApi_Hwatch/api/HealthWatch/InsertUpdatePatientFamilyInfo")
+    Call<Respatientinsertupdate> makeHWinsertUpdatePatientFamilyInfo(
+            @Body ReqInsertUpdatePatientFamilyInfo request
     );
 
 

@@ -1,0 +1,42 @@
+[
+    {
+        "bbmp_zone_no_ksrsac": "8",
+        "software_zone_no": "BBMP Zone No:8",
+        "zone_name": "YELAHANKA"
+    },
+    {
+        "bbmp_zone_no_ksrsac": "2",
+        "software_zone_no": "BBMP Zone No:2",
+        "zone_name": "DASARAHALLI"
+    },
+    {
+        "bbmp_zone_no_ksrsac": "5",
+        "software_zone_no": "BBMP Zone No:5",
+        "zone_name": "RR NAGARA"
+    },
+    {
+        "bbmp_zone_no_ksrsac": "3",
+        "software_zone_no": "BBMP Zone No:3",
+        "zone_name": "EAST"
+    },
+    {
+        "bbmp_zone_no_ksrsac": "4",
+        "software_zone_no": "BBMP Zone No:4",
+        "zone_name": "MAHADEVAPURA"
+    },
+    {
+        "bbmp_zone_no_ksrsac": "7",
+        "software_zone_no": "BBMP Zone No:7",
+        "zone_name": "WEST"
+    },
+    {
+        "bbmp_zone_no_ksrsac": "6",
+        "software_zone_no": "BBMP Zone No:6",
+        "zone_name": "SOUTH"
+    },
+    {
+        "bbmp_zone_no_ksrsac": "1",
+        "software_zone_no": "BBMP Zone No:1",
+        "zone_name": "BOMMANAHALLI"
+    }
+    ]

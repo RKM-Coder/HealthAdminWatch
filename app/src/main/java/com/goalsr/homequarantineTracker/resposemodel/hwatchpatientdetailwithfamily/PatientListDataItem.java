@@ -106,6 +106,93 @@ public class PatientListDataItem{
 	@SerializedName("age")
 	private int age=0;
 
+	@SerializedName("IsHavingTravelHistory")
+	private boolean isHavingTravelHistory=false;
+
+	@SerializedName("HisOfLabCaseConfirmed")
+	private boolean hisOfLabCaseConfirmed=false;
+
+	@SerializedName("IsHospitalized")
+	private boolean isHospitalized=false;
+
+	@SerializedName("AreaType")
+	private int areaType=0;
+
+	@SerializedName("ZoneBBMPID")
+	private int zoneBBMPID=0;
+
+	@SerializedName("WardBBMPID")
+	private int wardBBMPID=0;
+
+	@SerializedName("RiskArea")
+	private int riskArea=0;
+
+	@SerializedName("DateOfFirstSymptom")
+	private String dateOfFirstSymptom="";
+
+	public int getRiskArea() {
+		return riskArea;
+	}
+
+	public void setRiskArea(int riskArea) {
+		this.riskArea = riskArea;
+	}
+
+	public boolean isHavingTravelHistory() {
+		return isHavingTravelHistory;
+	}
+
+	public void setHavingTravelHistory(boolean havingTravelHistory) {
+		isHavingTravelHistory = havingTravelHistory;
+	}
+
+	public boolean isHisOfLabCaseConfirmed() {
+		return hisOfLabCaseConfirmed;
+	}
+
+	public void setHisOfLabCaseConfirmed(boolean hisOfLabCaseConfirmed) {
+		this.hisOfLabCaseConfirmed = hisOfLabCaseConfirmed;
+	}
+
+	public boolean isHospitalized() {
+		return isHospitalized;
+	}
+
+	public void setHospitalized(boolean hospitalized) {
+		isHospitalized = hospitalized;
+	}
+
+	public int getAreaType() {
+		return areaType;
+	}
+
+	public void setAreaType(int areaType) {
+		this.areaType = areaType;
+	}
+
+	public int getZoneBBMPID() {
+		return zoneBBMPID;
+	}
+
+	public void setZoneBBMPID(int zoneBBMPID) {
+		this.zoneBBMPID = zoneBBMPID;
+	}
+
+	public int getWardBBMPID() {
+		return wardBBMPID;
+	}
+
+	public void setWardBBMPID(int wardBBMPID) {
+		this.wardBBMPID = wardBBMPID;
+	}
+
+	public String getDateOfFirstSymptom() {
+		return dateOfFirstSymptom;
+	}
+
+	public void setDateOfFirstSymptom(String dateOfFirstSymptom) {
+		this.dateOfFirstSymptom = dateOfFirstSymptom;
+	}
 
 	private boolean syncstatus=true;
 

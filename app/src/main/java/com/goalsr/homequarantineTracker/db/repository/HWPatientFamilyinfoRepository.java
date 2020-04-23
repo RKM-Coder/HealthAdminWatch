@@ -3,6 +3,7 @@ package com.goalsr.homequarantineTracker.db.repository;
 import android.app.Application;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 
@@ -47,11 +48,25 @@ public class HWPatientFamilyinfoRepository {
         return mDao.getListAllItem();
     }
 
+    public List<PatientFamilyDetailsItem> getPatientFamilyInfoNONSYNC(){
+        return mDao.getListAllItemNONSYNC(false);
+    }
+    public List<PatientFamilyDetailsItem> getPatientFamilyInfoNONSYNCNonEmpty(){
+        return mDao.getListAllItemNONSYNCNonEmptyFid(false);
+    }
+    public List<PatientFamilyDetailsItem> getPatientFamilyInfoNONSYNCEmpty(){
+        return mDao.getListAllItemNONSYNCNonEmpty(false);
+    }
+
     public LiveData<List<PatientFamilyDetailsItem>> getPatientFamilyInfoLivedataById(int familyid){
         return mDao.getListAllItemLivedataById(familyid);
     }
 
-    public PatientFamilyDetailsItem getPatientFamilyInfo(int id){
+    public PatientFamilyDetailsItem getPatientFamilyInfoByFamilyLocalId(String id){
+        return mDao.getListAllItemFamilyLocalId(id);
+    }
+
+    public PatientFamilyDetailsItem getPatientFamilyInfoByFamilyMId(int id){
         return mDao.getListAllItem(id);
     }
 
@@ -65,9 +80,15 @@ public class HWPatientFamilyinfoRepository {
         // mDao.insertItem(value);
     }
 
-    public void updatesyncdata(boolean status, String id) {
+    public void updatesyncdatainserupdateFamilyCID(boolean status, String id,int familyId) {
 
-        new UpdateAsynctask2(mDao, status, id).execute();
+        new UpdateAsynctaskByCID(mDao, status, id,familyId).execute();
+        // mDao.insertItem(value);
+    }
+
+    public void updatesyncdatainserupdatepatient(boolean status, String id,int familyId) {
+
+        new UpdateAsynctask2(mDao, status, id,familyId).execute();
         // mDao.insertItem(value);
     }
 
@@ -107,6 +128,11 @@ public class HWPatientFamilyinfoRepository {
     }*/
 
     public LiveData<List<PatientFamilyDetailsItem>> getListAllItemLivedata(int cid) {
+
+        return mDao.getListAllItemLivedata(cid);
+    }
+
+    public LiveData<List<PatientFamilyDetailsItem>> getListAllItemLivedataByLocalId(int cid) {
 
         return mDao.getListAllItemLivedata(cid);
     }
@@ -169,18 +195,56 @@ public class HWPatientFamilyinfoRepository {
         boolean status;
         String id;
         String today;
+        int familyID;
 
-        public UpdateAsynctask2(HWPatientFamilyInfoDao mDao, boolean status, String id) {
+        public UpdateAsynctask2(HWPatientFamilyInfoDao mDao, boolean status, String id,int familyid) {
             this.mDao = mDao;
             this.status = status;
             this.id = id;
             this.today = today;
+            this.familyID = familyid;
         }
 
 
         @Override
         protected Void doInBackground(Void... voids) {
-            //mDao.update(status,id);
+            try {
+                Log.e("PATIENT UPDATE", id + "-------------------" + familyID);
+                mDao.updatestatus(status,id,familyID);
+               //Log.e("PATIENT UPDATE SUCC", idlong+"");
+            }catch (Exception e){
+
+            }
+            return null;
+        }
+    }
+
+    private class UpdateAsynctaskByCID extends AsyncTask<Void, Void, Void> {
+
+        HWPatientFamilyInfoDao mDao;
+        boolean status;
+        String id;
+        String today;
+        int familyID;
+
+        public UpdateAsynctaskByCID(HWPatientFamilyInfoDao mDao, boolean status, String id,int familyid) {
+            this.mDao = mDao;
+            this.status = status;
+            this.id = id;
+            this.today = today;
+            this.familyID = familyid;
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                Log.e("PATIENT UPDATE", id + "-------------------" + familyID);
+                mDao.updatestatusCid(status,id,familyID);
+                //Log.e("PATIENT UPDATE SUCC", idlong+"");
+            }catch (Exception e){
+
+            }
             return null;
         }
     }

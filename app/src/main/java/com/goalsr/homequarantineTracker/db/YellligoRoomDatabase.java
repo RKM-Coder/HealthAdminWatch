@@ -20,7 +20,7 @@ import com.goalsr.homequarantineTracker.resposemodel.ResStaticMasterDistricDB;
 import com.goalsr.homequarantineTracker.resposemodel.VillageModel;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientFamilyInfo;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
-import com.goalsr.homequarantineTracker.resposemodel.hwSymtommaker.ReqSymtomAdd;
+import com.goalsr.homequarantineTracker.resposemodel.hwSymtommaker.ReqHWSymtomAdd;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientFamilyDetailsItem;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
 
@@ -28,7 +28,7 @@ import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfami
 /**
  * Created by ramkrishna on 11/7/18.
  */
-@Database(entities = {ReqSymtomAdd.class,PatientListDataItem.class, PatientFamilyDetailsItem.class,QHTracker.class, ResPatientInfo.class, ResPatientFamilyInfo.class, ResStaticMasterDistricDB.class, VillageModel.class}, version = 1,exportSchema = false)
+@Database(entities = {ReqHWSymtomAdd.class,PatientListDataItem.class, PatientFamilyDetailsItem.class,QHTracker.class, ResPatientInfo.class, ResPatientFamilyInfo.class, ResStaticMasterDistricDB.class, VillageModel.class}, version = 1,exportSchema = false)
 public abstract class YellligoRoomDatabase extends RoomDatabase {
 
     private static YellligoRoomDatabase INSTANCE;
