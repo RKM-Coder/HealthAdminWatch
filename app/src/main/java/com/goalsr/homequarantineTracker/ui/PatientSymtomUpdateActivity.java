@@ -1177,7 +1177,7 @@ public class PatientSymtomUpdateActivity extends BaseActivity implements Symptom
         reqGvtPatientSymptom.setDateTime(AppConstants.getCurrentDateTimeHW());
 
         String uniqueId = UUID.randomUUID().toString().toUpperCase();
-        String imagename = PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(), PreferenceStore.CITIZEN_ID) + "_" + uniqueId + ".png";
+        String imagename =  System.currentTimeMillis()+ "_" + uniqueId + ".png";
         reqGvtPatientSymptom.setImageName(imagename);
         reqGvtPatientSymptom.setImageFilePath(filepath);
         reqGvtPatientSymptom.setLatitude(mLocation.getLatitude());

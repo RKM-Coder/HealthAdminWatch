@@ -6,9 +6,11 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+import androidx.paging.DataSource;
 
 import com.goalsr.homequarantineTracker.db.YellligoRoomDatabase;
 import com.goalsr.homequarantineTracker.db.dao.HWPatientInfoDao;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientFamilyDetailsItem;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
 
 import java.util.List;
@@ -58,8 +60,17 @@ public class HWPatientinfoRepository {
         return mDao.getListAllItemByAdminNONSYNC(false);
     }
 
+    public PatientListDataItem checkIsExist(String mob) {
+
+        return mDao.getItemMobileNoExist(mob);
+    }
+
     public LiveData<List<PatientListDataItem>> getListAllItemByAdminLivedata(int ptype){
         return mDao.getListAllItemByAdminLivedata(ptype);
+    }
+
+    public DataSource.Factory getCustomerList(int type) {
+        return mDao.getListOfcustomerbypagging(type);
     }
 
     public LiveData<List<PatientListDataItem>> getListAllItemByAdminLivedata(){
@@ -148,7 +159,13 @@ public class HWPatientinfoRepository {
         @Override
         protected Void doInBackground(Void... voids) {
             for (PatientListDataItem item : value) {
-                mDao.insertItem(item);
+
+                try {
+                    mDao.insertItem(item);
+                }catch (Exception e){
+                    Log.e("Exception",item.getCitizenID()+""+e.getMessage());
+                }
+
             }
 
             return null;

@@ -153,8 +153,9 @@ public class HomeMainActivity extends BaseActivity implements HWFamillyListAdapt
 
     private void updatView() {
         int ciD=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID);
+        String clocalid=PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(),PreferenceStore.CITIZEN_LOCALID);
         //ArrayList<ResPatientFamilyInfo> lisofpatient = new ArrayList<>();
-        getPatienFamillytViewmodel().getLivedatPAtient(ciD).observe(this, new Observer<List<PatientFamilyDetailsItem>>() {
+        getPatienFamillytViewmodel().getLivedatPAtientByLocalID(clocalid).observe(this, new Observer<List<PatientFamilyDetailsItem>>() {
             @Override
             public void onChanged(List<PatientFamilyDetailsItem> resPatientFamilyInfos) {
                 adapter.setValue((ArrayList<PatientFamilyDetailsItem>) resPatientFamilyInfos);

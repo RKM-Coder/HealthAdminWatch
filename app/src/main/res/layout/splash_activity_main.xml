@@ -47,7 +47,7 @@
         android:lineSpacingExtra="8sp"
         android:gravity="center_horizontal"
         android:layout_marginTop="20dp"
-        android:text="Health Watch"
+        android:text="Containment Watch"
         app:layout_constraintTop_toBottomOf="@id/main_logo"
 
         app:layout_constraintLeft_toLeftOf="parent"

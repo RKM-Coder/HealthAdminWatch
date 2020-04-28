@@ -1,5 +1,7 @@
 package com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
@@ -74,7 +76,7 @@ public class PatientListDataItem{
 	private String portOfArrival="";
 
 	@SerializedName("gramPanchayatCode")
-	private int gramPanchayatCode=-1;
+	private long gramPanchayatCode=-1;
 
 	@SerializedName("profileCreatedBy")
 	private int profileCreatedBy=0;
@@ -86,7 +88,7 @@ public class PatientListDataItem{
 	private String mobileNo="";
 
 	@SerializedName("villageCode")
-	private int villageCode=-1;
+	private long villageCode=-1;
 
 	@SerializedName("symptoms")
 	private String symptoms="";
@@ -350,12 +352,12 @@ public class PatientListDataItem{
 		return portOfArrival;
 	}
 
-	public void setGramPanchayatCode(int gramPanchayatCode){
-		this.gramPanchayatCode = gramPanchayatCode;
+	public long getGramPanchayatCode() {
+		return gramPanchayatCode;
 	}
 
-	public int getGramPanchayatCode(){
-		return gramPanchayatCode;
+	public void setGramPanchayatCode(long gramPanchayatCode) {
+		this.gramPanchayatCode = gramPanchayatCode;
 	}
 
 	public void setProfileCreatedBy(int profileCreatedBy){
@@ -390,12 +392,12 @@ public class PatientListDataItem{
 		return localID;
 	}
 
-	public void setVillageCode(int villageCode){
-		this.villageCode = villageCode;
+	public long getVillageCode() {
+		return villageCode;
 	}
 
-	public int getVillageCode(){
-		return villageCode;
+	public void setVillageCode(long villageCode) {
+		this.villageCode = villageCode;
 	}
 
 	public void setSymptoms(String symptoms){
@@ -454,40 +456,25 @@ public class PatientListDataItem{
 		return age;
 	}
 
-	@Override
- 	public String toString(){
-		return 
-			"PatientListDataItem{" + 
-			"startDateOfQuarantine = '" + startDateOfQuarantine + '\'' + 
-			",endDateOfQuarantine = '" + endDateOfQuarantine + '\'' + 
-			",cityCode = '" + cityCode + '\'' + 
-			",latitude = '" + latitude + '\'' + 
-			",building = '" + building + '\'' + 
-			",patient_family_details = '" + patientFamilyDetails + '\'' + 
-			",distCode = '" + distCode + '\'' + 
-			",patientQuarantineStatus = '" + patientQuarantineStatus + '\'' + 
-			",street = '" + street + '\'' + 
-			",additionalInfo = '" + additionalInfo + '\'' + 
-			",houseNo = '" + houseNo + '\'' + 
-			",isProfileUpdated = '" + isProfileUpdated + '\'' + 
-			",wardCode = '" + wardCode + '\'' + 
-			",email = '" + email + '\'' + 
-			",longitude = '" + longitude + '\'' + 
-			",talukCode = '" + talukCode + '\'' + 
-			",portOfArrival = '" + portOfArrival + '\'' + 
-			",gramPanchayatCode = '" + gramPanchayatCode + '\'' + 
-			",profileCreatedBy = '" + profileCreatedBy + '\'' + 
-			",portOfOrigin = '" + portOfOrigin + '\'' + 
-			",mobileNo = '" + mobileNo + '\'' + 
-			",localID = '" + localID + '\'' + 
-			",villageCode = '" + villageCode + '\'' + 
-			",symptoms = '" + symptoms + '\'' + 
-			",genderCode = '" + genderCode + '\'' + 
-			",profileUpdatedBy = '" + profileUpdatedBy + '\'' + 
-			",createdDate = '" + createdDate + '\'' + 
-			",name = '" + name + '\'' + 
-			",citizenID = '" + citizenID + '\'' + 
-			",age = '" + age + '\'' + 
-			"}";
+	public static DiffUtil.ItemCallback<PatientListDataItem> DIFF_CALLBACK = new  DiffUtil.ItemCallback<PatientListDataItem>() {
+		@Override
+		public boolean areItemsTheSame(@NonNull PatientListDataItem oldItem, @NonNull PatientListDataItem newItem) {
+			return oldItem.getLocalID() == newItem.getLocalID();
 		}
+
+		@Override
+		public boolean areContentsTheSame(@NonNull PatientListDataItem oldItem, @NonNull PatientListDataItem newItem) {
+			return oldItem.equals(newItem);
+		}
+	};
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == this)
+			return true;
+
+		PatientListDataItem user = (PatientListDataItem) obj;
+
+		return user.getLocalID() == this.getLocalID();
+	}
 }

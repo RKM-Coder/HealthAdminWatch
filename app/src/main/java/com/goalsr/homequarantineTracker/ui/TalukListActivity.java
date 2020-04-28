@@ -250,7 +250,7 @@ public class TalukListActivity extends BaseActivity implements TalukListAdapter.
         String message = item.getBlockName();
         intent.putExtra("name", message);
         intent.putExtra("name_id", item.getBlockCode());
-        setResult(RES_PANCHYATE, intent);
+        setResult(RES_TALUK, intent);
         finish();
 
 

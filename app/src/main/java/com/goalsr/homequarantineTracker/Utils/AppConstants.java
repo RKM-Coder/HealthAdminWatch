@@ -6,9 +6,16 @@ import android.util.Log;
 import android.widget.Toast;
 
 
+import com.goalsr.homequarantineTracker.YelligoApplication;
+import com.goalsr.homequarantineTracker.resposemodel.HWSecurity.HealthWPSecurity;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -104,6 +111,21 @@ public class AppConstants {
         }
 
         return str;
+    }
+
+    public static String addDay(String oldDate, int numberOfDays) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        Calendar c = Calendar.getInstance();
+        try {
+            c.setTime(dateFormat.parse(oldDate));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        c.add(Calendar.DAY_OF_YEAR,numberOfDays);
+        dateFormat=new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        Date newDate=new Date(c.getTimeInMillis());
+        String resultDate=dateFormat.format(newDate);
+        return resultDate;
     }
 
 
@@ -338,6 +360,41 @@ public class AppConstants {
         double dist = (double) (earthRadius * c);
 
         return dist;
+
+    }
+
+    public static HealthWPSecurity getHealthWatchSecurityObjectupdated(){
+        HealthWPSecurity securityObject =new HealthWPSecurity();
+        securityObject.setName("BhoomiWapi@2020");
+
+        String passvalue=getPassValue("BhoomiWapi@2020");
+        securityObject.setPassphrase(passvalue);
+//        securityObject.setPassphrase("c2a2b557-c792-48f9-9ccd-56fda45974b9");
+
+        return securityObject;
+    }
+
+    public static String getPassValue(String Uname){
+        String result="";
+        int rollid=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID);
+        int uid=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login);
+        String unameRoleUSer = uid + Uname + rollid;
+        //byte[] b = s.getBytes(StandardCharsets.US_ASCII);
+        byte[] RoleUSerbytes = unameRoleUSer.getBytes();
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(unameRoleUSer.getBytes(StandardCharsets.US_ASCII));
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                result = Base64.getEncoder().encodeToString(hash);
+            }
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        //Log.e("Keyvalue",result);
+
+        return result;
 
     }
 

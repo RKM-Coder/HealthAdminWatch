@@ -14,6 +14,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -32,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static com.goalsr.homequarantineTracker.Utils.AppConstants.getHealthWatchSecurityObjectupdated;
 
 public class DasboardPType extends BaseActivity {
 
@@ -96,7 +100,11 @@ public class DasboardPType extends BaseActivity {
     }
 
     private void startWorkManager() {
-         PeriodicWorkRequest periodicWork = new PeriodicWorkRequest.Builder(MysyncServiceWorkmanager.class, 30, TimeUnit.MINUTES)
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+        PeriodicWorkRequest periodicWork = new PeriodicWorkRequest.Builder(MysyncServiceWorkmanager.class, 30, TimeUnit.MINUTES)
+                 .setConstraints(constraints)
                 .addTag(AppConstants.TRACKTAG)
                 .build();
         //WorkManager.getInstance().enqueueUniquePeriodicWork("Location", ExistingPeriodicWorkPolicy.REPLACE, periodicWork);
@@ -139,6 +147,7 @@ public class DasboardPType extends BaseActivity {
                 makesyncthenSync();
                 break;
             case R.id.img_4:
+                //getHealthWatchSecurityObjectupdated();
                 makesyncthenLogout();
                 break;
             case R.id.txtrelationChange:

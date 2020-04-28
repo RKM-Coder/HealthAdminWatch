@@ -3,6 +3,7 @@ package com.goalsr.homequarantineTracker.apiservice;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.goalsr.homequarantineTracker.Utils.AppConstants;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
 import com.goalsr.homequarantineTracker.resposemodel.hwSymtommaker.ReqHWSymtomAdd;
@@ -53,7 +54,7 @@ public class FileUploaderSymptom {
         Call<JsonElement> uploadFile(@Url String url, @Part MultipartBody.Part file, @Header("Authorization") String authorization);*/
 
         @Multipart
-        @POST("WebApi_Hwatch/api/HealthWatch/Multipart_UpdatePrimaryPatientSymptoms")
+        @POST("api/HealthWatch/Multipart_UpdatePrimaryPatientSymptoms")
         Call<ResSymptomInsertUpdate> uploadFilewithsymptom(@Part MultipartBody.Part file,
                                                            @Part("imageName") RequestBody imageName,
                                                            @Part("MobileImages") RequestBody MobileImages,
@@ -71,7 +72,7 @@ public class FileUploaderSymptom {
                                                           );
 
         @Multipart
-        @POST("WebApi_Hwatch/api/HealthWatch/Multipart_UpdatePatientFamilySymptoms")
+        @POST("api/HealthWatch/Multipart_UpdatePatientFamilySymptoms")
         Call<ResSymptomInsertUpdate> uploadFilewithsymptomfamily(@Part MultipartBody.Part file,
                                                            @Part("imageName") RequestBody imageName,
                                                            @Part("MobileImages") RequestBody MobileImages,
@@ -192,9 +193,9 @@ public class FileUploaderSymptom {
 
 
         String p_security_name="BhoomiWapi@2020";
-        String p_security_passphrase="c2a2b557-c792-48f9-9ccd-56fda45974b9";
+        String p_security_passphrase= AppConstants.getPassValue(p_security_name);
         int role_id= PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID);
-        String userID="PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login)";
+        int userID=PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login);
 
 //        call=uploadInterface.uploadFilewithsymptom(filePart,files.get(index).getImageName(),"mobileimage",)
         RequestBody filename = RequestBody.create(files.get(index).getImageName(),MediaType.parse("text/plain"));
@@ -209,7 +210,7 @@ public class FileUploaderSymptom {
         RequestBody psecurity = RequestBody.create(p_security_name,MediaType.parse("text/plain"));
         RequestBody psecuritypass = RequestBody.create(p_security_passphrase,MediaType.parse("text/plain"));
         RequestBody roleid = RequestBody.create(""+role_id,MediaType.parse("text/plain"));
-        RequestBody userid = RequestBody.create(userID,MediaType.parse("text/plain"));
+        RequestBody userid = RequestBody.create(""+userID,MediaType.parse("text/plain"));
 
         if (files.get(index).getTypeofpatient().equalsIgnoreCase("self")){
             call  = uploadInterface.uploadFilewithsymptom(/*uploadURL,*/ filePart,filename,
@@ -234,7 +235,9 @@ public class FileUploaderSymptom {
                 }else{
                     responses[index] = "";
                 }*/
-                responses.add(response.body());
+                if (response.body()!=null) {
+                    responses.add(response.body());
+                }
                 uploadNext();
             }
 

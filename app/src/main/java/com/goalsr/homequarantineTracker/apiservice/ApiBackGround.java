@@ -1,7 +1,9 @@
 package com.goalsr.homequarantineTracker.apiservice;
 
 import android.content.Context;
+import android.util.Log;
 
+import com.goalsr.homequarantineTracker.Utils.AppConstants;
 import com.goalsr.homequarantineTracker.Utils.FileUploader;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
@@ -78,8 +80,9 @@ public class ApiBackGround {
 
         ReqInsertUpdatePatientInfo reqInsertUpdatePatientInfo=new ReqInsertUpdatePatientInfo();
         reqInsertUpdatePatientInfo.setPrimary_patient_information(getListOfPatientInsertUpdateInfo());
+        reqInsertUpdatePatientInfo.setUser_id(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));
         reqInsertUpdatePatientInfo.setRole_id(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID));
-        reqInsertUpdatePatientInfo.setP_security(getHealthWatchSecurityObject());
+        reqInsertUpdatePatientInfo.setP_security(AppConstants.getHealthWatchSecurityObjectupdated());
 
         networkService.makeHWPatientInfoinsertupdate(reqInsertUpdatePatientInfo, new NetworkService.NetworkServiceListener() {
             @Override
@@ -111,8 +114,9 @@ public class ApiBackGround {
 
         ReqInsertUpdatePatientInfo reqInsertUpdatePatientInfo=new ReqInsertUpdatePatientInfo();
         reqInsertUpdatePatientInfo.setPrimary_patient_information(getListOfPatientInsertUpdateInfo());
+        reqInsertUpdatePatientInfo.setUser_id(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));
         reqInsertUpdatePatientInfo.setRole_id(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID));
-        reqInsertUpdatePatientInfo.setP_security(getHealthWatchSecurityObject());
+        reqInsertUpdatePatientInfo.setP_security(AppConstants.getHealthWatchSecurityObjectupdated());
 
         networkService.makeHWPatientInfoinsertupdate(reqInsertUpdatePatientInfo,null);
 
@@ -121,8 +125,9 @@ public class ApiBackGround {
 
         ReqInsertUpdatePatientFamilyInfo reqInsertUpdatePatientInfo=new ReqInsertUpdatePatientFamilyInfo();
         reqInsertUpdatePatientInfo.setPatient_family_information(getListOfPatientFamilyInsertUpdateInfoNonEmptydata());
+        reqInsertUpdatePatientInfo.setUser_id(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));
         reqInsertUpdatePatientInfo.setRole_id(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID));
-        reqInsertUpdatePatientInfo.setP_security(getHealthWatchSecurityObject());
+        reqInsertUpdatePatientInfo.setP_security(AppConstants.getHealthWatchSecurityObjectupdated());
 
         networkService.makeHWPatientFamilyInfoinsertupdate(reqInsertUpdatePatientInfo, new NetworkService.NetworkServiceListener() {
             @Override
@@ -156,8 +161,9 @@ public class ApiBackGround {
 
         ReqInsertUpdatePatientFamilyInfo reqInsertUpdatePatientInfo=new ReqInsertUpdatePatientFamilyInfo();
         reqInsertUpdatePatientInfo.setPatient_family_information(getListOfPatientFamilyInsertUpdateInfoEmptyFid());
+        reqInsertUpdatePatientInfo.setUser_id(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.USER_ID_login));
         reqInsertUpdatePatientInfo.setRole_id(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID));
-        reqInsertUpdatePatientInfo.setP_security(getHealthWatchSecurityObject());
+        reqInsertUpdatePatientInfo.setP_security(AppConstants.getHealthWatchSecurityObjectupdated());
 
         networkService.makeHWPatientFamilyInfoinsertupdate(reqInsertUpdatePatientInfo, new NetworkService.NetworkServiceListener() {
             @Override
@@ -189,7 +195,7 @@ public class ApiBackGround {
         ReqInsertUpdatePatientFamilyInfo reqInsertUpdatePatientInfo=new ReqInsertUpdatePatientFamilyInfo();
         reqInsertUpdatePatientInfo.setPatient_family_information(getListOfPatientFamilyInsertUpdateInfo());
         reqInsertUpdatePatientInfo.setRole_id(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID));
-        reqInsertUpdatePatientInfo.setP_security(getHealthWatchSecurityObject());
+        reqInsertUpdatePatientInfo.setP_security(AppConstants.getHealthWatchSecurityObjectupdated());
 
         networkService.makeHWPatientFamilyInfoinsertupdate(reqInsertUpdatePatientInfo,null);
 
@@ -216,6 +222,8 @@ public class ApiBackGround {
                         if (responses.size()>0){
                             for (ResSymptomInsertUpdate item:responses){
                                 if (item.getStatusCode()==200){
+                                    Log.e("Resultservice", item.getPatientupdatedata().getLocalID() );
+
                                     symptoAddRepository.clearbyID(item.getPatientupdatedata().getLocalID());
                                 }
                             }
@@ -260,6 +268,7 @@ public class ApiBackGround {
                         if (responses.size()>0){
                             for (ResSymptomInsertUpdate item:responses){
                                 if (item.getStatusCode()==200){
+                                    Log.e("Resultservice", item.getPatientupdatedata().getLocalID() );
                                     symptoAddRepository.clearbyID(item.getPatientupdatedata().getLocalID());
                                 }
                             }
@@ -325,13 +334,13 @@ public class ApiBackGround {
     private List<PatientFamilyDetailsItem> getListOfPatientFamilyInsertUpdateInfoNoEmptyFMID() {
         return hwPatientFamilyinfoRepository.getPatientFamilyInfoNONSYNC();
     }
-    private HealthWPSecurity getHealthWatchSecurityObject(){
+   /* public HealthWPSecurity getHealthWatchSecurityObject(){
         HealthWPSecurity securityObject =new HealthWPSecurity();
         securityObject.setName("BhoomiWapi@2020");
         securityObject.setPassphrase("c2a2b557-c792-48f9-9ccd-56fda45974b9");
 
         return securityObject;
-    }
+    }*/
 
 
 

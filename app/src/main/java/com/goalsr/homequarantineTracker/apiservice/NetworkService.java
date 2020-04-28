@@ -122,8 +122,14 @@ public class NetworkService {
                         if (response.body().getStatus_code() == 200) {
                             listener.onSuccess(response.body(), true);
 
-                        } else {
+                        } else if (response.body().getStatus_code() == 400) {
+                            {
 
+                                if (listener != null) {
+                                    ResHWGetOtp res = new ResHWGetOtp();
+                                    listener.onFailure(makeErrorResponse(res, "" + response.body().getStatus_messaage()));
+                                }
+                            }
                         }
                     }
 
@@ -209,7 +215,8 @@ public class NetworkService {
     }
 
     public void getHWPatientFamillyInfo(ReqGetPatientinfobody request, NetworkServiceListener listener) {
-        /* String s=new Gson().toJson(request);*/
+         String s=new Gson().toJson(request);
+         Log.e("resss0",s);
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
         Call<ResPatientData> response = apiService.getHWPatientFamilyInfo(request);
@@ -245,21 +252,25 @@ public class NetworkService {
     }
 
     private void insetpatientdtatainDB(Response<ResPatientData> dataResponse, NetworkServiceListener listener) {
-
+        hwPatientinfoRepository.insert(dataResponse.body().getPatientListData());
         for (PatientListDataItem item : dataResponse.body().getPatientListData()) {
-            hwPatientinfoRepository.insert(item);
+
             if (item.getPatientFamilyDetails().size() > 0) {
+
+                hwPatientFamilyinfoRepository.insert(item.getPatientFamilyDetails());
 //                List<PatientFamilyDetailsItem> familyDetailsItems=new ArrayList<>();
-                for (PatientFamilyDetailsItem itemfamily:item.getPatientFamilyDetails()){
+                /*for (PatientFamilyDetailsItem itemfamily:item.getPatientFamilyDetails()){
                     itemfamily.setCitizenIDLocalId(item.getLocalID());
                     hwPatientFamilyinfoRepository.insertitem(itemfamily);
-                }
+                }*/
 
 
 
 
             }
         }
+
+        goForfamilyCLocalIdupdate(dataResponse.body().getPatientListData());
 
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -268,16 +279,33 @@ public class NetworkService {
                 if (listener!=null)
                 listener.onSuccess(dataResponse.body(), true);
             }
-        }, 4000);
+        }, 1000);
 
 
     }
 
+    private void goForfamilyCLocalIdupdate(List<PatientListDataItem> patientListData) {
+        for (PatientListDataItem item : patientListData) {
+
+            if (item.getPatientFamilyDetails().size() > 0) {
+
+//                hwPatientFamilyinfoRepository.insert(item.getPatientFamilyDetails());
+//                List<PatientFamilyDetailsItem> familyDetailsItems=new ArrayList<>();
+                for (PatientFamilyDetailsItem itemfamily : item.getPatientFamilyDetails()) {
+                    itemfamily.setCitizenIDLocalId(item.getLocalID());
+                    hwPatientFamilyinfoRepository.update(itemfamily);
+                }
+
+
+            }
+        }
+    }
+
     public void makeHWPatientInfoinsertupdate(ReqInsertUpdatePatientInfo request, NetworkServiceListener listener) {
         Log.e("PATIENT UPDATE", "reqhit--"+request.getPrimary_patient_information().size());
-        /*if (request.getPrimary_patient_information().size() > 0) {*/
-            //String s = new Gson().toJson(request);
-            //Log.e("DATA", s);
+        if (request.getPrimary_patient_information().size() > 0) {
+            String s = new Gson().toJson(request);
+            Log.e("DATA", s);
             ApiInterface apiService =
                     ApiClient.getClient().create(ApiInterface.class);
 
@@ -290,13 +318,13 @@ public class NetworkService {
                         if (response.body().getStatusCode() == 200) {
                             if (response.body().getPatientupdatedata().size() > 0) {
                                 for (PatientupdatedataItem item : response.body().getPatientupdatedata()) {
-                                    Log.e("PATIENT UPDATE", item.getLocalID() + "-------------------" + item.getCitizenID());
+                                    Log.e("Resultservice", item.getLocalID() + "-------------------" + item.getCitizenID());
                                     hwPatientinfoRepository.updatesyncdatainserupdatepatient(true, item.getLocalID(), item.getCitizenID());
-                                    hwPatientFamilyinfoRepository.updatesyncdatainserupdateFamilyCID(true, item.getLocalID(), item.getCitizenID());
-                                    symptoAddRepository.updatesyncdatainserupdatepatientByCitizenId(true, item.getLocalID(), item.getCitizenID());
+                                    hwPatientFamilyinfoRepository.updatesyncdatainserupdateFamilyCID(false, item.getLocalID(), item.getCitizenID());
+                                    symptoAddRepository.updatesyncdatainserupdatepatientByCitizenId(false, item.getLocalID(), item.getCitizenID());
                                 }
                             }
-                            if (listener!=null){
+                            if (listener != null) {
                                 final Handler handler = new Handler();
                                 handler.postDelayed(new Runnable() {
                                     @Override
@@ -306,8 +334,8 @@ public class NetworkService {
                                 }, 2000);
                             }
 
-                        }else if (response.body().getStatusCode() == 400) {
-                            if (listener!=null){
+                        } else if (response.body().getStatusCode() == 400) {
+                            if (listener != null) {
                                 final Handler handler = new Handler();
                                 handler.postDelayed(new Runnable() {
                                     @Override
@@ -319,9 +347,8 @@ public class NetworkService {
                         }
 
 
-
-                    }else {
-                        if (listener!=null){
+                    } else {
+                        if (listener != null) {
                             listener.onFailure("Something went wrong");
                         }
                     }
@@ -330,19 +357,24 @@ public class NetworkService {
                 @Override
                 public void onFailure(Call<Respatientinsertupdate> call, Throwable t) {
 
-                    if (listener!=null){
+                    if (listener != null) {
                         listener.onFailure("Something went wrong");
                     }
 
 
                 }
             });
+        }else {
+            if (listener != null) {
+                listener.onSuccess("success",false);
+            }
+        }
 
     }
 
     public void makeHWPatientFamilyInfoinsertupdate(ReqInsertUpdatePatientFamilyInfo request, NetworkServiceListener listener) {
         Log.e("PATIENT UPDATE", "reqhit--"+request.getPatient_family_information().size());
-        /*if (request.getPatient_family_information().size() > 0) {*/
+        if (request.getPatient_family_information().size() > 0) {
             String s = new Gson().toJson(request);
             Log.e("DATA", s);
             ApiInterface apiService =
@@ -359,9 +391,9 @@ public class NetworkService {
                         if (response.body().getStatusCode() == 200) {
                             if (response.body().getPatientupdatedata().size() > 0) {
                                 for (PatientupdatedataItem item : response.body().getPatientupdatedata()) {
-                                    Log.e("PATIENT UPDATE", item.getLocalID() + "-------------------" + item.getCitizenID());
+                                    Log.e("Resultservice", item.getLocalID() + "-------------------" + item.getCitizenID());
                                     hwPatientFamilyinfoRepository.updatesyncdatainserupdatepatient(true, item.getLocalID(), item.getCitizenID());
-                                    symptoAddRepository.updatesyncdatainserupdatepatientByFamilyID(true, item.getLocalID(), item.getCitizenID());
+                                    symptoAddRepository.updatesyncdatainserupdatepatientByFamilyID(false, item.getLocalID(), item.getCitizenID());
                                 }
                             }
 
@@ -379,6 +411,10 @@ public class NetworkService {
                             }
                         }
 
+                    }else {
+                        if (listener!=null){
+                            listener.onFailure("Something went wrong");
+                        }
                     }
                 }
 
@@ -390,6 +426,11 @@ public class NetworkService {
 
                 }
             });
+        }else {
+            if (listener != null) {
+                listener.onSuccess("success",false);
+            }
+        }
 
     }
 

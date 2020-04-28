@@ -23,7 +23,7 @@
                 android:id="@+id/tv_header_fac"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Health Watch"
+                android:text="Containment Watch"
                 android:textColor="@color/colorWhite"
                 android:textSize="18sp"
                 android:layout_marginLeft="@dimen/activity_horizontal_margin"

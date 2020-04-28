@@ -31,7 +31,9 @@ import com.goalsr.homequarantineTracker.base.BaseActivity;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ReqPatient;
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
 import com.goalsr.homequarantineTracker.resposemodel.gotOtpreq.ResGvtValidOtp;
+import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ReqHWOtp;
 import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ReqHWOtpValidate;
+import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ResHWGetOtp;
 import com.goalsr.homequarantineTracker.resposemodel.hwreqotp.ResOtpValidate;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ReqOtpValidGvt;
 import com.goalsr.homequarantineTracker.resposemodel.otpvalidGovt.ResGvtValidOtpValid;
@@ -289,7 +291,7 @@ public class OtpCheckerActivity extends BaseActivity {
         switch (view.getId()) {
             case R.id.tv_resendOTP:
 
-               // requestotp();
+                requestotp();
                 break;
             case R.id.btn_login:
                 if (Validation()) {
@@ -347,50 +349,56 @@ public class OtpCheckerActivity extends BaseActivity {
     private void requestotp() {
 
         showProgressDialogStatic();
-            networkService.makeAppLogin(mobnum, new NetworkService.NetworkServiceListener() {
-                @Override
-                public void onFailure(Object response) {
-                    hideProgressDialogStatic();
-                    if (response instanceof ResGvtValidOtp) {
-                        String error = ((ResGvtValidOtp) response).getMessageToDisplay();
-                        if (error != null) {
-                            Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG).show();
-                        }
-                    }
+        ReqHWOtp reqHWOtp=new ReqHWOtp();
+        reqHWOtp.setMobile_number(mobnum);
+        reqHWOtp.setP_security(getCommonApi().getHealthWatchSecurityObject());
 
-                }
 
-                @Override
-                public void onAuthFail(Object error) {
-                    hideProgressDialogStatic();
-                }
-
-                @Override
-                public void onSuccess(Object response, Boolean cancelFlag) {
-                    hideProgressDialogStatic();
-
-                    if (response instanceof ResGvtValidOtp) {
-                        if (((ResGvtValidOtp) response).getStatuscode() == 200) {
-                            if (((ResGvtValidOtp) response).isStatus()) {
-                                PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.ROLL_ID, ((ResGvtValidOtp) response).getRoleId());
-
-                                staerCountTimer();
-                              /*  Toast.makeText(getApplicationContext(), "The verification code has been sent to your mobile number.", Toast.LENGTH_LONG).show();
-                                Intent i = new Intent(getApplicationContext(), OtpCheckerActivity.class);
-                                i.putExtra("MobNumber", number);
-                                i.putExtra("rollid", rollid);
-                                startActivity(i);*/
-                            } else {
-                                Toast.makeText(getApplicationContext(), "Please Try Again", Toast.LENGTH_LONG).show();
-                            }
-                        } else {
-                            if (((ResGvtValidOtp) response).getMessageToDisplay() != null) {
-                                Toast.makeText(getApplicationContext(), "" + ((ResGvtValidOtp) response).getMessageToDisplay(), Toast.LENGTH_LONG).show();
-                            }
-                        }
+        networkService.makeHWReqgetOTTPLogin(reqHWOtp, new NetworkService.NetworkServiceListener() {
+            @Override
+            public void onFailure(Object response) {
+                hideProgressDialogStatic();
+                if (response instanceof ResHWGetOtp) {
+                    String error = ((ResHWGetOtp) response).getStatus_messaage();
+                    if (error != null) {
+                        Toast.makeText(getApplicationContext(), ""+error, Toast.LENGTH_LONG).show();
                     }
                 }
-            });
+
+            }
+
+            @Override
+            public void onAuthFail(Object error) {
+                hideProgressDialogStatic();
+            }
+
+            @Override
+            public void onSuccess(Object response, Boolean cancelFlag) {
+                hideProgressDialogStatic();
+
+                if (response instanceof ResHWGetOtp) {
+                    if (((ResHWGetOtp) response).getStatus_code() == 200) {
+
+                        if (((ResHWGetOtp) response).getData().getRole_id()==1) {
+                            staerCountTimer();
+                           /* PreferenceStore.getPrefernceHelperInstace().setIntValue(YelligoApplication.getContext(), PreferenceStore.ROLL_ID, ((ResHWGetOtp) response).getData().getRole_id());
+                            Toast.makeText(getApplicationContext(), "The verification code has been sent to your mobile number.", Toast.LENGTH_LONG).show();
+                            Intent i = new Intent(getApplicationContext(), OtpCheckerActivity.class);
+                            i.putExtra("MobNumber", mobnum);
+                            i.putExtra("rollid", ((ResHWGetOtp) response).getData().getRole_id());
+                            startActivity(i);*/
+                        }else{
+                            Toast.makeText(getApplicationContext(), "This App to be used only by the quarantined person. Please login to officer's App", Toast.LENGTH_LONG).show();
+                        }
+
+                    } else {
+                        if (((ResHWGetOtp) response).getStatus_messaage() != null) {
+                            Toast.makeText(getApplicationContext(), "" + ((ResHWGetOtp) response).getStatus_messaage(), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+            }
+        });
 
     }
 

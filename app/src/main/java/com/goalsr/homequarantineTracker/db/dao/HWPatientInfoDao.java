@@ -1,6 +1,7 @@
 package com.goalsr.homequarantineTracker.db.dao;
 
 import androidx.lifecycle.LiveData;
+import androidx.paging.DataSource;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
@@ -8,6 +9,7 @@ import androidx.room.Query;
 import androidx.room.Update;
 
 import com.goalsr.homequarantineTracker.resposemodel.getPatientinfo.ResPatientInfo;
+import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientFamilyDetailsItem;
 import com.goalsr.homequarantineTracker.resposemodel.hwatchpatientdetailwithfamily.PatientListDataItem;
 
 import java.util.List;
@@ -29,7 +31,8 @@ public interface HWPatientInfoDao {
 
     @Query("SELECT * from hwatch_patientifo where localID =:cid")
     PatientListDataItem getListAllItembyLocalId(String cid);
-
+    @Query("SELECT * from hwatch_patientifo where mobileNo =:mobile")
+    PatientListDataItem getItemMobileNoExist(String mobile);
 
     @Query("SELECT * from hwatch_patientifo where name not null order by Name ASC")
     List<PatientListDataItem> getListAllItemByAdmin();
@@ -45,6 +48,9 @@ public interface HWPatientInfoDao {
 
     @Query("UPDATE hwatch_patientifo SET syncstatus = :synstatus,citizenID=:citiId  WHERE localID =:localid ")
     long updateinsertpatientsyncstatus(boolean synstatus, String localid, int citiId);
+
+    @Query("SELECT * from hwatch_patientifo where name not null and patientQuarantineStatus =:ptype order by Name ASC")
+    public abstract DataSource.Factory<Integer,PatientListDataItem> getListOfcustomerbypagging(int ptype);
 
     /*@Query("SELECT * from qh_travel_tracking where syncstutas= :status")
     List<QHTracker> getListAllItemNonSync(boolean status);

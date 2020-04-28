@@ -14,7 +14,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 //import com.amitshekhar.DebugDB;
-import com.amitshekhar.DebugDB;
+//import com.amitshekhar.DebugDB;
 import com.goalsr.homequarantineTracker.R;
 import com.goalsr.homequarantineTracker.Utils.AppConstants;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
@@ -58,7 +58,7 @@ public class SplashMainActivity extends BaseActivity {
         } else {
             continueLoading();
         }
-        Log.e("DBaddress", DebugDB.getAddressLog());
+       // Log.e("DBaddress", DebugDB.getAddressLog());
 
     }
     private void initMvp() {

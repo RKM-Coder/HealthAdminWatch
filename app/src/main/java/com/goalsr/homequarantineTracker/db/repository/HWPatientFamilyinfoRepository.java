@@ -80,9 +80,9 @@ public class HWPatientFamilyinfoRepository {
         // mDao.insertItem(value);
     }
 
-    public void updatesyncdatainserupdateFamilyCID(boolean status, String id,int familyId) {
+    public void updatesyncdatainserupdateFamilyCID(boolean status, String lid,int cid) {
 
-        new UpdateAsynctaskByCID(mDao, status, id,familyId).execute();
+        new UpdateAsynctaskByCID(mDao, status, lid,cid).execute();
         // mDao.insertItem(value);
     }
 
@@ -132,9 +132,9 @@ public class HWPatientFamilyinfoRepository {
         return mDao.getListAllItemLivedata(cid);
     }
 
-    public LiveData<List<PatientFamilyDetailsItem>> getListAllItemLivedataByLocalId(int cid) {
+    public LiveData<List<PatientFamilyDetailsItem>> getListAllItemLivedataByLocalId(String cid) {
 
-        return mDao.getListAllItemLivedata(cid);
+        return mDao.getListAllItemLivedataCLOCAL(cid);
     }
 
     private class InsertAsynctask extends AsyncTask<Void, Void, Void> {

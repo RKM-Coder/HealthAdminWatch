@@ -42,6 +42,9 @@ public interface HWPatientFamilyInfoDao {
     @Query("SELECT * from hwatch_family_info where citizenID =:cid")
     LiveData<List<PatientFamilyDetailsItem>> getListAllItemLivedata(int cid);
 
+    @Query("SELECT * from hwatch_family_info where citizenIDLocalId =:cid")
+    LiveData<List<PatientFamilyDetailsItem>> getListAllItemLivedataCLOCAL(String cid);
+
     @Query("SELECT * from hwatch_family_info where familyLocalID =:cid")
     LiveData<List<PatientFamilyDetailsItem>> getListAllItemLivedataBylocalId(int cid);
 
@@ -60,8 +63,8 @@ public interface HWPatientFamilyInfoDao {
     @Query("UPDATE hwatch_family_info SET syncstatus = :synstatus,familyMemberID =:famID  WHERE familyLocalID =:id ")
     void updatestatus(boolean synstatus, String id,int famID);
 
-    @Query("UPDATE hwatch_family_info SET syncstatus = :synstatus,citizenID =:famID  WHERE citizenIDLocalId =:id and citizenID==0")
-    void updatestatusCid(boolean synstatus, String id,int famID);
+    @Query("UPDATE hwatch_family_info SET syncstatus = :synstatus,citizenID =:ciid  WHERE citizenIDLocalId =:l_id and citizenID==0")
+    void updatestatusCid(boolean synstatus, String l_id,int ciid);
 
     /*@Query("SELECT * from qh_travel_tracking where syncstutas= :status")
     List<QHTracker> getListAllItemNonSync(boolean status);

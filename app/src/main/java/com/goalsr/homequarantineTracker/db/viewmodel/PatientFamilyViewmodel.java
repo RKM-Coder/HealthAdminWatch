@@ -28,6 +28,9 @@ public class PatientFamilyViewmodel extends AndroidViewModel {
     public LiveData<List<PatientFamilyDetailsItem>> getLivedatPAtient(int cid){
         return patientinfoRepository.getListAllItemLivedata(cid);
     }
+    public LiveData<List<PatientFamilyDetailsItem>> getLivedatPAtientByLocalID(String cid){
+        return patientinfoRepository.getListAllItemLivedataByLocalId(cid);
+    }
     public LiveData<List<PatientFamilyDetailsItem>> getLivedatPAtientbylocalid(int cid){
         return patientinfoRepository.getListAllItemLivedata(cid);
     }

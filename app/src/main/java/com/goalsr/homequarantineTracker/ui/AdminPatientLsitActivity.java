@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.goalsr.homequarantineTracker.R;
+import com.goalsr.homequarantineTracker.Utils.AppConstants;
 import com.goalsr.homequarantineTracker.Utils.PreferenceStore;
 import com.goalsr.homequarantineTracker.YelligoApplication;
 import com.goalsr.homequarantineTracker.adapter.HWPatientListAdapter;
@@ -228,7 +229,8 @@ public class AdminPatientLsitActivity extends BaseActivity implements HWPatientL
                 reqPatient.setGram_Panchayat_code(-1);
                 reqPatient.setTaluk_code(-1);
                 reqPatient.setWard_code(-1);
-                reqPatient.setP_security(getCommonApi().getHealthWatchSecurityObject());
+                reqPatient.setRole_id(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.ROLL_ID));
+                reqPatient.setP_security(AppConstants.getHealthWatchSecurityObjectupdated());
                 networkService.getHWPatientFamillyInfo(reqPatient, new NetworkService.NetworkServiceListener() {
                     @Override
                     public void onFailure(Object response) {

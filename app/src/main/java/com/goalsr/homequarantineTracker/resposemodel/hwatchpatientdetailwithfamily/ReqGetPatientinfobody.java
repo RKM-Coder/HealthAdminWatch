@@ -4,6 +4,7 @@ import com.goalsr.homequarantineTracker.resposemodel.HWSecurity.HealthWPSecurity
 
 public class ReqGetPatientinfobody {
 	private int user_id;
+	private int role_id;
 	private int district_code;
 	private int ward_code;
 	private int city_code;
@@ -11,6 +12,15 @@ public class ReqGetPatientinfobody {
 	private int gram_Panchayat_code;
 
 	private HealthWPSecurity p_security;
+
+
+	public int getRole_id() {
+		return role_id;
+	}
+
+	public void setRole_id(int role_id) {
+		this.role_id = role_id;
+	}
 
 	public int getUser_id() {
 		return user_id;

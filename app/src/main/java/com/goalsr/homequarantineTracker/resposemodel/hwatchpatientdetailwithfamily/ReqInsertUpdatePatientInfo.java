@@ -10,8 +10,18 @@ public class ReqInsertUpdatePatientInfo {
     private List<PatientListDataItem> primary_patient_information;
 
     private int role_id;
+    private int user_id;
 
     private HealthWPSecurity p_security;
+
+
+    public int getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(int user_id) {
+        this.user_id = user_id;
+    }
 
     public List<PatientListDataItem> getPrimary_patient_information() {
         return primary_patient_information;

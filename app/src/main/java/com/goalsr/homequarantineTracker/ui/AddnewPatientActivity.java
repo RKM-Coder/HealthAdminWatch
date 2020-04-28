@@ -793,6 +793,8 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
 
                 if (simpleCheckedTextView.isChecked()) {
                     isForignTip = false;
+                    etPoarrival.setText("");
+                    etPoorigin.setText("");
                     simpleCheckedTextView.setChecked(false);
                     llpoarrival.setVisibility(View.GONE);
                     llpoorigin.setVisibility(View.GONE);
@@ -1059,6 +1061,10 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
         if (daovvalue.equalsIgnoreCase("dao")) {
             startdate = uri;
             txtDOA.setText("" + AppConstants.dateFormatChangerGVT(uri));
+            if (!startdate.equalsIgnoreCase("")) {
+                enddate = AppConstants.addDay(startdate, 14);
+                txtQurantinedate.setText("" + AppConstants.dateFormatChangerGVT(enddate));
+            }
 
         } else if (daovvalue.equalsIgnoreCase("qao")) {
             enddate = uri;
@@ -1097,6 +1103,7 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             resPatientInfoupdate.setGenderCode(selectedgender);
             resPatientInfoupdate.setStartDateOfQuarantine(startdate);
             resPatientInfoupdate.setEndDateOfQuarantine(enddate);
+            resPatientInfoupdate.setDateOfFirstSymptom(dateofsymtom);
             resPatientInfoupdate.setPortOfOrigin(etPoorigin.getText().toString());
             resPatientInfoupdate.setPortOfArrival(etPoarrival.getText().toString());
             resPatientInfoupdate.setHouseNo(etHouseno.getText().toString());
@@ -1108,6 +1115,8 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             resPatientInfoupdate.setHisOfLabCaseConfirmed(isHistoryContactLab);
             resPatientInfoupdate.setRiskArea(selctedriskarea);
             resPatientInfoupdate.setAreaType(selectaretype);
+
+            resPatientInfoupdate.setHavingTravelHistory(isForignTip);
 
 
             //info symtom
@@ -1124,8 +1133,8 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             resPatientInfoupdate.setCityCode(Integer.parseInt(selctedCityId));
             resPatientInfoupdate.setWardCode(Integer.parseInt(selctedWordId));
             resPatientInfoupdate.setTalukCode(Integer.parseInt(selctedtalukid));
-            resPatientInfoupdate.setGramPanchayatCode(Integer.parseInt(selctedpanchyateId));
-            resPatientInfoupdate.setVillageCode(Integer.parseInt(selctedvillageId));
+            resPatientInfoupdate.setGramPanchayatCode(Long.parseLong(selctedpanchyateId));
+            resPatientInfoupdate.setVillageCode(Long.parseLong(selctedvillageId));
             resPatientInfoupdate.setWardBBMPID(Integer.parseInt(selctedbbmpwordId));
             resPatientInfoupdate.setZoneBBMPID(Integer.parseInt(selctedbbmpzoneid));
 
@@ -1165,7 +1174,7 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
 
                     hideProgressDialogStatic();
 
-                    showDialog("Successfully added", true);
+                    showDialogAlert("Successfully added", true);
 
                 }
             }, 1000);
@@ -1186,8 +1195,8 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             } else {
                 resPatientfamilyInfoupdate = resPatientFamilyInfo;
             }
-            resPatientfamilyInfoupdate.setCitizenID(resPatientInfo.getCitizenID());
-
+            resPatientfamilyInfoupdate.setCitizenID(PreferenceStore.getPrefernceHelperInstace().getIntValue(YelligoApplication.getContext(),PreferenceStore.CITIZEN_ID));
+            resPatientfamilyInfoupdate.setCitizenIDLocalId(PreferenceStore.getPrefernceHelperInstace().getString(YelligoApplication.getContext(),PreferenceStore.CITIZEN_LOCALID));
             resPatientfamilyInfoupdate.setLatitude(mLocation.getLatitude());
             resPatientfamilyInfoupdate.setLongitude(mLocation.getLongitude());
 
@@ -1199,10 +1208,11 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             resPatientfamilyInfoupdate.setRelationShipCode(selectedrelation);//
             resPatientfamilyInfoupdate.setStartDateOfQuarantine(startdate);
             resPatientfamilyInfoupdate.setEndDateOfQuarantine(enddate);
+            resPatientfamilyInfoupdate.setDateOfFirstSymptom(dateofsymtom);
             resPatientfamilyInfoupdate.setPortOfOrigin(etPoorigin.getText().toString());
             resPatientfamilyInfoupdate.setPortOfArrival(etPoarrival.getText().toString());
 
-
+            resPatientfamilyInfoupdate.setHavingTravelHistory(isForignTip);
 
             resPatientfamilyInfoupdate.setHospitalized(isHospitalised);
             resPatientfamilyInfoupdate.setHisOfLabCaseConfirmed(isHistoryContactLab);
@@ -1257,7 +1267,7 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
 
                     hideProgressDialogStatic();
 
-                    showDialog("Successfully added", true);
+                    showDialogAlert("Successfully added", true);
 
                 }
             }, 1000);
@@ -1265,7 +1275,7 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
         }
     }
 
-    private void showDialog(String message, boolean b) {
+    private void showDialogAlert(String message, boolean b) {
         if (!isFinishing()) {
             CustomDialogGeneric dialog = new CustomDialogGeneric(AddnewPatientActivity.this, "",
                     new CustomDialogGeneric.OnButtonClickListener() {
@@ -1317,6 +1327,8 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
 
         }
 
+
+
         if (keytype.equalsIgnoreCase("family")) {
             if (selectedrelation == 0) {
                 Toast.makeText(YelligoApplication.getContext(), "Please select relation", Toast.LENGTH_LONG).show();
@@ -1340,6 +1352,18 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             Toast.makeText(YelligoApplication.getContext(), "Please enter Mobile Number", Toast.LENGTH_LONG).show();
             return false;
         }
+
+        if (!etCustomerMobile.getText().toString().equalsIgnoreCase("")) {
+            if (getHwPatientinfoRepository().checkIsExist(etCustomerMobile.getText().toString()) != null) {
+                showDialogAlert("This mobile number already exist");
+                return false;
+            }else if (getHwPatientFamilyinfoRepository().checkIsExist(etCustomerMobile.getText().toString()) != null) {
+                showDialogAlert("This mobile number already exist");
+                return false;
+            }
+
+
+        }
         if (etCustomerMobile.getText().toString().length() != 10) {
             Toast.makeText(YelligoApplication.getContext(), "Please enter valid Mobile Number", Toast.LENGTH_LONG).show();
             return false;
@@ -1361,6 +1385,18 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             }*/
             if (enddate.equalsIgnoreCase("")) {
                 Toast.makeText(YelligoApplication.getContext(), "Please enter end date", Toast.LENGTH_LONG).show();
+                return false;
+            }
+        }
+
+        if (isForignTip){
+            if (TextUtils.isEmpty(etPoorigin.getText().toString())) {
+                Toast.makeText(YelligoApplication.getContext(), "Please enter Port of Origin", Toast.LENGTH_LONG).show();
+                return false;
+            }
+
+            if (TextUtils.isEmpty(etPoarrival.getText().toString())) {
+                Toast.makeText(YelligoApplication.getContext(), "Please enter Port Of Arrival", Toast.LENGTH_LONG).show();
                 return false;
             }
         }
@@ -1608,6 +1644,7 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
                 etCustomerMobile.setText("" + resPatientInfo.getMobileNo());
             }
 
+
             if (resPatientInfo.getEmail() != null) {
                 etCustomerEmail.setText("" + resPatientInfo.getEmail());
             }
@@ -1663,6 +1700,15 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
                 selectedString= new ArrayList<>( Arrays.asList(resPatientInfo.getSymptoms().split(",")));
                 adapter.setcheckitem(resPatientInfo.getSymptoms());
 //                setinlist();
+            }
+
+            if (resPatientInfo.isHavingTravelHistory()){
+                isForignTip=resPatientInfo.isHavingTravelHistory();
+                simpleCheckedTextView.setChecked(isForignTip);
+                llpoarrival.setVisibility(View.VISIBLE);
+                llpoorigin.setVisibility(View.VISIBLE);
+                etPoorigin.setText(""+resPatientInfo.getPortOfOrigin());
+                etPoarrival.setText(""+resPatientInfo.getPortOfArrival());
             }
 
 
@@ -1754,7 +1800,14 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             if (resPatientInfo.getStreet() != null) {
                 etStreet.setText("" + resPatientInfo.getStreet());
             }*/
-
+            if (resPatientFamilyInfo.isHavingTravelHistory()){
+                isForignTip=resPatientFamilyInfo.isHavingTravelHistory();
+                simpleCheckedTextView.setChecked(isForignTip);
+                llpoarrival.setVisibility(View.VISIBLE);
+                llpoorigin.setVisibility(View.VISIBLE);
+                etPoorigin.setText(""+resPatientFamilyInfo.getPortOfOrigin());
+                etPoarrival.setText(""+resPatientFamilyInfo.getPortOfArrival());
+            }
 
             if (resPatientFamilyInfo.getAge() != 0) {
                 etAge.setText("" + resPatientFamilyInfo.getAge());
@@ -1777,7 +1830,7 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
             if(resPatientFamilyInfo.getDateOfFirstSymptom()!=null){
                 if (!resPatientFamilyInfo.getDateOfFirstSymptom().equalsIgnoreCase("")){
                     dateofsymtom = resPatientFamilyInfo.getDateOfFirstSymptom();
-                    txtDOA11.setText("" + AppConstants.dateFormatChangerGVT(resPatientInfo.getDateOfFirstSymptom()));
+                    txtDOA11.setText("" + AppConstants.dateFormatChangerGVT(resPatientFamilyInfo.getDateOfFirstSymptom()));
                 }
             }
 
@@ -1889,7 +1942,35 @@ public class AddnewPatientActivity extends BaseActivity implements SymptomListAd
         }
     }
 
+    private void showDialogAlert(String message) {
+        if (!isFinishing()) {
+            CustomDialogGeneric dialog = new CustomDialogGeneric(AddnewPatientActivity.this, "",
+                    new CustomDialogGeneric.OnButtonClickListener() {
+                        @Override
+                        public void onLeftButtonClick(CustomDialogGeneric dialog) {
+                            dialog.dismiss();
+                            // Toast.makeText(getActivity(),"Customer created successfully",Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        }
 
+                        @Override
+                        public void onRightButtonClick(CustomDialogGeneric dialog, String notes) {
+                            dialog.dismiss();
+
+                        }
+
+
+                    });
+            dialog.setCancelable(false);
+            dialog.setRightButtonText("Retry");
+            dialog.setRightButtonVisibility(View.GONE);
+            dialog.setLeftButtonVisibility(View.VISIBLE);
+            dialog.setLeftButtonText("OK");
+            dialog.setDialogType(CustomDialogGeneric.TYPE_ALERT);
+            dialog.setDescription("" + message);
+            dialog.show();
+        }
+    }
 
 
     /*@OnClick(R.id.simpleCheckedTextView)

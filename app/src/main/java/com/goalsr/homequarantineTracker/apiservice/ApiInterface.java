@@ -43,16 +43,42 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface ApiInterface {
+  /*Production*/
 
-    /*@Headers({"Accept: application/json", "Content-Type: application/json"})
-    @POST("/mobileApi/login/")
-    Call<LoginResponse> makeAppLoggin(@Body LoginRequest request);*/
-    //@Headers({"Accept: application/json", "Content-Type: application/json"})
-//@HTTP(method = "GET", path = "/WebApi_Hwatch/api/HealthWatch/GetPatientList", hasBody = true)
-    /* @FormUrlEncoded
-    @HTTP(method = "GET", path = "/WebApi_Hwatch/api/HealthWatch/GetPatientList", hasBody = true)*/
-    /*HWATCH*/
+  @Headers({"Accept: application/json", "Content-Type: application/json"})
+  @POST("api/HealthWatch/GetPatientList")
+  Call<ResPatientData> getHWPatientFamilyInfo(
+          @Body ReqGetPatientinfobody request
+  );
 
+
+    /*@Headers({"Accept: application/json", "Content-Type: application/json"})*/
+    @POST("api/HealthWatch/GetOTP")
+    Call<ResHWGetOtp> makeHWReqOtp(
+            @Body ReqHWOtp request
+    );
+
+    @Headers({"Accept: application/json", "Content-Type: application/json"})
+    @POST("api/HealthWatch/ValidateOTP")
+    Call<ResOtpValidate> makeHWReqOtpValidate(
+            @Body ReqHWOtpValidate request
+    );
+
+    @Headers({"Accept: application/json", "Content-Type: application/json"})
+    @POST("api/HealthWatch/InsertUpdatePatientInfo")
+    Call<Respatientinsertupdate> makeHWinsertUpdatePatientInfo(
+            @Body ReqInsertUpdatePatientInfo request
+    );
+
+    @Headers({"Accept: application/json", "Content-Type: application/json"})
+    @POST("api/HealthWatch/InsertUpdatePatientFamilyInfo")
+    Call<Respatientinsertupdate> makeHWinsertUpdatePatientFamilyInfo(
+            @Body ReqInsertUpdatePatientFamilyInfo request
+    );
+
+
+    /*Testing*/
+/*
 
     @Headers({"Accept: application/json", "Content-Type: application/json"})
     @POST("WebApi_Hwatch/api/HealthWatch/GetPatientList")
@@ -84,6 +110,7 @@ public interface ApiInterface {
     Call<Respatientinsertupdate> makeHWinsertUpdatePatientFamilyInfo(
             @Body ReqInsertUpdatePatientFamilyInfo request
     );
+*/
 
 
 

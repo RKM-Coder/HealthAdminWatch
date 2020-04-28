@@ -43,6 +43,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.goalsr.homequarantineTracker.ui.AddnewPatientActivity.RES_DIST;
+import static com.goalsr.homequarantineTracker.ui.AddnewPatientActivity.RES_PANCHYATE;
 import static com.goalsr.homequarantineTracker.ui.AddnewPatientActivity.RES_TALUK;
 import static com.goalsr.homequarantineTracker.ui.AddnewPatientActivity.RES_TOWN;
 import static com.goalsr.homequarantineTracker.ui.AddnewPatientActivity.RES_WORD;
@@ -151,6 +152,12 @@ public class PanchyateListActivity extends BaseActivity implements PanchyateList
                 listOfTalukBydistrict.add(talukModel);
             }
         }
+        Collections.sort(listOfTalukBydistrict, new Comparator<PanchyateModel>() {
+            @Override
+            public int compare(PanchyateModel s1, PanchyateModel s2) {
+                return s1.getPanchayatName().compareTo(s2.getPanchayatName());
+            }
+        });
         adapter.addall((ArrayList<PanchyateModel>) listOfTalukBydistrict);
         // makeSpinnerTalukMethod((ArrayList<TalukModel>) listOfTalukBydistrict);
     }
@@ -249,7 +256,7 @@ public class PanchyateListActivity extends BaseActivity implements PanchyateList
         String message = item.getPanchayatName();
         intent.putExtra("name", message);
         intent.putExtra("name_id", item.getPanchayatCode());
-        setResult(RES_TALUK, intent);
+        setResult(RES_PANCHYATE, intent);
         finish();
 
 
@@ -266,7 +273,7 @@ public class PanchyateListActivity extends BaseActivity implements PanchyateList
     public void onBackPressed() {
         //hideSoftKeyboard(RuralDistGenericListActivity.this);
         Intent intent = new Intent();
-        if (key.equalsIgnoreCase("dist")) {
+        /*if (key.equalsIgnoreCase("dist")) {
             String message = "";
             intent.putExtra("name", message);
             intent.putExtra("name_id", "");
@@ -281,7 +288,11 @@ public class PanchyateListActivity extends BaseActivity implements PanchyateList
             intent.putExtra("name", message);
             intent.putExtra("name_id", "");
             setResult(RES_WORD, intent);
-        }
+        }*/
+        String message = "";
+        intent.putExtra("name", message);
+        intent.putExtra("name_id", "");
+        setResult(RES_PANCHYATE, intent);
         // finish();
         super.onBackPressed();
     }
